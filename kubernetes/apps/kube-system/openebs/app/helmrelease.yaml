@@ -12,6 +12,7 @@ spec:
         kind: HelmRepository
         name: openebs
   interval: 1h
+  # Values: https://github.com/openebs/openebs/blob/release/4.4/charts/values.yaml
   values:
     # Disable components we don't need
     engines:
@@ -20,17 +21,28 @@ spec:
           enabled: false
         zfs:
           enabled: false
+        rawfile:
+          enabled: false
       replicated:
         mayastor:
           enabled: false
 
+    loki:
+      enabled: false
+    alloy:
+      enabled: false
+
     # Enable LocalPV HostPath
+    # Values: https://github.com/openebs/dynamic-localpv-provisioner/blob/v4.4.0/deploy/helm/charts/values.yaml
     localpv-provisioner:
       enabled: true
       rbac:
         create: true
+      localpv:
+        enabled: true
+        name: localpv-provisioner
+        basePath: "/var/openebs-system/local"
       hostpathClass:
         enabled: true
         name: openebs-hostpath
         isDefaultClass: true
-        basePath: /var/openebs-system
