@@ -103,4 +103,4 @@ spec:
       userdata:
         enabled: true
         type: persistentVolumeClaim
-        existingClaim: pvc-282350f5-f42b-4bc2-baf0-c5bb0bf5e57a
+        existingClaim: radarr
