@@ -49,6 +49,14 @@ spec:
                     remediation:
                       remediateLastFailure: true
                       retries: 2
+                  values:
+                    controllers:
+                      "*":
+                        containers:
+                          "*":
+                            env:
+                              TZ: &tz Europe/Moscow
+                              TIMEZONE: *tz
               target:
                 group: helm.toolkit.fluxcd.io
                 kind: HelmRelease
