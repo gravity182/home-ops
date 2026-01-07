@@ -78,3 +78,9 @@ spec:
         existingClaim: media-data
         globalMounts:
           - path: /data
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 0775
+        globalMounts:
+          - path: /config/scripts

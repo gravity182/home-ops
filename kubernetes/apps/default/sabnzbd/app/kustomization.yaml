@@ -4,3 +4,10 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+configMapGenerator:
+  - name: sabnzbd-scripts
+    files:
+      - Clean.py=./resources/Clean.py
+      - replace_for.py=./resources/replace_for.py
+generatorOptions:
+  disableNameSuffixHash: true
