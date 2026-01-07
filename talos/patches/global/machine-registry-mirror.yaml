@@ -1,0 +1,7 @@
+---
+machine:
+  registries:
+    mirrors:
+      factory.talos.dev:
+        endpoints:
+          - http://192.168.3.25:5001

@@ -34,12 +34,14 @@ nodes:
         routes:
           - network: "0.0.0.0/0"
             gateway: "192.168.3.1"
-        mtu: 1500
+        mtu: 1400
         vip:
           ip: "192.168.3.100"
 
 # Global patches
 patches:
+  - "@./patches/global/machine-install.yaml"
+  - "@./patches/global/machine-registry-mirror.yaml"
   - "@./patches/global/machine-files.yaml"
   - "@./patches/global/machine-kubelet.yaml"
   - "@./patches/global/machine-network.yaml"
@@ -50,4 +52,3 @@ patches:
 controlPlane:
   patches:
     - "@./patches/controller/cluster.yaml"
-
