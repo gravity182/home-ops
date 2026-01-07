@@ -100,7 +100,16 @@ spec:
         size: 1Gi
         globalMounts:
           - path: /cache
-      userdata:
+      radarr:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: radarr
+      sonarr:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: sonarr
+      sabnzbd:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: sabnzbd
+      
