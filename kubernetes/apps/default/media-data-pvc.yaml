@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: openebs-media
+  resources:
+    requests:
+      storage: 900Gi
