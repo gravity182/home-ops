@@ -42,9 +42,10 @@
 ## Key Architectural Decisions
 
 1. **Storage:** OpenEBS LocalPV-HostPath (single node, no dedicated disks)
-   - Uses `/var/openebs/local` (writable on Talos by default)
-   - No Talos extraMounts needed
+   - Uses `/var/openebs-system/local` with Talos kubelet extraMount
+   - Talos extraMount at `/var/openebs-system` with bind, rshared, rw options
    - CNCF graduated project with snapshot support
+   - OpenEBS 4.4.0 with observability stack disabled
 
 2. **VPN:** WireGuard sidecar component (portable, no network infrastructure changes)
    - Reusable Kustomize component at `kubernetes/components/vpn-sidecar/`
@@ -128,11 +129,13 @@
 
 **Goal:** Deploy OpenEBS LocalPV-HostPath
 
-**Tasks:**
-- Create storage app structure at `kubernetes/apps/kube-system/openebs/`
-- Deploy OpenEBS via Flux HelmRelease
-- Set openebs-hostpath as default StorageClass
-- Verify PVC creation works
+**Completed:**
+- ✅ Created storage app structure at `kubernetes/apps/kube-system/openebs/`
+- ✅ Deployed OpenEBS 4.4.0 via Flux HelmRelease
+- ✅ Disabled observability stack (Loki, Minio, Alloy)
+- ✅ Configured Talos kubelet extraMount for `/var/openebs-system`
+- ✅ Set openebs-hostpath as default StorageClass
+- ✅ Verified PVC creation works with Authentik PostgreSQL
 
 ### Phase 3: VPN Sidecar Component ✅ COMPLETE
 
@@ -145,17 +148,17 @@
 - ✅ SOPS-encrypted WireGuard NL configuration
 - ✅ Local network routing preserved (192.168.x, 10.x, 172.16.x)
 
-### Phase 4: Authentik Authentication ⏳ IN PROGRESS
+### Phase 4: Authentik Authentication ✅ COMPLETE
 
 **Goal:** Deploy Authentik SSO before media apps
 
-**Tasks:**
-- Create namespace and app structure
-- Deploy Authentik with PostgreSQL + Redis subcharts
-- Configure forward auth with Envoy Gateway SecurityPolicy
-- Complete initial Authentik setup wizard
+**Completed:**
+- ✅ Created namespace and app structure
+- ✅ Deployed Authentik with PostgreSQL + Redis subcharts
+- ✅ OpenEBS storage working with openebs-hostpath StorageClass
+- ✅ Authentik accessible and operational
 
-### Phase 5: Critical Apps Deployment (NOT STARTED)
+### Phase 5: Critical Apps Deployment ⏳ IN PROGRESS
 
 **Goal:** Deploy 6 critical apps
 
@@ -166,6 +169,9 @@
 4. prowlarr (with VPN) - first VPN test
 5. qbittorrent (with VPN) - second VPN validation
 6. jellyfin (media server) - user-facing
+
+**Progress:**
+- ⏳ Ready to begin deployment
 
 ### Phase 6: Monitoring Stack (NOT STARTED - OPTIONAL)
 
@@ -181,7 +187,7 @@
 
 **Goal:** Comprehensive testing of all components
 
-## Current Status: Phase 4 In Progress
+## Current Status: Phase 5 In Progress
 
 ### What's Working
 
@@ -190,78 +196,41 @@
 ✅ Flux GitOps syncing from GitHub
 ✅ Cilium CNI operational
 ✅ Envoy Gateway for ingress
-✅ OpenEBS storage provisioner deployed
-✅ Talos User Volumes configured
+✅ OpenEBS storage provisioner deployed (openebs-hostpath)
 ✅ VPN sidecar component ready
-✅ Authentik manifests deployed
+✅ Authentik deployed and operational
 
-### Current Task: Provisioning Storage for Authentik
+### Current Task: Deploy Critical Media Apps
 
-**Task:** Applying Talos User Volume configuration for OpenEBS persistent storage
+**Task:** Deploy the 6 critical media apps starting with radarr
 
-**Details:**
-- User Volume `openebs-system` being provisioned on internal SSD
-- WWID-based disk selector ensures correct disk selection
-- Will mount at `/var/mnt/openebs-system` with 100GiB minimum
-- OpenEBS basePath updated to use User Volume mount point
+**Deployment Order:**
+1. **radarr** (no VPN) - First deployment to validate the pattern
+2. **sonarr** (no VPN) - Confirm the pattern works
+3. **sabnzbd** (no VPN) - Usenet client
+4. **prowlarr** (with VPN) - First app with VPN sidecar
+5. **qbittorrent** (with VPN) - Second VPN validation
+6. **jellyfin** (no VPN) - Media server for end users
 
-**What We've Tried:**
-
-1. ✅ Added `wipe: true` patch to force disk wipe
-2. ✅ Fixed malformed schematic ID URL (installer vs metal-installer - not the issue)
-3. ✅ Verified disk is correctly specified (/dev/sda)
-4. ✅ Set up local Docker registry to serve installer image
-   - Registry running at 192.168.3.25:5001 (port 5000 blocked by AirPlay)
-   - Image: `localhost:5001/installer/039535a70c3bd1667c355eca78571267704e55c8a24785033d183b8f26e39d82:v1.12.1`
-5. ✅ Configured registry mirror to redirect factory.talos.dev to local registry
-6. ⏳ **CURRENT:** Testing mirror configuration
-
-**Current Configuration (Attempting):**
-
-Mirror config in `talos/patches/global/machine-insecure-registry.yaml`:
-```yaml
-machine:
-  registries:
-    mirrors:
-      factory.talos.dev:
-        endpoints:
-          - http://192.168.3.25:5001
+**App Structure Pattern:**
+```
+kubernetes/apps/media/
+├── namespace.yaml
+├── kustomization.yaml
+├── radarr/
+│   ├── ks.yaml
+│   └── app/
+│       ├── kustomization.yaml
+│       ├── helmrelease.yaml
+│       └── secret.sops.yaml (if needed)
 ```
 
-Image URL in `talconfig.yaml`:
-```yaml
-talosImageURL: factory.talos.dev/installer/039535a70c3bd1667c355eca78571267704e55c8a24785033d183b8f26e39d82
-```
-
-Local registry image path:
-```
-localhost:5001/installer/039535a70c3bd1667c355eca78571267704e55c8a24785033d183b8f26e39d82:v1.12.1
-```
-
-**Errors Observed on Node (via TV screen):**
-- `volume status component controller-runtime error evaluating disk no such attribute: system disk` (normal before installation)
-- `kubernetes endpoint watch error: ... no route to host` (normal during installation)
-- Earlier: `failed to do request: Head <url>: http: server gave HTTP response to HTTPS client`
-
-**Next Steps to Resolve:**
-
-1. Verify local registry has image with correct path structure:
-   ```bash
-   curl http://localhost:5001/v2/_catalog
-   curl http://localhost:5001/v2/installer/039535a70c3bd1667c355eca78571267704e55c8a24785033d183b8f26e39d82/tags/list
-   ```
-
-2. If registry structure is correct, regenerate and apply:
-   ```bash
-   cd talos
-   talhelper genconfig
-   talosctl apply-config --talosconfig=./clusterconfig/talosconfig --nodes 192.168.3.26 --file=./clusterconfig/kubernetes-homeserver-main.yaml --insecure
-   ```
-
-3. If still failing, consider:
-   - Try standard Talos installer without factory extensions temporarily
-   - Use `talosctl reset` to wipe disk before applying config
-   - Check if there's a DNS resolution issue from the node
+**Key Requirements:**
+- Use bjw-s app-template chart
+- Configure persistent storage with OpenEBS
+- Reference old homeserver configs for app-specific settings
+- VPN apps use the vpn-sidecar component
+- Consider Authentik forward auth integration
 
 ## Important Files & Credentials
 
@@ -365,30 +334,31 @@ flux reconcile ks cluster-apps
 
 ## Critical Context for Next Session
 
-1. **Talos Installation is the blocker** - everything else depends on this working
-2. **Local registry is running** at 192.168.3.25:5001 with Talos installer image
-3. **Mirror configuration** is the current approach being tested
-4. **Node is currently in Windows** - need to boot from USB to maintenance mode
-5. **All configs are committed to git** except for Talos secrets (generated during bootstrap)
-6. **Fresh start approach** - no data migration, backups restored manually later
+1. **Infrastructure is ready** - Talos, Kubernetes, Flux, OpenEBS, VPN sidecar, Authentik all operational
+2. **Local registry is running** at 192.168.3.25:5001 (mirrors factory.talos.dev)
+3. **All configs are committed to git** and managed by Flux
+4. **Fresh start approach** - no data migration, backups will be restored manually later
+5. **VPN sidecar component** ready at `kubernetes/components/vpn-sidecar/`
 
 ## Next Actions (Priority Order)
 
-1. **Fix Talos installation** - This is blocking everything
-   - Verify local registry image path structure
-   - Test mirror redirection
-   - Consider alternative installation methods if mirror fails
+1. **Deploy radarr** (no VPN) - First media app to validate pattern
+   - Create namespace `media`
+   - Set up app structure following onedr0p pattern
+   - Use bjw-s app-template chart
+   - Reference old homeserver config for app settings
 
-2. **Complete Phase 1** - Bootstrap Kubernetes and Flux
-   - After Talos installs successfully
-   - Run `task bootstrap:apps`
-   - Verify all infrastructure pods running
+2. **Deploy sonarr** (no VPN) - Confirm pattern works
 
-3. **Begin Phase 2** - Deploy OpenEBS storage
-   - Create manifests at `kubernetes/apps/kube-system/openebs/`
-   - Commit and push to trigger Flux deployment
+3. **Deploy sabnzbd** (no VPN) - Usenet client
 
-4. **Continue through phases** 3-7 as outlined above
+4. **Deploy prowlarr** (with VPN) - First VPN sidecar test
+   - Validate vpn-sidecar component integration
+   - Verify VPN connectivity
+
+5. **Deploy qbittorrent** (with VPN) - Second VPN app
+
+6. **Deploy jellyfin** (no VPN) - User-facing media server
 
 ## Lessons Learned
 
@@ -397,10 +367,11 @@ flux reconcile ks cluster-apps
 3. **`wipe: false` by default** - Need explicit `wipe: true` patch for fresh installs
 4. **Talos uses HTTPS for registries by default** - Need `http://` prefix in mirror endpoints
 5. **VIP configuration is intentional** - 192.168.3.100 for HA even on single node
-6. **System disk errors are normal** - Before Talos installation completes
+6. **OpenEBS 4.4.0 includes observability stack** - Loki, Minio, Alloy enabled by default, must explicitly disable
+7. **OpenEBS basePath** - Use `/var/openebs-system/local` for LocalPV HostPath storage
 
 ---
 
 **Last Updated:** 2026-01-07
-**Current Phase:** Phase 4 (Authentik) - IN PROGRESS
-**Next Step:** Apply User Volume config, then verify Authentik PostgreSQL can mount storage
+**Current Phase:** Phase 5 (Critical Apps Deployment) - IN PROGRESS
+**Next Step:** Deploy radarr as first media app to validate the deployment pattern
