@@ -19,6 +19,11 @@ spec:
               repository: ghcr.io/jellyfin/jellyfin
               tag: 10@sha256:cd7e4cb71812dd76988a725da615e37c6d0d24c200be904ad5d183e51f1dc6ed
             env:
+              JELLYFIN_DATA_DIR: /config
+              JELLYFIN_CONFIG_DIR: /config/.jellyfin
+              JELLYFIN_LOG_DIR: /config/log
+              JELLYFIN_CACHE_DIR: /cache
+              JELLYFIN_PublishedServerUrl: https://jellyfin.${SECRET_DOMAIN}
               TZ: Europe/Moscow
             probes:
               liveness: &probes
