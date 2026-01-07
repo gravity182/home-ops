@@ -11,3 +11,4 @@ resources:
   - ./media-data-pvc.yaml
   - ./echo/ks.yaml
   - ./radarr/ks.yaml
+  - ./backrest/ks.yaml
