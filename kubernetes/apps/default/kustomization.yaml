@@ -11,4 +11,9 @@ resources:
   - ./media-data-pvc.yaml
   - ./echo/ks.yaml
   - ./radarr/ks.yaml
+  - ./sonarr/ks.yaml
+  - ./sabnzbd/ks.yaml
+  - ./prowlarr/ks.yaml
+  - ./qbittorrent/ks.yaml
+  - ./jellyfin/ks.yaml
   - ./backrest/ks.yaml
