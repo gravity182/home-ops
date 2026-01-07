@@ -60,8 +60,6 @@ spec:
           - port: http
     route:
       app:
-        annotations:
-          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
