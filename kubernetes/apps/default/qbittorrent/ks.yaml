@@ -10,6 +10,8 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
+      - name: qbittorrent-settings
+        kind: ConfigMap
   prune: true
   sourceRef:
     kind: GitRepository

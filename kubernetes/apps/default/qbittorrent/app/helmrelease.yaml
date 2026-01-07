@@ -13,6 +13,18 @@ spec:
       qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          vuetorrent:
+            image:
+              repository: curlimages/curl
+              tag: latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                curl -sSfL "https://github.com/VueTorrent/VueTorrent/releases/download/${VUETORRENT_VERSION}/vuetorrent.zip" -o /tmp/vuetorrent.zip
+                unzip -qn /tmp/vuetorrent.zip -d /
+                echo "VueTorrent ${VUETORRENT_VERSION} installed"
         containers:
           app:
             image:
@@ -84,3 +96,7 @@ spec:
         globalMounts:
           - path: /data
             subPath: torrents
+      vuetorrent:
+        type: emptyDir
+        globalMounts:
+          - path: /vuetorrent
