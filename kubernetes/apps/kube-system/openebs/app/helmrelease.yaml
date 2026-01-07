@@ -15,10 +15,8 @@ spec:
   values:
     # Override kubectl image for pre-upgrade hook (1.25.15 doesn't exist)
     preUpgradeHook:
-      image:
-        registry: registry.k8s.io
-        repo: kubectl
-        tag: v1.35.0
+      enabled: true
+      repo: bitnamilegacy/kubectl
 
     # Disable components we don't need
     engines:
