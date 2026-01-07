@@ -8,4 +8,6 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./media-data-pvc.yaml
   - ./echo/ks.yaml
+  - ./radarr/ks.yaml
