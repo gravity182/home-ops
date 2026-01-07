@@ -82,18 +82,21 @@ spec:
       config:
         enabled: true
         type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
         size: 1Gi
         globalMounts:
           - path: /config
       data:
         enabled: true
         type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
         size: 1Gi
         globalMounts:
           - path: /data
       cache:
         enabled: true
         type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
         size: 1Gi
         globalMounts:
           - path: /cache
