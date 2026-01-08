@@ -1,0 +1,198 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: k8s-monitoring
+spec:
+  chart:
+    spec:
+      chart: k8s-monitoring
+      version: 3.7.1
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h
+  values:
+    cluster:
+      ## This a static label that will be attached to all collected logs
+      name: homeserver
+
+    destinations:
+      - name: loki
+        type: loki
+        url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
+
+    # --------
+    # Features
+    # --------
+
+    # Gathers Kubernetes lifecycle events as log data
+    clusterEvents:
+      enabled: true
+      collector: alloy-singleton
+      labelsToKeep:
+        - "level"
+        - "namespace"
+        - "node"
+        - "source"
+        - "reason"
+        - "job"
+      structuredMetadata:
+        name: name
+      # filter namespaces
+      # you can add your other namespaces to scrape
+      # [] means all namespaces
+      namespaces:
+        - default
+        - authentik
+        - monitoring
+        - kube-system
+
+    # Gathers logs from the Kubernetes Nodes
+    nodeLogs:
+      enabled: true
+      gatherMethod: volumes
+      collector: alloy-logs
+      journal:
+        maxAge: 24h
+        path: "/var/log/journal"
+        # The list of systemd units to keep scraped logs from
+        units:
+          - kubelet.service
+          - containerd.service
+          - systemd-networkd.service
+          - systemd-resolved.service
+          - chronyd.service
+          - systemd-timesyncd.service
+          - firewalld.service
+          - NetworkManager.service
+          - k3s.service
+          - cron.service
+          - systemd-journald.service
+          - sshd.service
+          - kernel
+
+    # Gathers logs from the Kubernetes Pods
+    podLogs:
+      enabled: true
+      gatherMethod: volumes
+      collector: alloy-logs
+      # remap labels
+      # target: source
+      labels:
+        app_kubernetes_io_name: app.kubernetes.io/name
+        app_kubernetes_io_component: app.kubernetes.io/component
+        app: app_kubernetes_io_name
+        component: app_kubernetes_io_component
+        homeserver_vpn: homeserver/vpn
+      # extra discovery.relabel rules
+      # see https://grafana.com/docs/alloy/latest/reference/components/discovery/discovery.relabel/
+      extraDiscoveryRules: |-
+        // add more labels
+        rule {
+          action        = "replace"
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node_name"
+        }
+        rule {
+          action        = "replace"
+          source_labels = ["__meta_kubernetes_pod_container_image"]
+          target_label  = "container_image"
+        }
+        rule {
+          action        = "replace"
+          source_labels = ["__meta_kubernetes_pod_container_init"]
+          target_label  = "container_init"
+        }
+      # extra loki.process rules
+      # see https://grafana.com/docs/alloy/latest/reference/components/loki/loki.process/
+      extraLogProcessingStages:
+      # indexed labels
+      labelsToKeep:
+        - service_name
+        - app
+        - component
+        - container
+        - container_init
+        - node_name
+        - namespace
+        - level
+        - homeserver_vpn
+      # unindexed labels
+      # high-cardinality labels should go here
+      structuredMetadata:
+        pod: pod
+        container_image: container_image
+      # filter namespaces
+      # you can add your other namespaces to scrape
+      # [] means all namespaces
+      namespaces:
+        - default
+        - authentik
+        - monitoring
+        - kube-system
+
+    # Gathers metrics related the the Kubernetes Cluster itself
+    clusterMetrics:
+      enabled: false
+      collector: alloy-metrics
+      # filter namespaces
+      # you can add your other namespaces to scrape
+      # [] means all namespaces
+      namespaces:
+        - default
+        - authentik
+        - monitoring
+        - kube-system
+
+    # ----------
+    # Collectors
+    # ----------
+
+    # The Grafana Alloy instance that is responsible for anything that must be done on a single instance,
+    # such as gathering Cluster events from the API server.
+    # It is deployed as a ReplicaSet with one replica
+    alloy-singleton:
+      enabled: true
+      alloy:
+        resources:
+          requests: {}
+          limits: {}
+        mounts:
+          dockercontainers: false
+          varlog: false
+
+    # The Grafana Alloy instance that scrapes workload logs on each node.
+    # It is deployed as a DaemonSet with one replica per node
+    alloy-logs:
+      enabled: true
+      alloy:
+        resources:
+          requests: {}
+          limits: {}
+        mounts:
+          dockercontainers: false
+          # required for node & pod logs
+          varlog: true
+        clustering:
+          enabled: false
+
+    # The Grafana Alloy instance that is responsible for scraping metrics from prometheus sources like cadvisor and kube-state-metrics
+    # It is deployed as a StatefulSet
+    alloy-metrics:
+      enabled: false
+      alloy:
+        resources:
+          requests: {}
+          limits: {}
+        clustering:
+          enabled: false
+
+    # The Grafana Alloy instance that opens receiver ports to process data delivered directly to Alloy (HTTP, gRPC, Zipkin, etc)
+    # For example, applications instrumented with OpenTelemetry SDKs
+    # It is deployed as a Daemonset
+    alloy-receiver:
+      enabled: false
+
+    alloy-profiles:
+      enabled: false
