@@ -41,3 +41,10 @@ tasks:
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
+
+  reconcile:all:
+    desc: Force reconcile all kustomizations
+    cmd: flux reconcile kustomization --all-namespaces
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which flux
