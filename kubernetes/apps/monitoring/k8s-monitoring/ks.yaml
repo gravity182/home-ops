@@ -3,7 +3,6 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app k8s-monitoring
-  namespace: flux-system
 spec:
   commonMetadata:
     labels:
@@ -13,6 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   interval: 1h
   postBuild:
     substituteFrom:
@@ -22,4 +22,3 @@ spec:
   wait: true
   dependsOn:
     - name: loki
-    - name: grafana
