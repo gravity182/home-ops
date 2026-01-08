@@ -1,0 +1,76 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: soularr
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: soularr
+  interval: 1h
+  values:
+    controllers:
+      soularr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: mrusse08/soularr
+              tag: latest@sha256:15bcdf0bcbce937f39c1c93ba8384fc1508e849bff943b56e4bc79a076af9ea2
+            env:
+              SCRIPT_INTERVAL: "3600"
+              LIDARR_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: lidarr-api-key
+                    key: api-key
+              SLSKD_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: slskd-api-key-soularr
+                    key: api-key
+              TZ: Europe/Moscow
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: openebs-hostpath
+        accessMode: ReadWriteOnce
+        size: 100Mi
+        globalMounts:
+          - path: /data
+      config-file:
+        enabled: true
+        type: configMap
+        name: soularr-config
+        globalMounts:
+          - path: /data/config.ini
+            subPath: config.ini
+      soulseek-downloads:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /soulseek/downloaded
+            subPath: soulseek/downloaded
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
