@@ -2,11 +2,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: jellyfin
+  name: jellyfin-xxx
 spec:
   chartRef:
     kind: OCIRepository
-    name: jellyfin
+    name: jellyfin-xxx
   interval: 1h
   values:
     controllers:
@@ -23,7 +23,7 @@ spec:
               JELLYFIN_CONFIG_DIR: /config/.jellyfin
               JELLYFIN_LOG_DIR: /config/log
               JELLYFIN_CACHE_DIR: /cache
-              JELLYFIN_PublishedServerUrl: https://jellyfin.${SECRET_DOMAIN}
+              JELLYFIN_PublishedServerUrl: https://jellyfin-xxx.${SECRET_DOMAIN}
               TZ: Europe/Moscow
             probes:
               liveness: &probes
@@ -62,7 +62,7 @@ spec:
     route:
       app:
         hostnames:
-          - "jellyfin.${SECRET_DOMAIN}"
+          - "jellyfin-xxx.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -80,7 +80,7 @@ spec:
         type: persistentVolumeClaim
         storageClass: openebs-hostpath
         accessMode: ReadWriteOnce
-        size: 50Gi
+        size: 25Gi
         globalMounts:
           - path: /cache
       media:
@@ -88,8 +88,8 @@ spec:
         type: persistentVolumeClaim
         existingClaim: media-data
         globalMounts:
-          - path: /media
-            subPath: library
+          - path: /library
+            subPath: xxx
       tmp:
         enabled: true
         type: emptyDir
