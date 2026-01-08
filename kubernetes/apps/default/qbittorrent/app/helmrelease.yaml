@@ -22,6 +22,7 @@ spec:
               - /bin/sh
               - -c
               - |
+                set -e
                 curl -sSfL "https://github.com/VueTorrent/VueTorrent/releases/download/${VUETORRENT_VERSION}/vuetorrent.zip" -o /tmp/vuetorrent.zip
                 unzip -qn /tmp/vuetorrent.zip -d /
                 echo "VueTorrent ${VUETORRENT_VERSION} installed"
