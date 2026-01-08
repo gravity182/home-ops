@@ -94,7 +94,7 @@ spec:
         type: persistentVolumeClaim
         existingClaim: media-data
         globalMounts:
-          - path: /torrents
+          - path: /data/torrents
             subPath: torrents
       vuetorrent:
         type: emptyDir
