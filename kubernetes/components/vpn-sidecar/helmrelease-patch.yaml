@@ -1,0 +1,49 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: not-used
+spec:
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: placeholder
+              spec:
+                template:
+                  spec:
+                    securityContext:
+                      sysctls:
+                        - name: net.ipv4.conf.all.src_valid_mark
+                          value: "1"
+                    containers:
+                      - name: wireguard
+                        image: lscr.io/linuxserver/wireguard:latest
+                        imagePullPolicy: IfNotPresent
+                        securityContext:
+                          capabilities:
+                            add:
+                              - NET_ADMIN
+                          allowPrivilegeEscalation: false
+                        env:
+                          - name: PUID
+                            value: "1001"
+                          - name: PGID
+                            value: "1001"
+                          - name: TZ
+                            value: "Europe/Moscow"
+                        volumeMounts:
+                          - name: wireguard-conf
+                            mountPath: /config/wg_confs/wg0.conf
+                            subPath: wg0.conf
+                            readOnly: true
+                    volumes:
+                      - name: wireguard-conf
+                        secret:
+                          secretName: wireguard-nl-conf
+                          defaultMode: 0600
