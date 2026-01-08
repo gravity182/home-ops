@@ -12,6 +12,7 @@ spec:
         kind: HelmRepository
         name: grafana
   interval: 1h
+  ## See available values https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
   values:
     grafana.ini:
       analytics:
