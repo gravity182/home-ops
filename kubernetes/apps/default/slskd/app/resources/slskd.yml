@@ -1,0 +1,40 @@
+web:
+  port: 5030
+  authentication:
+    api_keys:
+      soularr:
+        key: __SLSKD_API_KEY_SOULARR__
+        cidr: "0.0.0.0/0,::/0"
+
+incoming:
+  port: 50300
+
+logging:
+  level: Information
+
+directories:
+  incomplete: /soulseek/incomplete
+  downloads: /soulseek/downloaded
+
+shares:
+  directories:
+    - "/shares/music"
+  filters:
+    - \.DS_Store$
+    - \.Spotlight-V100$
+    - \.Trashes$
+    - \.fseventsd$
+    - \.TemporaryItems$
+    - \._.*$
+    - \.directory$
+    - lost\+found/
+    - \.git/
+    - \.cache/
+    - \.tmp$
+    - \.temp$
+    - ~$
+    - \.swp$
+    - \.log$
+    - \.bak$
+    - Thumbs\.db$
+    - desktop\.ini$
