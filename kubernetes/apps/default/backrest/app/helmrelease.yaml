@@ -112,4 +112,15 @@ spec:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: sabnzbd
-      
+      jellyfin-config:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: jellyfin-config
+      prowlarr:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: prowlarr
+      qbittorrent:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: qbittorrent
