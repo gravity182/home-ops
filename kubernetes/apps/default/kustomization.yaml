@@ -17,4 +17,5 @@ resources:
   - ./qbittorrent/ks.yaml
   - ./jellyfin/ks.yaml
   - ./jellyfin-xxx/ks.yaml
+  - ./stash/ks.yaml
   - ./backrest/ks.yaml
