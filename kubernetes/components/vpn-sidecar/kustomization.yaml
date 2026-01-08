@@ -4,6 +4,6 @@ kind: Component
 resources:
   - ./secret.sops.yaml
 patches:
-  - path: ./deployment-patch.yaml
+  - path: ./helmrelease-patch.yaml
     target:
-      kind: Deployment
+      kind: HelmRelease
