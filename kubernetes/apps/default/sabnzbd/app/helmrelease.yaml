@@ -77,7 +77,8 @@ spec:
         type: persistentVolumeClaim
         existingClaim: media-data
         globalMounts:
-          - path: /data
+          - path: /data/usenet
+            subPath: usenet
       scripts:
         type: configMap
         name: sabnzbd-scripts
