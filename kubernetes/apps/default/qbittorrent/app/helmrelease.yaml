@@ -89,12 +89,12 @@ spec:
         size: 1Gi
         globalMounts:
           - path: /config
-      data:
+      torrents:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: media-data
         globalMounts:
-          - path: /data
+          - path: /torrents
             subPath: torrents
       vuetorrent:
         type: emptyDir
