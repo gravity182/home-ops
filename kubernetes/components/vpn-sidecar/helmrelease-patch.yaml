@@ -26,10 +26,12 @@ spec:
                         image: lscr.io/linuxserver/wireguard:latest
                         imagePullPolicy: IfNotPresent
                         securityContext:
+                          runAsNonRoot: false
+                          readOnlyRootFilesystem: false
+                          allowPrivilegeEscalation: false
                           capabilities:
                             add:
                               - NET_ADMIN
-                          allowPrivilegeEscalation: false
                         env:
                           - name: PUID
                             value: "1001"
