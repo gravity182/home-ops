@@ -35,7 +35,7 @@ spec:
               tag: 0.30.1@sha256:c3d60a1f5e0a6a3ea257ceeb986e1fbecada5a940925b7ce03bd10a07ed8e1ad
             env:
               STASH_CONFIG_FILE: /config/config.yml
-              STASH_STASH: /data/
+              STASH_STASH: /library/
               STASH_METADATA: /metadata/
               STASH_CACHE: /cache/
               STASH_BLOBS: /blobs/
