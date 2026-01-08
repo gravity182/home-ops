@@ -165,15 +165,6 @@ spec:
       replicas: 1
       # PRODUCTION OVERRIDE: values.extend.yaml removes resource limits
       resources: {}
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: "node-role.kubernetes.io/control-plane"
-                    operator: In
-                    values:
-                      - "true"
       extraArgs:
         - "-log.level=info"
         - "-config.expand-env=true"
@@ -194,40 +185,13 @@ spec:
       enabled: true
       allocatedMemory: 64
       writebackSizeLimit: 10MB
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: "node-role.kubernetes.io/control-plane"
-                    operator: In
-                    values:
-                      - "true"
 
     resultsCache:
       enabled: true
       allocatedMemory: 32
       writebackSizeLimit: 10MB
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: "node-role.kubernetes.io/control-plane"
-                    operator: In
-                    values:
-                      - "true"
 
     gateway:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: "node-role.kubernetes.io/control-plane"
-                    operator: In
-                    values:
-                      - "true"
 
     # Zero out replica counts of other deployment modes
     backend:
