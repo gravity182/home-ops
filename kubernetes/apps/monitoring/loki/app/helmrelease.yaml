@@ -12,6 +12,7 @@ spec:
         kind: HelmRepository
         name: grafana
   interval: 1h
+  ## See available values https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
   values:
     global:
       dnsService: "kube-dns"
@@ -73,7 +74,7 @@ spec:
 
       schemaConfig:
         configs:
-          - from: 2025-05-01
+          - from: "2025-05-01"
             store: tsdb
             object_store: s3
             schema: v13

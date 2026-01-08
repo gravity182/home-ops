@@ -12,6 +12,14 @@ spec:
         kind: HelmRepository
         name: grafana
   interval: 1h
+  ## See overview of this chart - https://grafana.com/docs/grafana-cloud/monitor-infrastructure/kubernetes-monitoring/configuration/helm-chart-config/helm-chart/
+  ##
+  ## Docs:
+  ## - Structure: https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring/docs/Structure.md
+  ## - Features: https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring/docs/Features.md
+  ## - Collectors: https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring/docs/Collectors.md
+  ##
+  ## See available values https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring/values.yaml
   values:
     cluster:
       ## This a static label that will be attached to all collected logs
