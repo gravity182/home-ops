@@ -1,0 +1,256 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+spec:
+  chart:
+    spec:
+      chart: loki
+      version: 6.49.0
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h
+  values:
+    global:
+      dnsService: "kube-dns"
+      dnsNamespace: "kube-system"
+      extraArgs:
+        - "-log.level=info"
+        - "-config.expand-env=true"
+        - "-log-config-reverse-order"
+      extraEnv:
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: loki-s3-credentials
+              key: S3_ACCESS_KEY
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: loki-s3-credentials
+              key: S3_SECRET_KEY
+
+    loki:
+      auth_enabled: false
+      commonConfig:
+        replication_factor: 1
+      analytics:
+        reporting_enabled: false
+
+      storage:
+        type: s3
+        bucketNames:
+          chunks: homeserver-loki-chunks
+          ruler: homeserver-loki-ruler
+          admin: homeserver-loki-admin
+        s3:
+          endpoint: https://storage.yandexcloud.net
+          accessKeyId: ${S3_ACCESS_KEY}
+          secretAccessKey: ${S3_SECRET_KEY}
+          region: ru-central1
+          s3ForcePathStyle: false
+          insecure: false
+          # Connection timeouts and limits
+          tls_handshake_timeout: 10s
+          expect_continue_timeout: 1s
+          max_idle_connections: 50
+          max_idle_connections_per_host: 25
+          max_connections_per_host: 50
+
+      storage_config:
+        tsdb_shipper:
+          active_index_directory: /var/loki/index
+          cache_location: /var/loki/index_cache
+          cache_ttl: 24h
+
+      query_range:
+        parallelise_shardable_queries: true
+        align_queries_with_step: true
+        cache_results: true
+        max_retries: 3
+
+      schemaConfig:
+        configs:
+          - from: 2025-05-01
+            store: tsdb
+            object_store: s3
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+
+      pattern_ingester:
+        enabled: true
+
+      ingester:
+        chunk_encoding: snappy
+        chunk_target_size: 1572864 # 1.5MB
+        max_chunk_age: 2h
+        chunk_idle_period: 1h
+        chunk_retain_period: 5m
+        wal:
+          enabled: true
+          replay_memory_ceiling: 2147483648 # 2GB in bytes
+        lifecycler:
+          address: 0.0.0.0
+          ring:
+            heartbeat_timeout: 1m
+            replication_factor: 1
+
+      tracing:
+        enabled: true
+
+      limits_config:
+        allow_structured_metadata: true
+        discover_log_levels: true
+        volume_enabled: true
+        # PRODUCTION OVERRIDE: 14 days retention (baseline is 90 days in values.yaml)
+        # Reduced for cost optimization on homelab setup with S3 storage
+        retention_period: 336h # 14 days
+        max_query_lookback: 336h # 14 days
+        ingestion_rate_mb: 32
+        ingestion_burst_size_mb: 64
+        max_streams_per_user: 10000
+        max_line_size: 262144 # 256KB
+        max_entries_limit_per_query: 50000
+        reject_old_samples: true
+        reject_old_samples_max_age: 24h
+        query_timeout: 300s
+        max_query_parallelism: 16
+        max_chunks_per_query: 2000000
+        max_query_series: 10000
+        split_queries_by_interval: 15m
+        cardinality_limit: 100000
+        max_streams_matchers_per_query: 1000
+
+      ruler:
+        enable: true
+
+      querier:
+        max_concurrent: 4
+        engine:
+          max_look_back_period: 30s
+
+      compactor:
+        working_directory: /var/loki/compactor
+        compaction_interval: 2h
+        retention_enabled: true
+        retention_delete_delay: 2h
+        retention_delete_worker_count: 10
+        # PRODUCTION OVERRIDE: values.yaml has 12h, values.extend.yaml overrides to 6h
+        apply_retention_interval: 6h
+        delete_request_store: s3
+        retention_backoff_config:
+          min_period: 500ms
+          max_period: 300s
+          max_retries: 5
+
+      frontend:
+        compress_responses: true
+        max_outstanding_per_tenant: 100
+
+      server:
+        http_server_read_timeout: 300s
+        http_server_write_timeout: 300s
+        http_server_idle_timeout: 120s
+        grpc_server_max_recv_msg_size: 4194304 # 4MB
+        grpc_server_max_send_msg_size: 4194304 # 4MB
+        graceful_shutdown_timeout: 30s
+
+    deploymentMode: SingleBinary
+
+    singleBinary:
+      replicas: 1
+      # PRODUCTION OVERRIDE: values.extend.yaml removes resource limits
+      resources: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node-role.kubernetes.io/control-plane"
+                    operator: In
+                    values:
+                      - "true"
+      extraArgs:
+        - "-log.level=info"
+        - "-config.expand-env=true"
+        - "-log-config-reverse-order"
+      extraEnv:
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: loki-s3-credentials
+              key: S3_ACCESS_KEY
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: loki-s3-credentials
+              key: S3_SECRET_KEY
+
+    chunksCache:
+      enabled: true
+      allocatedMemory: 64
+      writebackSizeLimit: 10MB
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node-role.kubernetes.io/control-plane"
+                    operator: In
+                    values:
+                      - "true"
+
+    resultsCache:
+      enabled: true
+      allocatedMemory: 32
+      writebackSizeLimit: 10MB
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node-role.kubernetes.io/control-plane"
+                    operator: In
+                    values:
+                      - "true"
+
+    gateway:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node-role.kubernetes.io/control-plane"
+                    operator: In
+                    values:
+                      - "true"
+
+    # Zero out replica counts of other deployment modes
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    ingester:
+      replicas: 0
+    querier:
+      replicas: 0
+    queryFrontend:
+      replicas: 0
+    queryScheduler:
+      replicas: 0
+    distributor:
+      replicas: 0
+    compactor:
+      replicas: 0
+    indexGateway:
+      replicas: 0
+    bloomCompactor:
+      replicas: 0
+    bloomGateway:
+      replicas: 0
