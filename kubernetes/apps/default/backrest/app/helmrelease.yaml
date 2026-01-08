@@ -112,6 +112,10 @@ spec:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: sabnzbd
+      jellyfin-xxx-config:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: jellyfin-xxx-config
       jellyfin-config:
         enabled: true
         type: persistentVolumeClaim
