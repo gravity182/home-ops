@@ -1,0 +1,156 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: slskd
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: slskd
+  interval: 1h
+  values:
+    controllers:
+      slskd:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-config:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                cp -fL /tmp/config/slskd.yml /app/slskd.yml
+                if [ -n "$SLSKD_API_KEY_SOULARR" ]; then
+                  sed -i "s/__SLSKD_API_KEY_SOULARR__/$SLSKD_API_KEY_SOULARR/g" /app/slskd.yml
+                  echo "API key 'soularr' substituted in slskd config"
+                fi
+            env:
+              - name: SLSKD_API_KEY_SOULARR
+                valueFrom:
+                  secretKeyRef:
+                    name: slskd-api-key-soularr
+                    key: api-key
+        containers:
+          app:
+            image:
+              repository: ghcr.io/slskd/slskd
+              tag: 0.24.1@sha256:e3635858d9614a2fb811601afca706dbf97a6838b849905c27294cbce71be268
+            env:
+              SLSKD_REMOTE_CONFIGURATION: "true"
+              SLSKD_NO_AUTH: "true"
+              SLSKD_SLSK_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: slskd-soulseek-credentials
+                    key: username
+              SLSKD_SLSK_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: slskd-soulseek-credentials
+                    key: password
+              TZ: Europe/Moscow
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 5030
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: slskd
+        ports:
+          http:
+            port: *port
+          incoming:
+            port: 50300
+    route:
+      app:
+        hostnames:
+          - "slskd.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: openebs-hostpath
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          slskd:
+            init-config:
+              - path: /app
+            app:
+              - path: /app
+      config-template:
+        enabled: true
+        type: configMap
+        name: slskd-config
+        advancedMounts:
+          slskd:
+            init-config:
+              - path: /tmp/config/slskd.yml
+                subPath: slskd.yml
+      downloads:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /soulseek/downloaded
+            subPath: soulseek/downloaded
+      incomplete:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /soulseek/incomplete
+            subPath: soulseek/incomplete
+      shares-music:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /shares/music
+            subPath: library/music
+      empty-dir:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /.net/slskd
+            subPath: net-slskd-dir
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

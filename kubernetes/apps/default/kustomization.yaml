@@ -19,4 +19,6 @@ resources:
   - ./jellyfin-xxx/ks.yaml
   - ./stash/ks.yaml
   - ./lidarr/ks.yaml
+  - ./slskd/ks.yaml
+  - ./soularr/ks.yaml
   - ./backrest/ks.yaml
