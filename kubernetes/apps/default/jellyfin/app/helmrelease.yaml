@@ -88,7 +88,7 @@ spec:
         type: persistentVolumeClaim
         existingClaim: media-data
         globalMounts:
-          - path: /media
+          - path: /library
             subPath: library
       tmp:
         enabled: true
