@@ -79,3 +79,8 @@ spec:
         size: 1Gi
         globalMounts:
           - path: /config
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
