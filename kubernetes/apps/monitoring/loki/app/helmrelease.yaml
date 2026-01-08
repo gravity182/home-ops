@@ -193,7 +193,7 @@ spec:
       allocatedMemory: 32
       writebackSizeLimit: 10MB
 
-    gateway:
+    gateway: {}
 
     # Zero out replica counts of other deployment modes
     backend:
