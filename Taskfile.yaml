@@ -42,18 +42,18 @@ tasks:
       - test -f {{.KUBECONFIG}}
       - which flux
 
-  reconcile:all:
-    desc: Force reconcile all kustomizations
-    cmd: flux reconcile kustomization --all-namespaces
-    preconditions:
-      - test -f {{.KUBECONFIG}}
-      - which flux
-
   reconcile:ks:
     desc: Force reconcile specific kustomization [NAME=required NAMESPACE=default]
     cmd: flux reconcile kustomization {{.NAME}} -n {{.NAMESPACE | default "default"}}
     requires:
       vars: [NAME]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which flux
+
+  reconcile:all:
+    desc: Force reconcile all kustomizations
+    cmd: flux reconcile kustomization --all-namespaces
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
