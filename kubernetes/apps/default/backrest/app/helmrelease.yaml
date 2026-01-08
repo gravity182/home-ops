@@ -128,3 +128,7 @@ spec:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: qbittorrent
+      stash-config:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: stash-config
