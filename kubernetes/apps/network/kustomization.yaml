@@ -12,5 +12,4 @@ resources:
   # - ./cloudflare-tunnel/ks.yaml  # Replaced by Tailscale
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
-  - ./tailscale-dns/ks.yaml
   - ./tailscale-operator/ks.yaml
