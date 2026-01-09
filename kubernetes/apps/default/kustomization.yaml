@@ -15,6 +15,7 @@ resources:
   - ./sabnzbd/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
+  - ./qbit-manage/ks.yaml
   - ./jellyfin/ks.yaml
   - ./jellyfin-xxx/ks.yaml
   - ./jellyseerr/ks.yaml
