@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import sys
+
+event_type = sys.argv[1]
+event_data = json.loads(sys.argv[2])
+
+print(f"Received event '{event_type}' ...")
+
+if event_type == "media_downloaded":
+    thumbnail_filepath = event_data.get("thumbnail_filepath")
+    if thumbnail_filepath and thumbnail_filepath.endswith("-thumb.jpg"):
+        dirname, filename = os.path.split(thumbnail_filepath)
+        new_filename = filename[:-10] + ".jpg"
+        new_filepath = os.path.join(dirname, new_filename)
+        os.rename(thumbnail_filepath, new_filepath)
+        print(f"Renamed thumbnail '{thumbnail_filepath}' to '{new_filepath}'")

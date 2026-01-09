@@ -1,0 +1,156 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pinchflat
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: pinchflat
+  interval: 1h
+  values:
+    controllers:
+      pinchflat:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        initContainers:
+          init-yt-dlp-configs:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                set -e
+                mkdir -p /config/extras/yt-dlp-configs
+                find /tmp/yt-dlp-configs -type f -print | while IFS= read -r file; do
+                  cp -fL "$file" /config/extras/yt-dlp-configs/ && \
+                    echo "Copied $(basename "$file") to /config/extras/yt-dlp-configs/"
+                done
+          init-user-scripts:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                set -e
+                mkdir -p /config/extras/user-scripts
+                find /tmp/user-scripts -type f -print | while IFS= read -r file; do
+                  cp -fL "$file" /config/extras/user-scripts/ && \
+                    chmod u+x "/config/extras/user-scripts/$(basename "$file")" && \
+                    echo "Copied $(basename "$file") to /config/extras/user-scripts/"
+                done
+        containers:
+          app:
+            image:
+              repository: ghcr.io/kieraneglin/pinchflat
+              tag: v2025.6.6@sha256:4e975edf58f0861a5cbfe8fc6aac4851ff5a02dfc3f05ffeea4982e3084a5a4a
+            env:
+              LOG_LEVEL: info
+              TZ: Europe/Moscow
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthcheck
+                    port: &port 8945
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: pinchflat
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "pinchflat.${SECRET_DOMAIN}"
+          - "youtube.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: openebs-hostpath
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          pinchflat:
+            init-yt-dlp-configs:
+              - path: /config
+            init-user-scripts:
+              - path: /config
+            app:
+              - path: /config
+      downloads:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        advancedMounts:
+          pinchflat:
+            app:
+              - path: /downloads
+                subPath: library/videos
+      yt-dlp-configs:
+        enabled: true
+        type: configMap
+        name: pinchflat-yt-dlp-configs
+        advancedMounts:
+          pinchflat:
+            init-yt-dlp-configs:
+              - path: /tmp/yt-dlp-configs
+      user-scripts:
+        enabled: true
+        type: configMap
+        name: pinchflat-user-scripts
+        defaultMode: 0755
+        advancedMounts:
+          pinchflat:
+            init-user-scripts:
+              - path: /tmp/user-scripts
+      empty-dir:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /etc/yt-dlp
+            subPath: etc-yt-dlp
+          - path: /etc/elixir_tzdata_data
+            subPath: etc-elixir-tzdata
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
