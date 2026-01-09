@@ -19,24 +19,19 @@ spec:
         tailscale.com/hostname: tailscale-dns
     servers:
       - zones:
-          - zone: ${SECRET_DOMAIN}.
-            scheme: dns://
+          - zone: .
         port: 53
         plugins:
           - name: errors
           - name: log
-          - name: health
-            configBlock: |-
-              lameduck 5s
-          - name: ready
           - name: template
             parameters: IN A ${SECRET_DOMAIN}
             configBlock: |-
+              match "^(.+[.])?${SECRET_DOMAIN}[.]$"
               answer "{{ .Name }} 60 IN A 100.90.39.87"
-          - name: template
-            parameters: ANY AAAA ${SECRET_DOMAIN}
-            configBlock: |-
-              rcode NOERROR
+              fallthrough
+          - name: forward
+            parameters: . /etc/resolv.conf
           - name: cache
             parameters: 30
     resources:
