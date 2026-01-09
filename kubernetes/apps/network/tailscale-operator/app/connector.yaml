@@ -1,0 +1,9 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: homeserver-subnet
+spec:
+  subnetRouter:
+    advertiseRoutes:
+      - 192.168.3.0/24
