@@ -21,10 +21,6 @@ spec:
     proxyConfig:
       defaultTags:
         - tag:k8s
-    oauth:
-      clientId: ""
-      clientSecret: ""
     oauthSecretVolume:
-      name: oauth-secret
       secret:
         secretName: tailscale-operator-oauth
