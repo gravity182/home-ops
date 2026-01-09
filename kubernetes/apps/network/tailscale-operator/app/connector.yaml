@@ -6,6 +6,6 @@ metadata:
 spec:
   subnetRouter:
     advertiseRoutes:
-      - "192.168.3.101/32"
-      - "192.168.3.102/32"
-      - "192.168.3.103/32"
+      - 192.168.3.101/32 # k8s-gateway
+      - 192.168.3.102/32 # envoy-internal
+      - 192.168.3.103/32 # envoy-external
