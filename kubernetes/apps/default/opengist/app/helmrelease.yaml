@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: opengist
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: opengist
+  interval: 1h
+  values:
+    controllers:
+      opengist:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/thomiceli/opengist
+              tag: "1.11@sha256:86e7eb1f9fb2aa7b5d620fe452406de331c6e4d1c47b4d23d46b4b01e1ebf69d"
+            env:
+              OG_LOG_LEVEL: warn
+              OG_HTTP_PORT: &port 6157
+              OG_EXTERNAL_URL: "https://opengist.${SECRET_DOMAIN}"
+              OG_OIDC_CLIENT_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: opengist-openid-secret
+                    key: openid-client-id
+              OG_OIDC_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: opengist-openid-secret
+                    key: openid-client-secret
+              OG_OIDC_PROVIDER_NAME: Authentik
+              OG_OIDC_DISCOVERY_URL: "https://authentik.${SECRET_DOMAIN}/application/o/opengist/.well-known/openid-configuration"
+              OG_OIDC_GROUP_CLAIM_NAME: groups
+              OG_OIDC_ADMIN_GROUP: opengist_admin
+              TZ: Europe/Moscow
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: opengist
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "opengist.${SECRET_DOMAIN}"
+          - "gist.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: openebs-hostpath
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /opengist
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

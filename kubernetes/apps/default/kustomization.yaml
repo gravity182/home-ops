@@ -24,4 +24,5 @@ resources:
   - ./lidarr/ks.yaml
   - ./slskd/ks.yaml
   - ./soularr/ks.yaml
+  - ./opengist/ks.yaml
   - ./backrest/ks.yaml
