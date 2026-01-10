@@ -80,6 +80,7 @@ spec:
         enabled: true
         type: configMap
         name: qbit-manage-config
+        defaultMode: 0775
         advancedMounts:
           qbit-manage:
             copy-config:
