@@ -19,7 +19,7 @@ resources:
   - ./pinchflat/ks.yaml
   - ./jellyfin/ks.yaml
   - ./jellyfin-xxx/ks.yaml
-  - ./jellyseerr/ks.yaml
+  - ./seerr/ks.yaml
   - ./stash/ks.yaml
   - ./lidarr/ks.yaml
   - ./slskd/ks.yaml
