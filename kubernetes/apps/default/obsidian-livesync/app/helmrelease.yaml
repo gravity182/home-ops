@@ -12,9 +12,23 @@ spec:
   values:
     controllers:
       obsidian-livesync:
+        type: statefulset
+        statefulset:
+          volumeClaimTemplates:
+            - name: data
+              size: 10Gi
+              storageClass: openebs-hostpath
+              accessMode: ReadWriteOnce
+              globalMounts:
+                - path: /opt/couchdb/data
+            - name: etc-local-d
+              size: 1Gi
+              storageClass: openebs-hostpath
+              accessMode: ReadWriteOnce
+              globalMounts:
+                - path: /opt/couchdb/etc/local.d
         annotations:
           reloader.stakater.com/auto: "true"
-        strategy: Recreate
         containers:
           app:
             image:
@@ -84,22 +98,6 @@ spec:
           - name: envoy-internal
             namespace: network
     persistence:
-      data:
-        enabled: true
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        globalMounts:
-          - path: /opt/couchdb/data
-      etc-local-d:
-        enabled: true
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        globalMounts:
-          - path: /opt/couchdb/etc/local.d
       config:
         enabled: true
         type: configMap
