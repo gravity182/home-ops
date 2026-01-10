@@ -96,7 +96,6 @@ spec:
       app:
         hostnames:
           - "pinchflat.${SECRET_DOMAIN}"
-          - "youtube.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
