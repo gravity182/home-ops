@@ -49,7 +49,7 @@ spec:
           app:
             image:
               repository: ghcr.io/kieraneglin/pinchflat
-              tag: v2025.6.6@sha256:4e975edf58f0861a5cbfe8fc6aac4851ff5a02dfc3f05ffeea4982e3084a5a4a
+              tag: latest
             env:
               LOG_LEVEL: info
               TZ: Europe/Moscow
