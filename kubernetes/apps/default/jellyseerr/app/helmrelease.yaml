@@ -65,6 +65,7 @@ spec:
       app:
         hostnames:
           - "jellyseerr.${SECRET_DOMAIN}"
+          - "requests.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
