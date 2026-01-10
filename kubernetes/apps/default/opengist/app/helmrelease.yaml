@@ -56,7 +56,9 @@ spec:
               readiness: *probes
             securityContext:
               readOnlyRootFilesystem: false
-              capabilities: { drop: ["ALL"] }
+              capabilities:
+                drop: ["ALL"]
+                add: ["CHOWN", "SETUID", "SETGID"]
             resources:
               requests:
                 cpu: 50m
