@@ -126,7 +126,7 @@ tracker:
     tag: ~tracker_TV-Vault
     notifiarr: tv-vault
   plab:
-    tag: ~tracker_Pornolab
+    tag: ~tracker_PornoLab
     notifiarr: pornolab
 
 nohardlinks:
