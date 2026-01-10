@@ -9,7 +9,6 @@ components:
 resources:
   - ./namespace.yaml
   - ./cloudflare-dns/ks.yaml
-  # - ./cloudflare-tunnel/ks.yaml  # Replaced by Tailscale
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./tailscale-operator/ks.yaml
