@@ -70,8 +70,10 @@ spec:
             spec:
               ports:
                 - name: https
+                  port: 443
                   nodePort: 30443
                 - name: http
+                  port: 80
                   nodePort: 30080
   shutdown:
     drainTimeout: 180s
