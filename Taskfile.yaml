@@ -25,6 +25,15 @@ tasks:
 
   default: task --list
 
+  sops:edit:
+    desc: Edit a file with SOPS [FILE=required]
+    cmd: sops {{.FILE}}
+    requires:
+      vars: [FILE]
+    preconditions:
+      - test -f {{.FILE}}
+      - which sops
+
   sops:encrypt:
     desc: Encrypt a file with SOPS [FILE=required]
     cmd: sops --encrypt --in-place {{.FILE}}
