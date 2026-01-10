@@ -23,6 +23,25 @@ spec:
           failedJobsHistory: 1
         pod:
           restartPolicy: OnFailure
+        initContainers:
+          copy-config:
+            image:
+              repository: ghcr.io/stuffanthings/qbit_manage
+              tag: v4.6.5@sha256:4f36632a138b4e5aeab3b765b7f389087bfb140c80dbbec1343eca74dc351245
+            command:
+              - sh
+              - -c
+              - |
+                if [ ! -f /config/config.yml ]; then
+                  cp /config-template/config.yml /config/config.yml
+                  echo "Config file copied from template"
+                else
+                  echo "Config file already exists, skipping copy"
+                fi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -61,10 +80,11 @@ spec:
         enabled: true
         type: configMap
         name: qbit-manage-config
-        globalMounts:
-          - path: /config/config.yml
-            subPath: config.yml
-            readOnly: true
+        advancedMounts:
+          qbit-manage:
+            copy-config:
+              - path: /config-template
+                readOnly: true
       qbittorrent-data:
         enabled: true
         type: persistentVolumeClaim
