@@ -32,12 +32,8 @@ spec:
               - sh
               - -c
               - |
-                if [ ! -f /config/config.yml ]; then
-                  cp /config-template/config.yml /config/config.yml
-                  echo "Config file copied from template"
-                else
-                  echo "Config file already exists, skipping copy"
-                fi
+                cp /config-template/config.yml /config/config.yml
+                echo "Config file copied from template"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
