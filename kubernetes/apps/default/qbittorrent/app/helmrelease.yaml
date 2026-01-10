@@ -34,8 +34,18 @@ spec:
               tag: 5.1.4@sha256:e9c2c24ad2b39fa0ee44de682bf26b14bf23cffea1de9e1f082f26caed4277f9
             env:
               QBT_WEBUI_PORT: &port 8080
-              QBT_TORRENTING_PORT: 50413
+              QBT_TORRENTING_PORT: &p2p-port 30413
               TZ: Europe/Moscow
+            ports:
+              - name: http
+                containerPort: *port
+                protocol: TCP
+              - name: bittorrent-tcp
+                containerPort: *p2p-port
+                protocol: TCP
+              - name: bittorrent-udp
+                containerPort: *p2p-port
+                protocol: UDP
             probes:
               liveness: &probes
                 enabled: true
@@ -71,10 +81,23 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
+        forceRename: qbittorrent
         controller: qbittorrent
         ports:
           http:
             port: *port
+      bittorrent:
+        controller: qbittorrent
+        type: NodePort
+        ports:
+          bittorrent-tcp:
+            port: *p2p-port
+            protocol: TCP
+            nodePort: *p2p-port
+          bittorrent-udp:
+            port: *p2p-port
+            protocol: UDP
+            nodePort: *p2p-port
     route:
       app:
         hostnames:
@@ -82,6 +105,10 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       config:
         enabled: true
