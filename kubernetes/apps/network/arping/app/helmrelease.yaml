@@ -49,4 +49,4 @@ spec:
         data:
           INTERFACE: enp1s0
           IP_ADDRESS: "192.168.3.26"
-          INTERVAL: "30"
+          INTERVAL: "300"
