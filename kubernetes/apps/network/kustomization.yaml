@@ -12,3 +12,4 @@ resources:
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./tailscale-operator/ks.yaml
+  - ./arping/ks.yaml
