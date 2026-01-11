@@ -43,7 +43,7 @@ spec:
                 cpu: 1m
                 memory: 16Mi
               limits:
-                memory: 32Mi
+                memory: 64Mi
     configMaps:
       config:
         data:
