@@ -19,17 +19,17 @@ spec:
           hostNetwork: true
           dnsPolicy: ClusterFirstWithHostNet
         containers:
-          app:
+          arping:
             image:
               repository: alpine
               tag: 3.21
             command:
               - /bin/sh
-              - -c
+              - -lc
               - |
-                apk add --no-cache iputils
+                apk add --no-cache iputils-arping;
                 while true; do
-                  arping -c 1 -U -I "$INTERFACE" "$IP_ADDRESS"
+                  arping -U -c 2 -I "$INTERFACE" "$IP_ADDRESS"
                   sleep "$INTERVAL"
                 done
             envFrom:
