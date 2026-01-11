@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: arping
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: arping
+  interval: 1h
+  values:
+    controllers:
+      arping:
+        type: daemonset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+        containers:
+          app:
+            image:
+              repository: alpine
+              tag: 3.21
+            command:
+              - /bin/sh
+              - -c
+              - |
+                apk add --no-cache iputils
+                while true; do
+                  arping -c 1 -U -I "$INTERFACE" "$IP_ADDRESS"
+                  sleep "$INTERVAL"
+                done
+            envFrom:
+              - configMapRef:
+                  identifier: config
+            securityContext:
+              capabilities:
+                add: ["NET_RAW"]
+            resources:
+              requests:
+                cpu: 1m
+                memory: 16Mi
+              limits:
+                memory: 32Mi
+    configMaps:
+      config:
+        data:
+          INTERFACE: enp1s0
+          IP_ADDRESS: "192.168.3.26"
+          INTERVAL: "30"
