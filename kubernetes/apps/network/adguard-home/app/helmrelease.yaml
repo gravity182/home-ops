@@ -14,6 +14,10 @@ spec:
   interval: 1h
   # https://github.com/gabe565/charts/blob/main/charts/adguard-home/values.yaml
   values:
+    image:
+      repository: adguard/adguardhome
+      tag: v0.107.71
+
     env:
       TZ: Europe/Moscow
 
@@ -66,38 +70,35 @@ spec:
         size: 4Gi
 
     config: |
-      bind_host: 0.0.0.0
-      bind_port: 3000
+      http:
+        pprof:
+          port: 6060
+          enabled: false
+        address: 0.0.0.0:3000
+        session_ttl: 720h
       users: []
       auth_attempts: 5
       block_auth_min: 15
       http_proxy: ""
       language: ""
       theme: auto
-      debug_pprof: false
-      web_session_ttl: 720
       dns:
         bind_hosts:
           - 0.0.0.0
         port: 53
         anonymize_client_ip: false
-        protection_enabled: true
-        blocking_mode: default
-        blocking_ipv4: ""
-        blocking_ipv6: ""
-        blocked_response_ttl: 10
-        parental_block_host: family-block.dns.adguard.com
-        safebrowsing_block_host: standard-block.dns.adguard.com
         ratelimit: 20
+        ratelimit_subnet_len_ipv4: 24
+        ratelimit_subnet_len_ipv6: 56
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
-          - "https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}"
+          - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}
+        upstream_dns_file: ""
         bootstrap_dns:
-          - "1.1.1.1"
-        upstream_mode: parallel
-        all_servers: false
-        fastest_addr: false
+          - 1.1.1.1
+        fallback_dns: []
+        upstream_mode: load_balance
         fastest_timeout: 1s
         allowed_clients: []
         disallowed_clients: []
@@ -108,10 +109,13 @@ spec:
         trusted_proxies:
           - 127.0.0.0/8
           - ::1/128
+        cache_enabled: true
         cache_size: 4194304
         cache_ttl_min: 0
         cache_ttl_max: 0
         cache_optimistic: false
+        cache_optimistic_answer_ttl: 30s
+        cache_optimistic_max_age: 12h
         bogus_nxdomain: []
         aaaa_disabled: false
         enable_dnssec: false
@@ -123,21 +127,7 @@ spec:
         handle_ddr: true
         ipset: []
         ipset_file: ""
-        filtering_enabled: true
-        filters_update_interval: 24
-        parental_enabled: false
-        safesearch_enabled: false
-        safebrowsing_enabled: false
-        safebrowsing_cache_size: 1048576
-        safesearch_cache_size: 1048576
-        parental_cache_size: 1048576
-        cache_time: 30
-        rewrites:
-          - domain: "${SECRET_DOMAIN}"
-            answer: "192.168.3.102"
-          - domain: "*.${SECRET_DOMAIN}"
-            answer: "192.168.3.102"
-        blocked_services: []
+        bootstrap_prefer_ipv6: false
         upstream_timeout: 10s
         private_networks: []
         use_private_ptr_resolvers: true
@@ -146,6 +136,10 @@ spec:
         dns64_prefixes: []
         serve_http3: false
         use_http3_upstreams: false
+        serve_plain_dns: true
+        hostsfile_enabled: true
+        pending_requests:
+          enabled: true
       tls:
         enabled: false
         server_name: ""
@@ -162,15 +156,17 @@ spec:
         private_key_path: ""
         strict_sni_check: false
       querylog:
-        enabled: true
-        file_enabled: true
+        dir_path: ""
+        ignored: []
         interval: 2160h
         size_memory: 1000
-        ignored: []
-      statistics:
         enabled: true
-        interval: 1
+        file_enabled: true
+      statistics:
+        dir_path: ""
         ignored: []
+        interval: 24h
+        enabled: true
       filters:
         - enabled: false
           url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt
@@ -199,6 +195,46 @@ spec:
           lease_duration: 86400
           ra_slaac_only: false
           ra_allow_slaac: false
+      filtering:
+        blocking_ipv4: ""
+        blocking_ipv6: ""
+        blocked_services:
+          schedule:
+            time_zone: UTC
+          ids: []
+        protection_disabled_until: null
+        safe_search:
+          enabled: false
+          bing: true
+          duckduckgo: true
+          ecosia: true
+          google: true
+          pixabay: true
+          yandex: true
+          youtube: true
+        blocking_mode: default
+        parental_block_host: family-block.dns.adguard.com
+        safebrowsing_block_host: standard-block.dns.adguard.com
+        rewrites:
+          - domain: ${SECRET_DOMAIN}
+            answer: 192.168.3.102
+            enabled: true
+          - domain: '*.${SECRET_DOMAIN}'
+            answer: 192.168.3.102
+            enabled: true
+        safe_fs_patterns:
+          - /opt/adguardhome/work/data/userfilters/*
+        safebrowsing_cache_size: 1048576
+        safesearch_cache_size: 1048576
+        parental_cache_size: 1048576
+        cache_time: 30
+        filters_update_interval: 24
+        blocked_response_ttl: 10
+        filtering_enabled: false
+        rewrites_enabled: true
+        parental_enabled: false
+        safebrowsing_enabled: false
+        protection_enabled: true
       clients:
         runtime_sources:
           whois: true
@@ -207,15 +243,17 @@ spec:
           dhcp: true
           hosts: true
         persistent: []
-      log_file: ""
-      log_max_backups: 0
-      log_max_size: 100
-      log_max_age: 3
-      log_compress: false
-      log_localtime: false
-      verbose: false
+      log:
+        enabled: true
+        file: ""
+        max_backups: 0
+        max_size: 100
+        max_age: 3
+        compress: false
+        local_time: false
+        verbose: false
       os:
         group: ""
         user: ""
         rlimit_nofile: 0
-      schema_version: 17
+      schema_version: 32
