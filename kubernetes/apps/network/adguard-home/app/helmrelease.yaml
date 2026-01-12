@@ -93,7 +93,7 @@ spec:
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
-          - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}
+          - h3://doh3.dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}
         upstream_dns_file: ""
         bootstrap_dns:
           - 1.1.1.1
@@ -118,7 +118,7 @@ spec:
         cache_optimistic_max_age: 12h
         bogus_nxdomain: []
         aaaa_disabled: false
-        enable_dnssec: false
+        enable_dnssec: true
         edns_client_subnet:
           custom_ip: ""
           enabled: false
@@ -135,7 +135,7 @@ spec:
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
-        use_http3_upstreams: false
+        use_http3_upstreams: true
         serve_plain_dns: true
         hostsfile_enabled: true
         pending_requests:
