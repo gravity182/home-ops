@@ -230,7 +230,7 @@ spec:
         cache_time: 30
         filters_update_interval: 24
         blocked_response_ttl: 10
-        filtering_enabled: false
+        filtering_enabled: true
         rewrites_enabled: true
         parental_enabled: false
         safebrowsing_enabled: false
