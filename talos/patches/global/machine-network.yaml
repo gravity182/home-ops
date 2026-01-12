@@ -1,6 +1,13 @@
 machine:
   network:
+    interfaces:
+      - interface: enp1s0
+        dhcp: false
+        addresses:
+          - 192.168.3.26/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.3.1
     disableSearchDomain: true
     nameservers:
-      - 1.1.1.1
-      - 1.0.0.1
+      - 192.168.3.110
