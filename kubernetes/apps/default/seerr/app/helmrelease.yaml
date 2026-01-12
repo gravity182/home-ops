@@ -64,7 +64,6 @@ spec:
     route:
       app:
         hostnames:
-          - "seerr.${SECRET_DOMAIN}"
           - "requests.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-external
