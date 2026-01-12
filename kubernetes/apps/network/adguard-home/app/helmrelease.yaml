@@ -133,6 +133,8 @@ spec:
         parental_cache_size: 1048576
         cache_time: 30
         rewrites:
+          - domain: "${SECRET_DOMAIN}"
+            answer: "192.168.3.102"
           - domain: "*.${SECRET_DOMAIN}"
             answer: "192.168.3.102"
         blocked_services: []
