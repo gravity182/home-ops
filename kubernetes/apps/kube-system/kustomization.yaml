@@ -12,5 +12,4 @@ resources:
   - ./coredns/ks.yaml
   - ./intel-gpu-resource-driver/ks.yaml
   - ./metrics-server/ks.yaml
-  - ./openebs/ks.yaml
   - ./reloader/ks.yaml
