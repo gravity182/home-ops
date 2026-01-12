@@ -119,7 +119,7 @@ spec:
         cache_optimistic_max_age: 12h
         bogus_nxdomain: []
         aaaa_disabled: false
-        enable_dnssec: false
+        enable_dnssec: true
         edns_client_subnet:
           custom_ip: ""
           enabled: false
