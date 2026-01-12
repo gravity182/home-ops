@@ -67,6 +67,8 @@ spec:
           - "seerr.${SECRET_DOMAIN}"
           - "requests.${SECRET_DOMAIN}"
         parentRefs:
+          - name: envoy-external
+            namespace: network
           - name: envoy-internal
             namespace: network
     persistence:

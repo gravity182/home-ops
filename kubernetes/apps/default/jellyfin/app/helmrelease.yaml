@@ -72,10 +72,6 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-      lan:
-        hostnames:
-          - "jellyfin-lan.${SECRET_DOMAIN}"
-        parentRefs:
           - name: envoy-internal
             namespace: network
     persistence:
