@@ -78,7 +78,6 @@ spec:
     route:
       app:
         hostnames:
-          - "opengist.${SECRET_DOMAIN}"
           - "gist.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-external
