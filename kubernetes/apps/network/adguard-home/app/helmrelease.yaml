@@ -118,7 +118,7 @@ spec:
         cache_optimistic_max_age: 12h
         bogus_nxdomain: []
         aaaa_disabled: false
-        enable_dnssec: true
+        enable_dnssec: false
         edns_client_subnet:
           custom_ip: ""
           enabled: false
@@ -135,7 +135,7 @@ spec:
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
-        use_http3_upstreams: true
+        use_http3_upstreams: false
         serve_plain_dns: true
         hostsfile_enabled: true
         pending_requests:
