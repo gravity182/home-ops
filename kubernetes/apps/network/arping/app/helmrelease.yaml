@@ -29,7 +29,12 @@ spec:
               - |
                 apk add --no-cache iputils-arping;
                 while true; do
-                  arping -U -c 2 -I "$INTERFACE" "$IP_ADDRESS"
+                  # Send gratuitous ARP reply (often more effective than request)
+                  arping -A -c 3 -I "$INTERFACE" "$IP_ADDRESS"
+                  # Also send gratuitous ARP request
+                  arping -U -c 3 -I "$INTERFACE" "$IP_ADDRESS"
+                  # Ping gateway to refresh its ARP entry for us
+                  arping -c 1 -I "$INTERFACE" "$GATEWAY" >/dev/null 2>&1 || true
                   sleep "$INTERVAL"
                 done
             envFrom:
@@ -49,4 +54,5 @@ spec:
         data:
           INTERFACE: enp1s0
           IP_ADDRESS: "192.168.3.26"
-          INTERVAL: "300"
+          GATEWAY: "192.168.3.1"
+          INTERVAL: "60"
