@@ -5,7 +5,7 @@ metadata:
   name: openebs
 spec:
   interval: 1h
-  path: ./kubernetes/apps/kube-system/openebs/app
+  path: ./kubernetes/apps/openebs/openebs/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
