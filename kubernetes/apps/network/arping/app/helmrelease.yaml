@@ -27,14 +27,13 @@ spec:
               - /bin/sh
               - -lc
               - |
-                apk add --no-cache iputils-arping;
+                apk add --no-cache iputils-arping iputils-ping;
                 while true; do
-                  # Send gratuitous ARP reply (often more effective than request)
+                  # Gratuitous ARP announcements
                   arping -A -c 3 -I "$INTERFACE" "$IP_ADDRESS"
-                  # Also send gratuitous ARP request
                   arping -U -c 3 -I "$INTERFACE" "$IP_ADDRESS"
-                  # Ping gateway to refresh its ARP entry for us
-                  arping -c 1 -I "$INTERFACE" "$GATEWAY" >/dev/null 2>&1 || true
+                  # ICMP ping gateway - forces router to ARP for us and track our IP
+                  ping -c 3 -I "$IP_ADDRESS" "$GATEWAY" >/dev/null 2>&1 || true
                   sleep "$INTERVAL"
                 done
             envFrom:
@@ -55,4 +54,4 @@ spec:
           INTERFACE: enp1s0
           IP_ADDRESS: "192.168.3.26"
           GATEWAY: "192.168.3.1"
-          INTERVAL: "60"
+          INTERVAL: "15"
