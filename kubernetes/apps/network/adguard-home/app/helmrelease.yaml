@@ -93,6 +93,7 @@ spec:
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
+          - h3://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}
           - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}
         upstream_dns_file: ""
         bootstrap_dns:
@@ -135,7 +136,7 @@ spec:
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
-        use_http3_upstreams: false
+        use_http3_upstreams: true
         serve_plain_dns: true
         hostsfile_enabled: true
         pending_requests:
