@@ -14,7 +14,7 @@ metadata:
   name: l2-policy
 spec:
   externalIPs: true
-  loadBalancerIPs: false
+  loadBalancerIPs: true
   interfaces:
     - enp1s0
   nodeSelector:
