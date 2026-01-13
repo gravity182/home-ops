@@ -29,6 +29,8 @@ spec:
               SONARR__SERVER__PORT: &port 8989
               SONARR__UPDATE__BRANCH: develop
               TZ: Europe/Moscow
+            envFrom:
+              - secret: sonarr-jellyfin-api
             probes:
               liveness: &probes
                 enabled: true
@@ -90,3 +92,9 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      scripts:
+        type: configMap
+        name: sonarr-scripts
+        defaultMode: 0775
+        globalMounts:
+          - path: /config/scripts
