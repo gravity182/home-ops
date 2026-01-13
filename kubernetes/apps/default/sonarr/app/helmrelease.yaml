@@ -32,6 +32,7 @@ spec:
               TZ: Europe/Moscow
             envFrom:
               - secret: sonarr-jellyfin-api
+              - configMap: sonarr-jellyfin-config
             probes:
               liveness: &probes
                 enabled: true

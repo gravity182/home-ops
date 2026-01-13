@@ -14,5 +14,10 @@ configMapGenerator:
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: radarr-jellyfin-config
+    literals:
+      - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
+      - JELLYFIN_LIBRARY_ID=f137a2dd21bbc1b99aa5c0f6bf02a805
+      - JELLYFIN_REFRESH_PEOPLE_TASK_ID=866456ed0d44e15468124ce33d85961e
 generatorOptions:
   disableNameSuffixHash: true
