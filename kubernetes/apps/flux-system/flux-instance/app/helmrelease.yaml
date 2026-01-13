@@ -124,11 +124,19 @@ spec:
             target:
               kind: Deployment
               name: (helm-controller|kustomize-controller)
-          - # Cancel health checks on new Kustomizations revisions
+          - # Cancel ongoing health checks when a new revision is detected
             patch: |-
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --feature-gates=CancelHealthCheckOnNewRevision=true
+            target:
+              kind: Deployment
+              name: kustomize-controller
+          - # Fail if undefined variables are used in post-build substitutions
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --feature-gates=StrictPostBuildSubstitutions=true
             target:
               kind: Deployment
               name: kustomize-controller
