@@ -137,6 +137,10 @@ spec:
         enabled: true
         type: persistentVolumeClaim
         existingClaim: stash-metadata
+      stash-blobs:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: stash-blobs
       lidarr:
         enabled: true
         type: persistentVolumeClaim
