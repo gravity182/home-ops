@@ -29,6 +29,8 @@ spec:
               RADARR__SERVER__PORT: &port 7878
               RADARR__UPDATE__BRANCH: develop
               TZ: Europe/Moscow
+            envFrom:
+              - secret: radarr-jellyfin-api
             probes:
               liveness: &probes
                 enabled: true
@@ -90,3 +92,9 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      scripts:
+        type: configMap
+        name: radarr-scripts
+        defaultMode: 0775
+        globalMounts:
+          - path: /config/scripts
