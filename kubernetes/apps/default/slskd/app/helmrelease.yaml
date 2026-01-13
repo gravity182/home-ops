@@ -14,6 +14,7 @@ spec:
       slskd:
         annotations:
           reloader.stakater.com/auto: "true"
+        strategy: Recreate
         initContainers:
           init-config:
             image:

@@ -14,6 +14,7 @@ spec:
       backrest:
         annotations:
           reloader.stakater.com/auto: "true"
+        strategy: Recreate
         containers:
           app:
             image:
