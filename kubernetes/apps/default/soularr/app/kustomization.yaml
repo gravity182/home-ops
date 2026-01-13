@@ -9,5 +9,8 @@ configMapGenerator:
   - name: soularr-config
     files:
       - config.ini=./resources/config.ini
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 generatorOptions:
   disableNameSuffixHash: true

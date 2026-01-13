@@ -11,5 +11,8 @@ configMapGenerator:
   - name: sonarr-scripts
     files:
       - jellyfin-notify.sh=./resources/jellyfin-notify.sh
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 generatorOptions:
   disableNameSuffixHash: true
