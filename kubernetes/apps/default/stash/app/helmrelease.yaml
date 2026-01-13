@@ -14,6 +14,7 @@ spec:
       stash:
         annotations:
           reloader.stakater.com/auto: "true"
+        strategy: Recreate
         initContainers:
           allow-public-access:
             image:
