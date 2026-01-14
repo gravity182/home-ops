@@ -32,6 +32,8 @@ spec:
               - --target
               - /config/python-packages
               - requests
+              - stashapi
+              - stashapp-tools
           allow-public-access:
             image:
               repository: busybox
