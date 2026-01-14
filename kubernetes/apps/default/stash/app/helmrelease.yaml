@@ -61,6 +61,8 @@ spec:
               STASH_GENERATED: /generated/
               STASH_PORT: &port 9999
               TZ: Europe/Moscow
+              LIBRARY_SCENES: /library/scenes
+              LIBRARY_IMAGES: /library/images
             probes:
               liveness: &probes
                 enabled: true
@@ -157,3 +159,11 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      renamer-config:
+        enabled: true
+        type: configMap
+        name: stash-renamer-config
+        globalMounts:
+          - path: /config/plugins/renamerOnUpdate/config.py
+            subPath: config.py
+            readOnly: true
