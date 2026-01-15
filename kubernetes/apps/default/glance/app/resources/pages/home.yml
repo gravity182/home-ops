@@ -86,6 +86,10 @@
           title: Infra & Tools
           cache: 1m
           sites:
+            - title: OpenGist
+              url: https://gist.${SECRET_DOMAIN}
+              check-url: http://opengist.default.svc.cluster.local:6157
+              icon: sh:opengist-light
             - title: AdGuard Home
               url: https://adguard.${SECRET_DOMAIN}
               check-url: http://adguard-home.network.svc.cluster.local:3000
@@ -98,11 +102,3 @@
               url: https://grafana.${SECRET_DOMAIN}
               check-url: http://grafana.monitoring.svc.cluster.local:80
               icon: sh:grafana-light
-            - title: OpenGist
-              url: https://gist.${SECRET_DOMAIN}
-              check-url: http://opengist.default.svc.cluster.local:6157
-              icon: sh:opengist-light
-            - title: Backrest
-              url: https://backrest.${SECRET_DOMAIN}
-              check-url: http://backrest.default.svc.cluster.local:9898
-              icon: sh:backrest-light
