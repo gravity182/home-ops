@@ -1,19 +1,20 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/not-first/glance-schema/master/schema.json#/definitions/widget
+# https://github.com/glanceapp/community-widgets/blob/main/widgets/qbittorrent-stats/README.md
 - type: custom-api
   title: qBittorrent
   cache: 10s
   options:
-    view: "basic"   # "basic" or "detailed"
-    mode: "upload"  # "default" or "upload"
+    view: "detailed" # "basic" or "detailed"
+    mode: "upload" # "default" or "upload"
   subrequests:
     transfer:
-      url: http://qbittorrent.default.svc.cluster.local:8080/api/v2/transfer/info
+      url: http://${QBITTORRENT_IP}/api/v2/transfer/info
     seeding:
-      url: http://qbittorrent.default.svc.cluster.local:8080/api/v2/torrents/info
+      url: http://${QBITTORRENT_IP}/api/v2/torrents/info
       parameters:
         filter: seeding
     leeching:
-      url: http://qbittorrent.default.svc.cluster.local:8080/api/v2/torrents/info
+      url: http://${QBITTORRENT_IP}/api/v2/torrents/info
       parameters:
         filter: downloading
   template: |
@@ -73,12 +74,12 @@
               {{ range $t := $downloadingTorrents }}
                 {{ $state := $t.String "state" }}
                 {{ $icon := "?" }}
-                {{ if ge ($t.Int "completed") ($t.Int "size") }}{{ $icon = "OK" }}
-                {{ else if eq $state "downloading" "forcedDL" }}{{ $icon = "v" }}
-                {{ else if eq $state "pausedDL" "stoppedDL" "pausedUP" "stalledDL" "stalledUP" "queuedDL" "queuedUP" }}{{ $icon = "||" }}
+                {{ if ge ($t.Int "completed") ($t.Int "size") }}{{ $icon = "✔" }}
+                {{ else if eq $state "downloading" "forcedDL" }}{{ $icon = "↓" }}
+                {{ else if eq $state "pausedDL" "stoppedDL" "pausedUP" "stalledDL" "stalledUP" "queuedDL" "queuedUP" }}{{ $icon = "❚❚" }}
                 {{ else if eq $state "error" "missingFiles" }}{{ $icon = "!" }}
-                {{ else if eq $state "checkingDL" "checkingUP" "allocating" }}{{ $icon = "..." }}
-                {{ else if eq $state "checkingResumeData" }}{{ $icon = "~" }}
+                {{ else if eq $state "checkingDL" "checkingUP" "allocating" }}{{ $icon = "…" }}
+                {{ else if eq $state "checkingResumeData" }}{{ $icon = "⟳" }}
                 {{ end }}
 
                 <li class="flex items-center" style="gap: 10px;">
@@ -100,7 +101,7 @@
                     </div>
                     {{ $eta := $t.Int "eta" }}
                     <div class="size-sm color-paragraph">
-                      {{ if eq $eta 8640000 }}inf
+                      {{ if eq $eta 8640000 }}∞
                       {{ else if gt $eta 3600 }}{{ printf "%dh %dm" (div $eta 3600) (mod (div $eta 60) 60) }}
                       {{ else if gt $eta 0 }}{{ printf "%dm" (div $eta 60) }}
                       {{ else }}--{{ end }}
@@ -120,11 +121,11 @@
               <ul class="list collapsible-container" data-collapse-after="0" style="--list-gap: 15px;">
                 {{ range $t := $seedingTorrents }}
                   {{ $state := $t.String "state" }}
-                  {{ $icon := "^" }}
-                  {{ if eq $state "pausedUP" "stoppedUP" "stalledUP" "queuedUP" }}{{ $icon = "||" }}
+                  {{ $icon := "↑" }}
+                  {{ if eq $state "pausedUP" "stoppedUP" "stalledUP" "queuedUP" }}{{ $icon = "❚❚" }}
                   {{ else if eq $state "error" "missingFiles" }}{{ $icon = "!" }}
-                  {{ else if eq $state "checkingUP" }}{{ $icon = "..." }}
-                  {{ else if eq $state "checkingResumeData" }}{{ $icon = "~" }}
+                  {{ else if eq $state "checkingUP" }}{{ $icon = "…" }}
+                  {{ else if eq $state "checkingResumeData" }}{{ $icon = "⟳" }}
                   {{ end }}
 
                   <li class="flex items-center" style="gap: 10px;">
