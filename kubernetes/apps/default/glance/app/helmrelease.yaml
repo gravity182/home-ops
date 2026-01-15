@@ -3,44 +3,38 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: opengist
+  name: glance
 spec:
   chartRef:
     kind: OCIRepository
-    name: opengist
+    name: glance
   interval: 1h
   values:
     controllers:
-      opengist:
+      glance:
         annotations:
           reloader.stakater.com/auto: "true"
-        strategy: Recreate
         containers:
           app:
             image:
-              repository: ghcr.io/thomiceli/opengist
-              tag: "1.11@sha256:86e7eb1f9fb2aa7b5d620fe452406de331c6e4d1c47b4d23d46b4b01e1ebf69d"
+              repository: glanceapp/glance
+              tag: v0.8.4
+            args:
+              - "--config"
+              - "/app/config/glance.yml"
             env:
-              UID: "1001"
-              GID: "1001"
-              OG_LOG_LEVEL: warn
-              OG_HTTP_PORT: &port 6157
-              OG_EXTERNAL_URL: "https://gist.${SECRET_DOMAIN}"
-              OG_OIDC_CLIENT_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: opengist-openid-secret
-                    key: openid-client-id
-              OG_OIDC_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: opengist-openid-secret
-                    key: openid-client-secret
-              OG_OIDC_PROVIDER_NAME: Authentik
-              OG_OIDC_DISCOVERY_URL: "https://authentik.${SECRET_DOMAIN}/application/o/opengist/.well-known/openid-configuration"
-              OG_OIDC_GROUP_CLAIM_NAME: groups
-              OG_OIDC_ADMIN_GROUP: opengist_admin
               TZ: Europe/Moscow
+              SECRET_DOMAIN:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: SECRET_DOMAIN
+            envFrom:
+              - secret: glance-secrets
+            ports:
+              - name: http
+                containerPort: &port 8080
+                protocol: TCP
             probes:
               liveness: &probes
                 enabled: true
@@ -55,44 +49,64 @@ spec:
                   failureThreshold: 3
               readiness: *probes
             securityContext:
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop: ["ALL"]
-                add: ["CHOWN", "SETUID", "SETGID"]
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 50m
+                cpu: 25m
                 memory: 128Mi
               limits:
-                memory: 512Mi
+                memory: 256Mi
     defaultPodOptions:
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
         fsGroup: 1001
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        controller: opengist
+        controller: glance
         ports:
           http:
             port: *port
     route:
       app:
         hostnames:
-          - "gist.${SECRET_DOMAIN}"
+          - "${SECRET_DOMAIN}"
         parentRefs:
-          - name: envoy-external
-            namespace: network
           - name: envoy-internal
             namespace: network
     persistence:
       config:
         enabled: true
-        type: persistentVolumeClaim
-        storageClass: openebs-hostpath
-        accessMode: ReadWriteOnce
-        size: 1Gi
+        type: configMap
+        name: glance-config
+        defaultMode: 0644
         globalMounts:
-          - path: /opengist
+          - path: /app/config
+      config-pages:
+        enabled: true
+        type: configMap
+        name: glance-pages-config
+        defaultMode: 0644
+        globalMounts:
+          - path: /app/config/pages
+      config-widgets:
+        enabled: true
+        type: configMap
+        name: glance-widgets-config
+        defaultMode: 0644
+        globalMounts:
+          - path: /app/config/widgets
+      media:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /data
+            readOnly: true
       tmp:
         enabled: true
         type: emptyDir

@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/not-first/glance-schema/master/schema.json
+server:
+  host: 0.0.0.0
+  port: 8080
+
+theme:
+  background-color: 220 18 12
+  primary-color: 195 85 55
+  contrast-multiplier: 1.05
+
+pages:
+  - $include: pages/home.yml
