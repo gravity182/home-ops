@@ -13,5 +13,11 @@ configMapGenerator:
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: stash-python-requirements
+    files:
+      - requirements.txt=./resources/python/requirements.txt
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 generatorOptions:
   disableNameSuffixHash: true
