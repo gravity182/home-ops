@@ -87,3 +87,8 @@ spec:
         defaultMode: 0775
         globalMounts:
           - path: /config/scripts
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
