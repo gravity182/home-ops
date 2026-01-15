@@ -93,7 +93,7 @@ spec:
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
-          - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/homelab
+          - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab
         upstream_dns_file: ""
         bootstrap_dns:
           - 1.1.1.1
