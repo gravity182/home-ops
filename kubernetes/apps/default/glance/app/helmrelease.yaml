@@ -29,6 +29,7 @@ spec:
                   secretKeyRef:
                     name: cluster-secrets
                     key: SECRET_DOMAIN
+              QBITTORRENT_IP: qbittorrent.default.svc.cluster.local:8080
             envFrom:
               - secret: glance-secrets
             ports:
