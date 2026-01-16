@@ -13,6 +13,7 @@
         - type: dns-stats
           service: adguard
           url: http://adguard-home.network.svc.cluster.local:3000
+          title-url: https://adguard.${SECRET_DOMAIN}
         - type: server-stats
           servers:
             - type: local
