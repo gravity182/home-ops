@@ -54,7 +54,7 @@ spec:
               liveness: *tba-probe
             resources:
               requests:
-                cpu: 10m
+                cpu: 25m
                 memory: 64Mi
               limits:
                 cpu: 100m
