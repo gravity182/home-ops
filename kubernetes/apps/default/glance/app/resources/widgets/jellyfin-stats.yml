@@ -1,9 +1,10 @@
 # https://github.com/glanceapp/community-widgets/blob/main/widgets/jellyfin-emby-stats/README.md
 - type: custom-api
-  title: "Jellyfin/Emby Stats"
-  base-url: ${JELLYFIN_URL}
+  title: "Jellyfin Stats"
+  title-url: ${JELLYFIN_URL}
+  base-url: ${JELLYFIN_API_URL}
   options:
-    url: ${JELLYFIN_URL}
+    url: ${JELLYFIN_API_URL}
     key: ${JELLYFIN_API_KEY}
 
   template: |
