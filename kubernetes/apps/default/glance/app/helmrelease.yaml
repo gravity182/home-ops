@@ -37,6 +37,8 @@ spec:
               SONARR_URL: "https://sonarr.${SECRET_DOMAIN}"
               LIDARR_API_URL: http://lidarr.default.svc.cluster.local:8686
               LIDARR_URL: "https://lidarr.${SECRET_DOMAIN}"
+              SPEEDTEST_URL: "https://speedtest.${SECRET_DOMAIN}"
+              SPEEDTEST_API_URL: "http://speedtest-tracker.default.svc.cluster.local:80"
             envFrom:
               - secret: glance-secrets
             ports:
