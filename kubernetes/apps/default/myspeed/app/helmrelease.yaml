@@ -28,7 +28,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /
+                    path: /api/config
                     port: &port 5216
                   initialDelaySeconds: 20
                   periodSeconds: 10
@@ -39,7 +39,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /
+                    path: /api/config
                     port: *port
                   initialDelaySeconds: 10
                   periodSeconds: 10
