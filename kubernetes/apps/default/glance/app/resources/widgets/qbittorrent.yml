@@ -2,19 +2,20 @@
 # https://github.com/glanceapp/community-widgets/blob/main/widgets/qbittorrent-stats/README.md
 - type: custom-api
   title: qBittorrent
+  title-url: ${QBITTORRENT_URL}
   cache: 10s
   options:
     view: "basic" # "basic" or "detailed"
     mode: "upload" # "default" or "upload"
   subrequests:
     transfer:
-      url: http://${QBITTORRENT_IP}/api/v2/transfer/info
+      url: ${QBITTORRENT_API_URL}/api/v2/transfer/info
     seeding:
-      url: http://${QBITTORRENT_IP}/api/v2/torrents/info
+      url: ${QBITTORRENT_API_URL}/api/v2/torrents/info
       parameters:
         filter: seeding
     leeching:
-      url: http://${QBITTORRENT_IP}/api/v2/torrents/info
+      url: ${QBITTORRENT_API_URL}/api/v2/torrents/info
       parameters:
         filter: downloading
   template: |
