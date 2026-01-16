@@ -21,6 +21,12 @@ configMapGenerator:
   - name: glance-widgets-config
     files:
       - ./resources/widgets/qbittorrent.yml
+      - ./resources/widgets/arr-releases-radarr.yml
+      - ./resources/widgets/arr-releases-sonarr.yml
+      - ./resources/widgets/arr-releases-lidarr.yml
+      - ./resources/widgets/jellyfin-stats.yml
+      - ./resources/widgets/nextdns-stats.yml
+      - ./resources/widgets/astronomy-picture-of-the-day.yml
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled

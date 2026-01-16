@@ -30,6 +30,13 @@ spec:
                     name: cluster-secrets
                     key: SECRET_DOMAIN
               QBITTORRENT_IP: qbittorrent.default.svc.cluster.local:8080
+              JELLYFIN_URL: http://jellyfin.default.svc.cluster.local:8096
+              RADARR_API_URL: http://radarr.default.svc.cluster.local:7878
+              RADARR_URL: "https://radarr.${SECRET_DOMAIN}"
+              SONARR_API_URL: http://sonarr.default.svc.cluster.local:8989
+              SONARR_URL: "https://sonarr.${SECRET_DOMAIN}"
+              LIDARR_API_URL: http://lidarr.default.svc.cluster.local:8686
+              LIDARR_URL: "https://lidarr.${SECRET_DOMAIN}"
             envFrom:
               - secret: glance-secrets
             ports:
