@@ -46,6 +46,13 @@ spec:
                   periodSeconds: 10
                   failureThreshold: 3
               liveness: *mongo-probe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                cpu: 100m
+                memory: 256Mi
     service:
       app:
         controller: mongodb
