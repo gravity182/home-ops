@@ -1,0 +1,16 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ytdl
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./ghcr-secret.sops.yaml
+  - ./downloads-pvc.yaml
+  - ./mongodb/ks.yaml
+  - ./telegram-bot-api/ks.yaml
+  - ./pot-provider/ks.yaml
+  - ./bot/ks.yaml
