@@ -26,6 +26,7 @@
                 "/data":
                   name: media
                   hide: false
+        - $include: ../widgets/speedtest-tracker.yml
     - size: full
       widgets:
         - type: monitor
