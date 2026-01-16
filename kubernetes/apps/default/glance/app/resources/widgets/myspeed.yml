@@ -1,0 +1,114 @@
+# Custom widget for MySpeed (https://github.com/gnmyt/myspeed)
+- type: custom-api
+  cache: 30m
+  title: Internet Speed
+  title-url: ${SPEEDTEST_URL}
+  url: ${SPEEDTEST_API_URL}/api/speedtests?limit=1
+  headers:
+    Accept: application/json
+  subrequests:
+    stats:
+      url: ${SPEEDTEST_API_URL}/api/speedtests/statistics?days=1
+      headers:
+        Accept: application/json
+    status:
+      url: ${SPEEDTEST_API_URL}/api/speedtests/status
+      headers:
+        Accept: application/json
+    config:
+      url: ${SPEEDTEST_API_URL}/api/config
+      headers:
+        Accept: application/json
+  options:
+    showPercentageDiff: true
+  template: |
+    {{ $showPercentage := .Options.BoolOr "showPercentageDiff" true }}
+    {{ $stats := .Subrequest "stats" }}
+    {{ $status := .Subrequest "status" }}
+    {{ $config := .Subrequest "config" }}
+    {{ $tests := .JSON.Array "" }}
+
+    {{ if ne .Response.StatusCode 200 }}
+      <div class="color-negative text-center">
+        <p>MySpeed API error.</p>
+        <p class="size-sm">Status: {{ .Response.StatusCode }}</p>
+      </div>
+    {{ else if eq (len $tests) 0 }}
+      <div class="text-center color-paragraph">
+        <p>No tests yet.</p>
+        <p class="size-sm">Run a test from MySpeed first.</p>
+      </div>
+    {{ else if ne $stats.Response.StatusCode 200 }}
+      <div class="color-negative text-center">
+        <p>MySpeed stats error.</p>
+        <p class="size-sm">Stats status: {{ $stats.Response.StatusCode }}</p>
+      </div>
+    {{ else }}
+      {{ $latest := index $tests 0 }}
+      {{ $dl := $latest.Float "download" }}
+      {{ $ul := $latest.Float "upload" }}
+      {{ $ping := $latest.Float "ping" }}
+
+      <div class="flex justify-between text-center margin-block-3">
+        <div>
+          {{ $downloadChange := percentChange ($stats.JSON.Float "download.avg") $dl }}
+          {{ if $showPercentage }}
+          <div
+            class="size-small {{ if gt $downloadChange 0.0 }}color-positive{{ else if lt $downloadChange 0.0 }}color-negative{{ else }}color-primary{{ end }}"
+            style="display: inline-flex; align-items: center;">
+            {{ $downloadChange | printf "%+.1f%%" }}
+          </div>
+          {{ end }}
+          <div class="color-highlight size-h3">{{ $dl | printf "%.1f" }}</div>
+          <div class="size-h6">DOWNLOAD (Mbps)</div>
+        </div>
+
+        <div>
+          {{ $uploadChange := percentChange ($stats.JSON.Float "upload.avg") $ul }}
+          {{ if $showPercentage }}
+          <div
+            class="size-small {{ if gt $uploadChange 0.0 }}color-positive{{ else if lt $uploadChange 0.0 }}color-negative{{ else }}color-primary{{ end }}"
+            style="display: inline-flex; align-items: center;">
+            {{ $uploadChange | printf "%+.1f%%" }}
+          </div>
+          {{ end }}
+          <div class="color-highlight size-h3">{{ $ul | printf "%.1f" }}</div>
+          <div class="size-h6">UPLOAD (Mbps)</div>
+        </div>
+
+        <div>
+          {{ $pingChange := percentChange ($stats.JSON.Float "ping.avg") $ping }}
+          {{ if $showPercentage }}
+          <div
+            class="size-small {{ if gt $pingChange 0.0 }}color-negative{{ else if lt $pingChange 0.0 }}color-positive{{ else }}color-primary{{ end }}"
+            style="display: inline-flex; align-items: center;">
+            {{ $pingChange | printf "%+.1f%%" }}
+          </div>
+          {{ end }}
+          <div class="color-highlight size-h3">{{ $ping | printf "%.0f ms" }}</div>
+          <div class="size-h6">PING</div>
+        </div>
+      </div>
+
+      <div class="flex justify-between size-sm color-paragraph" style="margin-top: 0.5rem;">
+        <div>
+          {{ $provider := $config.JSON.String "provider" }}
+          Provider: {{ if $provider }}{{ $provider }}{{ else }}unknown{{ end }}
+        </div>
+        <div>
+          {{ if eq $status.Response.StatusCode 200 }}
+            {{ if $status.JSON.Bool "paused" }}Paused{{ else if $status.JSON.Bool "running" }}Running{{ else }}Idle{{ end }}
+          {{ else }}
+            Status: unknown
+          {{ end }}
+        </div>
+        <div>
+          {{ $created := $latest.String "created" }}
+          {{ if $created }}
+            Last: {{ ($created | parseTime "RFC3339Nano") | formatTime "02 Jan 15:04" }}
+          {{ else }}
+            Last: unknown
+          {{ end }}
+        </div>
+      </div>
+    {{ end }}

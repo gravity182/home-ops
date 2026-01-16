@@ -27,4 +27,4 @@ resources:
   - ./opengist/ks.yaml
   - ./backrest/ks.yaml
   - ./glance/ks.yaml
-  - ./speedtest-tracker/ks.yaml
+  - ./myspeed/ks.yaml
