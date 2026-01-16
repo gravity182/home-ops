@@ -29,7 +29,8 @@ spec:
                   secretKeyRef:
                     name: cluster-secrets
                     key: SECRET_DOMAIN
-              QBITTORRENT_IP: "qbittorrent.default.svc.cluster.local:8080"
+              QBITTORRENT_URL: "https://qbittorrent.${SECRET_DOMAIN}"
+              QBITTORRENT_API_URL: "http://qbittorrent.default.svc.cluster.local:8080"
               JELLYFIN_URL: "https://jellyfin.${SECRET_DOMAIN}"
               JELLYFIN_API_URL: "http://jellyfin.default.svc.cluster.local:8096"
               RADARR_API_URL: "http://radarr.default.svc.cluster.local:7878"
