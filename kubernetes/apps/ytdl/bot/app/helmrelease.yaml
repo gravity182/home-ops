@@ -67,8 +67,7 @@ spec:
                 spec:
                   tcpSocket:
                     port: 5000
-                  initialDelaySeconds: 120
-                  periodSeconds: 30
+                  periodSeconds: 10
                   failureThreshold: 6
               liveness: *bot-probe
             resources:
