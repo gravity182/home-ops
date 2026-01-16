@@ -23,14 +23,19 @@ spec:
             env:
               PUID: 1001
               PGID: 1001
-              TZ: Europe/Moscow
+              TZ: &tz Europe/Moscow
+              DISPLAY_TIMEZONE: *tz
+              APP_TIMEZONE: *tz
               APP_URL: "https://speedtest.${SECRET_DOMAIN}"
+              PUBLIC_DASHBOARD: "true"
               DB_CONNECTION: sqlite
               SPEEDTEST_SCHEDULE: "0 * * * *"
               SPEEDTEST_SERVERS: ""
-              DISPLAY_TIMEZONE: Europe/Moscow
-            envFrom:
-              - secret: speedtest-tracker
+              APP_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: speedtest-tracker
+                    key: APP_KEY
             probes:
               liveness: &probes
                 enabled: true
