@@ -28,7 +28,7 @@ configMapGenerator:
       - ./resources/widgets/arr-releases-lidarr.yml
       - ./resources/widgets/jellyfin-stats.yml
       - ./resources/widgets/astronomy-picture-of-the-day.yml
-      - ./resources/widgets/speedtest-tracker.yml
+      - ./resources/widgets/myspeed.yml
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
