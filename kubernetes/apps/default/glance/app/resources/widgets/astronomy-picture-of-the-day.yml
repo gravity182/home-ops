@@ -1,0 +1,19 @@
+# https://github.com/glanceapp/community-widgets/tree/main/widgets/astronomy-picture-of-the-day
+- type: custom-api
+  title: Astronomy Picture of the Day
+  cache: 1d
+  url: https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}
+  headers:
+    Accept: application/json
+  template: |
+    {{- if eq (.JSON.String "media_type") "image" -}}
+      <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
+        <img
+          src="{{ .JSON.String "url" }}"
+          alt="{{ .JSON.String "title" }}"
+          style="max-width:100%; height:auto; display:block; border-radius:4px;"
+        />
+      </div>
+    {{- else -}}
+      <p class="color-negative" style="text-align:center;">No image available today.</p>
+    {{- end }}

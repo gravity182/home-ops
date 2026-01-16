@@ -9,9 +9,11 @@
         - type: weather
           location: ${GLANCE_WEATHER_LOCATION}
           units: metric
+        - $include: ../widgets/astronomy-picture-of-the-day.yml
         - type: dns-stats
           service: adguard
           url: http://adguard-home.network.svc.cluster.local:3000
+        - $include: ../widgets/nextdns-stats.yml
         - type: server-stats
           servers:
             - type: local
@@ -80,6 +82,10 @@
               url: https://slskd.${SECRET_DOMAIN}
               check-url: http://slskd.default.svc.cluster.local:5030
               icon: sh:slskd-light
+        - $include: ../widgets/jellyfin-stats.yml
+        - $include: ../widgets/arr-releases-radarr.yml
+        - $include: ../widgets/arr-releases-sonarr.yml
+        - $include: ../widgets/arr-releases-lidarr.yml
     - size: small
       widgets:
         - type: monitor
