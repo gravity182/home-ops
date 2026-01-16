@@ -27,7 +27,6 @@ configMapGenerator:
       - ./resources/widgets/arr-releases-sonarr.yml
       - ./resources/widgets/arr-releases-lidarr.yml
       - ./resources/widgets/jellyfin-stats.yml
-      - ./resources/widgets/nextdns-stats.yml
       - ./resources/widgets/astronomy-picture-of-the-day.yml
     options:
       annotations:

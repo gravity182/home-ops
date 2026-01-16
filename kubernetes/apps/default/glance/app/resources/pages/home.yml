@@ -13,7 +13,6 @@
         - type: dns-stats
           service: adguard
           url: http://adguard-home.network.svc.cluster.local:3000
-        - $include: ../widgets/nextdns-stats.yml
         - type: server-stats
           servers:
             - type: local
@@ -27,7 +26,6 @@
                 "/data":
                   name: media
                   hide: false
-        - $include: ../widgets/qbittorrent.yml
     - size: full
       widgets:
         - type: monitor
@@ -82,6 +80,7 @@
               url: https://slskd.${SECRET_DOMAIN}
               check-url: http://slskd.default.svc.cluster.local:5030
               icon: sh:slskd-light
+        - $include: ../widgets/qbittorrent.yml
         - $include: ../widgets/jellyfin-stats.yml
         - $include: ../widgets/arr-releases-radarr.yml
         - $include: ../widgets/arr-releases-sonarr.yml
