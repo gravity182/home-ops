@@ -23,36 +23,18 @@ spec:
             env:
               TZ: Europe/Moscow
             probes:
-              liveness:
+              readiness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /api/config
                     port: &port 5216
-                  initialDelaySeconds: 20
+                  initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 2
-                  failureThreshold: 6
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /api/config
-                    port: *port
-                  initialDelaySeconds: 10
-                  periodSeconds: 10
-                  timeoutSeconds: 2
-                  failureThreshold: 6
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: *port
-                  periodSeconds: 2
-                  failureThreshold: 60
+                  failureThreshold: 3
+              liveness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
