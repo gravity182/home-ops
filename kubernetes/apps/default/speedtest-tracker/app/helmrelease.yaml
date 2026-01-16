@@ -23,6 +23,7 @@ spec:
             env:
               PUID: 1001
               PGID: 1001
+              APP_DEBUG: "true"
               TZ: &tz Europe/Moscow
               DISPLAY_TIMEZONE: *tz
               APP_TIMEZONE: *tz
@@ -30,7 +31,6 @@ spec:
               PUBLIC_DASHBOARD: "true"
               DB_CONNECTION: sqlite
               SPEEDTEST_SCHEDULE: "0 * * * *"
-              SPEEDTEST_SERVERS: ""
               APP_KEY:
                 valueFrom:
                   secretKeyRef:
