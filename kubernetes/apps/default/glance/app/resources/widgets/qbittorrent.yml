@@ -4,7 +4,7 @@
   title: qBittorrent
   cache: 10s
   options:
-    view: "detailed" # "basic" or "detailed"
+    view: "basic" # "basic" or "detailed"
     mode: "upload" # "default" or "upload"
   subrequests:
     transfer:
