@@ -34,6 +34,8 @@ spec:
                 value: mongodb://mongodb:27017
               - name: POT_PROVIDER__URL
                 value: http://pot-provider:4416
+              - name: BOT__FORCE_IPV4
+                value: "true"
               - name: BOT__TOKEN
                 valueFrom:
                   secretKeyRef:
