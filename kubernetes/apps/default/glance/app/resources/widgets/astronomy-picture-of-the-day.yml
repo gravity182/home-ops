@@ -7,13 +7,38 @@
     Accept: application/json
   template: |
     {{- if eq (.JSON.String "media_type") "image" -}}
-      <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
+      <div style="display:flex; flex-direction:column; align-items:center; width:100%; padding:8px; box-sizing:border-box;">
+        <!-- Clickable title -->
+        <p class="color-primary" style="margin:0 0 8px; text-align:center;">
+          <a
+            href="https://apod.nasa.gov/apod/astropix.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="color: inherit; text-decoration: none;"
+          >
+            {{ .JSON.String "title" }}
+          </a>
+        </p>
+
+        <!-- Image -->
         <img
           src="{{ .JSON.String "url" }}"
           alt="{{ .JSON.String "title" }}"
           style="max-width:100%; height:auto; display:block; border-radius:4px;"
         />
+
+        <!-- Explanation dropdown -->
+        <details style="width:100%; margin-top:12px;">
+          <summary class="color-highlight size-h5" style="cursor:pointer;">
+             Show Explanation
+          </summary>
+          <p class="color-highlight size-h5" style="margin-top:8px; text-align:left; line-height:1.4;">
+            {{ .JSON.String "explanation" }}
+          </p>
+        </details>
       </div>
     {{- else -}}
-      <p class="color-negative" style="text-align:center;">No image available today.</p>
+      <p class="color-negative" style="text-align:center;">
+        No image available today.
+      </p>
     {{- end }}
