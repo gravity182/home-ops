@@ -2,10 +2,10 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: speedtest-tracker
+  name: myspeed
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/speedtest-tracker/app
+  path: ./kubernetes/apps/default/myspeed/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
