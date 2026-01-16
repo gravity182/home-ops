@@ -69,6 +69,13 @@ spec:
                   periodSeconds: 30
                   failureThreshold: 6
               liveness: *bot-probe
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
     defaultPodOptions:
       imagePullSecrets:
         - name: github-container-registry
