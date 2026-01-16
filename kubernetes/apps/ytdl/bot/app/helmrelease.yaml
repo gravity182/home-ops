@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bot
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: bot
+  interval: 1h
+  values:
+    controllers:
+      bot:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/gravity182/yt-download-bot
+              tag: latest@sha256:497d06028cc8cd8f124eb37ff817b26e2f9d316aea092d655366684dbdfef8de
+              pullPolicy: IfNotPresent
+            env:
+              - name: TZ
+                value: Europe/Moscow
+              - name: LOG_LEVEL
+                value: DEBUG
+              - name: BOT__ENABLED
+                value: "true"
+              - name: BOT__API_URL
+                value: http://telegram-bot-api:8081
+              - name: MONGODB__URI
+                value: mongodb://mongodb:27017
+              - name: POT_PROVIDER__URL
+                value: http://pot-provider:4416
+              - name: BOT__TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: telegram-bot-secret
+                    key: BOT_TOKEN
+              - name: YOUTUBE__EMAIL
+                valueFrom:
+                  secretKeyRef:
+                    name: youtube-cookies-secret
+                    key: YOUTUBE_EMAIL
+              - name: YOUTUBE__PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: youtube-cookies-secret
+                    key: YOUTUBE_PASSWORD
+              - name: YOUTUBE__API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: youtube-api-secret
+                    key: YOUTUBE_API_KEY
+            ports:
+              - name: webhook
+                containerPort: 5000
+                protocol: TCP
+            probes:
+              readiness: &bot-probe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5000
+                  initialDelaySeconds: 120
+                  periodSeconds: 30
+                  failureThreshold: 6
+              liveness: *bot-probe
+    defaultPodOptions:
+      imagePullSecrets:
+        - name: github-container-registry
+      terminationGracePeriodSeconds: 1800
+    service:
+      app:
+        controller: bot
+        ports:
+          webhook:
+            port: 5000
+    persistence:
+      downloads:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: downloads
+        globalMounts:
+          - path: /home/app/downloaded
