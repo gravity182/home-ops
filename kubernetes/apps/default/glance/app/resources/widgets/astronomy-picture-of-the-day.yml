@@ -12,7 +12,7 @@
         <p class="color-primary" style="margin:0 0 8px; text-align:center;">
           <a
             href="https://apod.nasa.gov/apod/astropix.html"
-            target="_blank"
+            target="_self"
             rel="noopener noreferrer"
             style="color: inherit; text-decoration: none;"
           >

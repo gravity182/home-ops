@@ -421,14 +421,14 @@
                   {{ if $showGrabbed }}
                     {{ if eq $buttonJustify "right" }}
                       </div>
-                      <a href="{{ $link }}" class="bookmarks-link size-h4 color-primary" target="_blank" rel="noreferrer"
+                      <a href="{{ $link }}" class="bookmarks-link size-h4 color-primary" target="_self" rel="noreferrer"
                         style="position: absolute; bottom: 1rem; right: 1rem;
                           {{ if $grabbed }} color: var(--color-positive); border: 1px solid var(--color-positive); {{ else }} color: var(--color-negative); border: 1px solid var(--color-negative); {{ end }}
                           font-weight: bold; padding: 2px 5px; border-radius: 3px; display: inline-block; margin-top: 5px; text-decoration: none;">
                       {{ if $grabbed }}Grabbed{{ else }}Missing{{ end }}
                       </a>
                     {{ else }}
-                      <a href="{{ $link }}" class="bookmarks-link size-h4 color-primary" target="_blank" rel="noreferrer"
+                      <a href="{{ $link }}" class="bookmarks-link size-h4 color-primary" target="_self" rel="noreferrer"
                         style="{{ if $grabbed }} color: var(--color-positive); border: 1px solid var(--color-positive); {{ else }} color: var(--color-negative); border: 1px solid var(--color-negative); {{ end }}
                           font-weight: bold; padding: 2px 5px; border-radius: 3px; display: inline-block; margin-top: 5px; text-decoration: none;">
                       {{ if $grabbed }}Grabbed{{ else }}Missing{{ end }}
