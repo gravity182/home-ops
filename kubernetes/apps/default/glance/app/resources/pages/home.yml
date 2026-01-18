@@ -10,24 +10,6 @@
           location: ${GLANCE_WEATHER_LOCATION}
           units: metric
         - $include: ../widgets/astronomy-picture-of-the-day.yml
-        - type: dns-stats
-          service: adguard
-          url: http://adguard-home.network.svc.cluster.local:3000
-          title-url: https://adguard.${SECRET_DOMAIN}
-        - type: server-stats
-          servers:
-            - type: local
-              name: homeserver
-              hide-swap: true
-              hide-mountpoints-by-default: true
-              mountpoints:
-                "/":
-                  name: host
-                  hide: false
-                "/data":
-                  name: media
-                  hide: false
-        - $include: ../widgets/myspeed.yml
     - size: full
       widgets:
         - type: monitor
@@ -93,15 +75,8 @@
               check-url: http://slskd.default.svc.cluster.local:5030
               same-tab: true
               icon: sh:slskd-light
-        - $include: ../widgets/qbittorrent.yml
-        - $include: ../widgets/jellyfin-stats.yml
-        - $include: ../widgets/arr-releases-radarr.yml
-        - $include: ../widgets/arr-releases-sonarr.yml
-        - $include: ../widgets/arr-releases-lidarr.yml
-    - size: small
-      widgets:
         - type: monitor
-          title: Infra & Tools
+          title: Utils
           cache: 1m
           sites:
             - title: OpenGist
@@ -109,6 +84,14 @@
               check-url: http://opengist.default.svc.cluster.local:6157
               same-tab: true
               icon: sh:opengist-light
+        - $include: ../widgets/qbittorrent.yml
+        - $include: ../widgets/jellyfin-stats.yml
+    - size: small
+      widgets:
+        - type: monitor
+          title: Infra & Tools
+          cache: 1m
+          sites:
             - title: AdGuard Home
               url: https://adguard.${SECRET_DOMAIN}
               check-url: http://adguard-home.network.svc.cluster.local:3000
@@ -124,3 +107,20 @@
               check-url: http://grafana.monitoring.svc.cluster.local:80
               same-tab: true
               icon: sh:grafana-light
+        - type: dns-stats
+          service: adguard
+          url: http://adguard-home.network.svc.cluster.local:3000
+          title-url: https://adguard.${SECRET_DOMAIN}
+        - type: server-stats
+          servers:
+            - type: local
+              name: homeserver
+              hide-swap: true
+              hide-mountpoints-by-default: true
+              mountpoints:
+                "/":
+                  name: host
+                  hide: false
+                "/data":
+                  name: media
+                  hide: false
