@@ -145,7 +145,8 @@ spec:
         globalMounts:
           - path: /shares/music
             subPath: library/music
-      empty-dir:
+            readOnly: true
+      net-slskd:
         enabled: true
         type: emptyDir
         globalMounts:
