@@ -26,5 +26,6 @@ resources:
   - ./obsidian-livesync/ks.yaml
   - ./opengist/ks.yaml
   - ./backrest/ks.yaml
+  - ./bazarr/ks.yaml
   - ./glance/ks.yaml
   - ./myspeed/ks.yaml
