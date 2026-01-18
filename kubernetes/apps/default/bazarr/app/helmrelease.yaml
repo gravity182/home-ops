@@ -23,9 +23,6 @@ spec:
             env:
               BAZARR__PORT: &port 6767
               TZ: Europe/Moscow
-            envFrom:
-              - secret: bazarr-jellyfin-api
-              - configMap: bazarr-jellyfin-config
             probes:
               liveness: &probes
                 enabled: true
@@ -87,9 +84,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-      scripts:
-        type: configMap
-        name: bazarr-scripts
-        defaultMode: 0775
-        globalMounts:
-          - path: /config/scripts
