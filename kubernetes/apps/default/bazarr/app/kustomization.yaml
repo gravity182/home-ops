@@ -6,18 +6,3 @@ components:
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
-  - ./secret.sops.yaml
-configMapGenerator:
-  - name: bazarr-scripts
-    files:
-      - jellyfin-notify.sh=./resources/jellyfin-notify.sh
-    options:
-      annotations:
-        kustomize.toolkit.fluxcd.io/substitute: disabled
-  - name: bazarr-jellyfin-config
-    literals:
-      - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
-      - JELLYFIN_TV_LIBRARY_ID=767bffe4f11c93ef34b805451a696a4e
-      - JELLYFIN_MOVIE_LIBRARY_ID=f137a2dd21bbc1b99aa5c0f6bf02a805
-generatorOptions:
-  disableNameSuffixHash: true
