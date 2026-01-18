@@ -10,4 +10,6 @@ curl -sX POST "${JELLYFIN_URL}/Items/${JELLYFIN_LIBRARY_ID}/Refresh?Recursive=tr
   -H "Content-Type: application/json" \
   -H "Content-Length: 0" > /dev/null
 
+curl -sX POST "${JELLYFIN_URL}/Library/Refresh?api_key=${JELLYFIN_API_KEY}" > /dev/null
+
 curl -sX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_REFRESH_PEOPLE_TASK_ID}?api_key=${JELLYFIN_API_KEY}" > /dev/null
