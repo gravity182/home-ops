@@ -19,5 +19,7 @@ configMapGenerator:
       - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
       - JELLYFIN_LIBRARY_ID=f137a2dd21bbc1b99aa5c0f6bf02a805
       - JELLYFIN_REFRESH_PEOPLE_TASK_ID=866456ed0d44e15468124ce33d85961e
+      - JELLYFIN_PATH_FROM=/data/library
+      - JELLYFIN_PATH_TO=/library
 generatorOptions:
   disableNameSuffixHash: true
