@@ -30,6 +30,11 @@
   },
   packageRules: [
     {
+      description: "Disable pinDigests for OCI Helm charts (workaround for renovatebot/renovate#29768)",
+      matchPackagePatterns: ["ghcr.io/.*/helm/.*"],
+      pinDigests: false,
+    },
+    {
       description: "Override Helmfile Dependency Name",
       matchDatasources: ["docker"],
       matchManagers: ["helmfile"],
