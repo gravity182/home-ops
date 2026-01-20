@@ -1,0 +1,39 @@
+log_level = "info"
+dry_run = false
+
+metadata_patterns = [
+  "*.nfo",
+  "*.json",
+  "*.jpg",
+  "*.jpeg",
+  "*.png",
+  "*.svg",
+  "*.sub",
+  "*.srt",
+  "*.vtt",
+  "*.idx",
+  "*.trickplay",
+  "theme.mp3",
+  ".DS_Store",
+  "Thumbs.db",
+]
+
+[[paths]]
+mount_path = "/mnt/movies"
+max_depth = 1
+
+[[paths]]
+mount_path = "/mnt/tv"
+max_depth = 2
+
+[[paths]]
+mount_path = "/mnt/music"
+max_depth = 2
+
+[[paths]]
+mount_path = "/mnt/books"
+max_depth = 1
+
+[[paths]]
+mount_path = "/mnt/xxx"
+max_depth = 1
