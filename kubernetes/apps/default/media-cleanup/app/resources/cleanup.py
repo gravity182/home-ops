@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 import tomllib
+import urllib.request
 
 with open('/config/config.toml', 'rb') as f:
     config = tomllib.load(f)
@@ -28,6 +29,10 @@ validate_config(config)
 media_dirs = config['paths']
 metadata_patterns = config['metadata_patterns']
 dry_run = config.get('dry_run', True)
+jellyfin_url = os.environ['JELLYFIN_URL']
+jellyfin_api_key = os.environ['JELLYFIN_API_KEY']
+
+deleted_count = 0
 
 log_level = getattr(logging, config.get('log_level', 'info').upper(), logging.INFO)
 dry_run_prefix = "[DRY RUN] " if dry_run else ""
@@ -54,6 +59,7 @@ def get_all_files(path):
 
 def check_dir(path):
     """Check all files in the directory tree and remove it if all are metadata"""
+    global deleted_count
     logging.debug(f"Checking directory: {path}")
 
     all_files = get_all_files(path)
@@ -61,6 +67,7 @@ def check_dir(path):
         logging.info(f"Removing '{path}', reason=empty_directory, metadata_files=[]")
         if not dry_run:
             shutil.rmtree(path)
+        deleted_count += 1
         return
 
     metadata_files = [f for f in all_files if is_metadata_file(os.path.basename(f))]
@@ -69,6 +76,7 @@ def check_dir(path):
         logging.info(f"Removing '{path}', reason=metadata_only, metadata_files={metadata_files_relative}")
         if not dry_run:
             shutil.rmtree(path)
+        deleted_count += 1
 
 
 def get_subdirs_at_depth(root_path, target_depth):
@@ -111,6 +119,18 @@ def scan_root_dirs(media_dirs_config):
                 check_dir(dir_path)
 
 
+def refresh_jellyfin():
+    """Trigger Jellyfin library refresh"""
+    try:
+        url = f"{jellyfin_url}/Library/Refresh?api_key={jellyfin_api_key}"
+        req = urllib.request.Request(url, method='POST')
+        req.add_header('Content-Length', '0')
+        urllib.request.urlopen(req)
+        logging.info("Jellyfin library refresh triggered")
+    except Exception as e:
+        logging.error(f"Failed to trigger Jellyfin refresh: {e}")
+
+
 if __name__ == '__main__':
     logging.debug("Starting media directory cleanup%s", " [DRY RUN]" if dry_run else "")
     logging.debug("Paths: %s", [d['mount_path'] for d in media_dirs])
@@ -118,5 +138,8 @@ if __name__ == '__main__':
 
     start_time = time.time()
     scan_root_dirs(media_dirs)
+
+    if deleted_count > 0 and not dry_run:
+        refresh_jellyfin()
 
     logging.debug("Finished in %.2f seconds", time.time() - start_time)
