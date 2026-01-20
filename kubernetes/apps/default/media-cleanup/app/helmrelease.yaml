@@ -1,0 +1,101 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: media-cleanup
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: media-cleanup
+  interval: 1h
+  values:
+    controllers:
+      media-cleanup:
+        type: cronjob
+        cronjob:
+          schedule: "*/10 * * * *"
+          timeZone: Europe/Moscow
+          concurrencyPolicy: Replace
+          successfulJobsHistory: 3
+          failedJobsHistory: 1
+        pod:
+          restartPolicy: OnFailure
+        containers:
+          app:
+            image:
+              repository: python
+              tag: 3.12-alpine
+            command: ["python", "/scripts/cleanup.py"]
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      scripts:
+        enabled: true
+        type: configMap
+        name: media-cleanup-script
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts
+            readOnly: true
+      config:
+        enabled: true
+        type: configMap
+        name: media-cleanup-config
+        defaultMode: 0775
+        globalMounts:
+          - path: /config
+            readOnly: true
+      movies:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /mnt/movies
+            subPath: library/movies
+      tv:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /mnt/tv
+            subPath: library/tv
+      music:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /mnt/music
+            subPath: library/music
+      books:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /mnt/books
+            subPath: library/books
+      xxx:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /mnt/xxx
+            subPath: xxx/scenes
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

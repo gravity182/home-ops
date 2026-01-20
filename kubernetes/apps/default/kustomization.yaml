@@ -15,6 +15,7 @@ resources:
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
   - ./qbit-manage/ks.yaml
+  - ./media-cleanup/ks.yaml
   - ./pinchflat/ks.yaml
   - ./jellyfin/ks.yaml
   - ./jellyfin-xxx/ks.yaml
