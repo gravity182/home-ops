@@ -30,6 +30,12 @@
   },
   packageRules: [
     {
+      description: "Disable pinDigests for OCIRepository (workaround for renovatebot/renovate#29768)",
+      matchManagers: ["flux"],
+      matchFileNames: ["**/ocirepository.yaml"],
+      pinDigests: false,
+    },
+    {
       description: "Override Helmfile Dependency Name",
       matchDatasources: ["docker"],
       matchManagers: ["helmfile"],
