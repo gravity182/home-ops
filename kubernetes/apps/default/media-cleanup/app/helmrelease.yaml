@@ -27,6 +27,13 @@ spec:
               repository: python
               tag: 3.12-alpine
             command: ["python", "/scripts/cleanup.py"]
+            env:
+              JELLYFIN_URL: http://jellyfin.default.svc.cluster.local:8096
+              JELLYFIN_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: media-cleanup-jellyfin-api
+                    key: api-key
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
