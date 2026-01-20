@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./secret.sops.yaml
 configMapGenerator:
   - name: media-cleanup-script
     files:
