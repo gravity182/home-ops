@@ -13,6 +13,12 @@
 # Kubernetes
 kubeconfig
 talosconfig
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 # Misc.
 .private/
 .task/
