@@ -51,7 +51,8 @@ else
   echo "No Sonarr path available; skipping per-item metadata refresh."
 fi
 
-curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_REFRESH_PEOPLE_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
+curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_INTRO_SKIPPER_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
+curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_MEDIA_SEGMENT_SCAN_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
 
 echo "tv series imported successfully: $sonarr_series_title"
 exit 0
