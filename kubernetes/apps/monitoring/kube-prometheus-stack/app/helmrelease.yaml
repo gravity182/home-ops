@@ -1,0 +1,159 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "81.2.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+  interval: 1h
+  values:
+    cleanPrometheusOperatorObjectNames: true
+
+    # Alertmanager
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ["alertname", "namespace"]
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 12h
+          receiver: telegram
+        receivers:
+          - name: "null"
+          - name: telegram
+            telegram_configs:
+              - bot_token_file: /etc/alertmanager/secrets/alertmanager-telegram-secret/bot-token
+                chat_id: ${SECRET_TELEGRAM_CHAT_ID}
+                parse_mode: HTML
+                message: |-
+                  {{ range .Alerts }}
+                  <b>{{ .Status | toUpper }}</b>: {{ .Labels.alertname }}
+                  {{ .Annotations.summary }}
+                  {{ end }}
+      alertmanagerSpec:
+        externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
+        secrets:
+          - alertmanager-telegram-secret
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-hostpath
+              resources:
+                requests:
+                  storage: 1Gi
+
+    # Prometheus
+    prometheus:
+      prometheusSpec:
+        externalUrl: "https://prometheus.${SECRET_DOMAIN}"
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        retention: 14d
+        retentionSize: 50GB
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-hostpath
+              resources:
+                requests:
+                  storage: 50Gi
+
+    # Grafana with Authentik OAuth
+    grafana:
+      enabled: true
+      persistence:
+        enabled: true
+        storageClassName: openebs-hostpath
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: username
+        passwordKey: password
+      grafana.ini:
+        analytics:
+          reporting_enabled: false
+          feedback_links_enabled: false
+          check_for_updates: false
+          check_for_plugin_updates: false
+        server:
+          root_url: "https://grafana.${SECRET_DOMAIN}"
+        auth:
+          disable_login_form: true
+          disable_signout_menu: true
+        auth.generic_oauth:
+          enabled: true
+          name: Authentik
+          scopes: "openid profile email groups"
+          auth_url: "https://authentik.${SECRET_DOMAIN}/application/o/authorize/"
+          token_url: "https://authentik.${SECRET_DOMAIN}/application/o/token/"
+          api_url: "https://authentik.${SECRET_DOMAIN}/application/o/userinfo/"
+          login_attribute_path: preferred_username
+          email_attribute_path: email
+          role_attribute_path: contains(groups[*], 'grafana_admin') && 'Admin' || 'Viewer'
+          allow_sign_up: true
+          auto_login: true
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+          secretKeyRef:
+            name: grafana-authentik-oauth-client-secret
+            key: client-id
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana-authentik-oauth-client-secret
+            key: client-secret
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: "http://loki-gateway.monitoring.svc.cluster.local:80"
+          isDefault: false
+          editable: false
+      sidecar:
+        datasources:
+          defaultDatasourceEnabled: true
+          isDefaultDatasource: true
+
+    # Subcharts
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+
+    # Custom alerts
+    additionalPrometheusRulesMap:
+      oom-rules:
+        groups:
+          - name: oom
+            rules:
+              - alert: OomKilled
+                annotations:
+                  summary: >-
+                    Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }}
+                    has been OOMKilled {{ $value }} times in the last 10 minutes.
+                expr: >-
+                  (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1)
+                  and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+                labels:
+                  severity: critical
+      dockerhub-rules:
+        groups:
+          - name: dockerhub
+            rules:
+              - alert: DockerhubRateLimitRisk
+                annotations:
+                  summary: >-
+                    There are {{ $value }} containers pulling from Dockerhub.
+                    This may lead to rate limiting.
+                expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
+                labels:
+                  severity: critical
