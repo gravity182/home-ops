@@ -180,13 +180,13 @@ spec:
 
     chunksCache:
       enabled: true
-      allocatedMemory: 64
-      writebackSizeLimit: 10MB
+      allocatedMemory: 256
+      writebackSizeLimit: 32MB
 
     resultsCache:
       enabled: true
-      allocatedMemory: 32
-      writebackSizeLimit: 10MB
+      allocatedMemory: 128
+      writebackSizeLimit: 16MB
 
     gateway: {}
 
