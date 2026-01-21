@@ -157,6 +157,11 @@ spec:
     # Collectors
     # ----------
 
+    # Disable anonymous Alloy usage reporting
+    collectorCommon:
+      alloy:
+        enableReporting: false
+
     # The Grafana Alloy instance that is responsible for anything that must be done on a single instance,
     # such as gathering Cluster events from the API server.
     # It is deployed as a ReplicaSet with one replica
