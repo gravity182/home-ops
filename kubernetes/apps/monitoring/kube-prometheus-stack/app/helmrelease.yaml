@@ -35,8 +35,25 @@ spec:
                 parse_mode: HTML
                 message: |-
                   {{ range .Alerts }}
-                  <b>{{ .Status | toUpper }}</b>: {{ .Labels.alertname }}
-                  {{ .Annotations.summary }}
+                  <b>{{ .Status | toUpper }}</b>: {{ .Labels.alertname }}{{ if .Labels.severity }} ({{ .Labels.severity }}){{ end }}
+                  {{ if .Annotations.summary }}{{ .Annotations.summary }}{{ end }}
+                  {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+                  {{ if or .Labels.cluster .Labels.namespace .Labels.pod .Labels.container .Labels.deployment .Labels.statefulset .Labels.daemonset .Labels.job .Labels.instance .Labels.node .Labels.service }}<b>Context</b>{{ end }}
+                  {{ if .Labels.cluster }}cluster: {{ .Labels.cluster }}{{ end }}
+                  {{ if .Labels.namespace }}ns: {{ .Labels.namespace }}{{ end }}
+                  {{ if .Labels.pod }}pod: {{ .Labels.pod }}{{ end }}
+                  {{ if .Labels.container }}container: {{ .Labels.container }}{{ end }}
+                  {{ if .Labels.deployment }}deploy: {{ .Labels.deployment }}{{ end }}
+                  {{ if .Labels.statefulset }}sts: {{ .Labels.statefulset }}{{ end }}
+                  {{ if .Labels.daemonset }}ds: {{ .Labels.daemonset }}{{ end }}
+                  {{ if .Labels.job }}job: {{ .Labels.job }}{{ end }}
+                  {{ if .Labels.instance }}instance: {{ .Labels.instance }}{{ end }}
+                  {{ if .Labels.node }}node: {{ .Labels.node }}{{ end }}
+                  {{ if .Labels.service }}service: {{ .Labels.service }}{{ end }}
+                  {{ if or .Annotations.runbook_url .GeneratorURL .ExternalURL }}<b>Links</b>{{ end }}
+                  {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+                  {{ if .GeneratorURL }}Generator: {{ .GeneratorURL }}{{ end }}
+                  {{ if .ExternalURL }}Alertmanager: {{ .ExternalURL }}{{ end }}
                   {{ end }}
       alertmanagerSpec:
         externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
