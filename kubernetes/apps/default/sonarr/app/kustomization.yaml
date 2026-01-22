@@ -10,7 +10,7 @@ resources:
 configMapGenerator:
   - name: sonarr-scripts
     files:
-      - jellyfin-notify.sh=./resources/jellyfin-notify.sh
+      - jellyfin-notify.sh=../../common/resources/jellyfin-notify.sh
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
@@ -18,7 +18,8 @@ configMapGenerator:
     literals:
       - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
       - JELLYFIN_LIBRARY_ID=767bffe4f11c93ef34b805451a696a4e
-      - JELLYFIN_REFRESH_PEOPLE_TASK_ID=866456ed0d44e15468124ce33d85961e
+      - JELLYFIN_GENERATE_TRICKPLAY_TASK_ID=64f5f44cd30dc273cb9890205473bbcc
+      - JELLYFIN_EXTRACT_CHAPTERS_TASK_ID=4e6637c832ed644d1af3370a2506e80a
       - JELLYFIN_INTRO_SKIPPER_TASK_ID=eed9a58097ab2f196265820308ec2e1c
       - JELLYFIN_MEDIA_SEGMENT_SCAN_TASK_ID=f861734dd71b37f9482b52a820e39013
       - JELLYFIN_PATH_FROM=/data/library
