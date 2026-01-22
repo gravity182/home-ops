@@ -32,6 +32,8 @@ configMapGenerator:
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
+  # Icons from selfh.st/icons (CC-BY-4.0)
+  # https://github.com/selfhst/icons
   - name: glance-icons
     files:
       - ./icons/adguard-home-light.svg
