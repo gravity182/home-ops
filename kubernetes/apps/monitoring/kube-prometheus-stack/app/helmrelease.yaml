@@ -148,6 +148,20 @@ spec:
 
     # Custom alerts
     additionalPrometheusRulesMap:
+      test-rules:
+        groups:
+          - name: test
+            rules:
+              - alert: TestAlert
+                annotations:
+                  summary: >-
+                    Test alert to verify Telegram formatting.
+                  description: >-
+                    This is a synthetic alert from Prometheus to validate Alertmanager message content.
+                expr: vector(1)
+                for: 1m
+                labels:
+                  severity: info
       oom-rules:
         groups:
           - name: oom
