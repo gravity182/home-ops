@@ -94,6 +94,10 @@ spec:
         refuse_any: true
         upstream_dns:
           - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab
+          # Geo-blocked domains: use Quad9 to bypass DNS-level blocking
+          - '[/tmdb.org/]9.9.9.9'
+          - '[/themoviedb.org/]9.9.9.9'
+          - '[/thetvdb.com/]9.9.9.9'
         upstream_dns_file: ""
         bootstrap_dns:
           - 1.1.1.1
