@@ -1,0 +1,382 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metrics-exporters
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: metrics-exporters
+  interval: 1h
+  values:
+    controllers:
+      radarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - radarr
+            env:
+              PORT: "9707"
+              URL: "http://radarr.default.svc.cluster.local:7878"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: RADARR_API_KEY
+            probes: &exportarrProbes
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &exportarrPort 9707
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *exportarrPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources: &exportarrResources
+              requests:
+                cpu: 10m
+                memory: 64Mi
+      sonarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - sonarr
+            env:
+              PORT: "9707"
+              URL: "http://sonarr.default.svc.cluster.local:8989"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: SONARR_API_KEY
+            probes: *exportarrProbes
+            resources: *exportarrResources
+      lidarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - lidarr
+            env:
+              PORT: "9707"
+              URL: "http://lidarr.default.svc.cluster.local:8686"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: LIDARR_API_KEY
+            probes: *exportarrProbes
+            resources: *exportarrResources
+      prowlarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - prowlarr
+            env:
+              PORT: "9707"
+              URL: "http://prowlarr.default.svc.cluster.local:9696"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: PROWLARR_API_KEY
+            probes: *exportarrProbes
+            resources: *exportarrResources
+      bazarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - bazarr
+            env:
+              PORT: "9707"
+              URL: "http://bazarr.default.svc.cluster.local:6767"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: BAZARR_API_KEY
+            probes: *exportarrProbes
+            resources: *exportarrResources
+      sabnzbd-exporter:
+        containers:
+          app:
+            image:
+              repository: msroest/sabnzbd_exporter
+              tag: 0.1.80
+            env:
+              SABNZBD_BASEURLS: "http://sabnzbd.default.svc.cluster.local:8080/sabnzbd"
+              SABNZBD_APIKEYS:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: SABNZBD_API_KEY
+            ports:
+              - name: metrics
+                containerPort: &sabPort 9387
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *sabPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *sabPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+      qbittorrent-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/martabal/qbittorrent-exporter
+              tag: v1.13.2
+            env:
+              QBITTORRENT_BASE_URL: "http://qbittorrent.default.svc.cluster.local:8080"
+              EXPORTER_PORT: "8090"
+            ports:
+              - name: metrics
+                containerPort: &qbitPort 8090
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *qbitPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *qbitPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+      jellyfin-exporter:
+        containers:
+          app:
+            image:
+              repository: rebelcore/jellyfin-exporter
+              tag: v1.3.9
+            args:
+              - "--jellyfin.address=http://jellyfin.default.svc.cluster.local:8096"
+              - "--jellyfin.token=$(JELLYFIN_API_KEY)"
+            env:
+              JELLYFIN_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: metrics-exporters-secret
+                    key: JELLYFIN_API_KEY
+            ports:
+              - name: metrics
+                containerPort: &jellyPort 9594
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *jellyPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *jellyPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      radarr-exporter:
+        controller: radarr-exporter
+        ports:
+          metrics:
+            port: 9707
+      sonarr-exporter:
+        controller: sonarr-exporter
+        ports:
+          metrics:
+            port: 9707
+      lidarr-exporter:
+        controller: lidarr-exporter
+        ports:
+          metrics:
+            port: 9707
+      prowlarr-exporter:
+        controller: prowlarr-exporter
+        ports:
+          metrics:
+            port: 9707
+      bazarr-exporter:
+        controller: bazarr-exporter
+        ports:
+          metrics:
+            port: 9707
+      sabnzbd-exporter:
+        controller: sabnzbd-exporter
+        ports:
+          metrics:
+            port: 9387
+      qbittorrent-exporter:
+        controller: qbittorrent-exporter
+        ports:
+          metrics:
+            port: 8090
+      jellyfin-exporter:
+        controller: jellyfin-exporter
+        ports:
+          metrics:
+            port: 9594
+
+    serviceMonitor:
+      radarr-exporter:
+        enabled: true
+        service:
+          identifier: radarr-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      sonarr-exporter:
+        enabled: true
+        service:
+          identifier: sonarr-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      lidarr-exporter:
+        enabled: true
+        service:
+          identifier: lidarr-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      prowlarr-exporter:
+        enabled: true
+        service:
+          identifier: prowlarr-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      bazarr-exporter:
+        enabled: true
+        service:
+          identifier: bazarr-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      sabnzbd-exporter:
+        enabled: true
+        service:
+          identifier: sabnzbd-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      qbittorrent-exporter:
+        enabled: true
+        service:
+          identifier: qbittorrent-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
+      jellyfin-exporter:
+        enabled: true
+        service:
+          identifier: jellyfin-exporter
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
