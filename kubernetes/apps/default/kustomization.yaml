@@ -30,3 +30,5 @@ resources:
   - ./bazarr/ks.yaml
   - ./glance/ks.yaml
   - ./myspeed/ks.yaml
+  - ./metrics-exporters/ks.yaml
+  - ./grafana-dashboards/ks.yaml
