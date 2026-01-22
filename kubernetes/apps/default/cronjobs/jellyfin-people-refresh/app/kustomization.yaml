@@ -1,0 +1,16 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./ocirepository.yaml
+  - ./helmrelease.yaml
+  - ./secret.sops.yaml
+configMapGenerator:
+  - name: jellyfin-people-refresh-script
+    files:
+      - refresh_people.py=./resources/refresh_people.py
+  - name: jellyfin-people-refresh-config
+    files:
+      - config.toml=./resources/config.toml
+generatorOptions:
+  disableNameSuffixHash: true
