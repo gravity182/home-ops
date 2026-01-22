@@ -50,10 +50,10 @@ spec:
                   {{ if .Labels.instance }}instance: {{ .Labels.instance }}{{ end }}
                   {{ if .Labels.node }}node: {{ .Labels.node }}{{ end }}
                   {{ if .Labels.service }}service: {{ .Labels.service }}{{ end }}
-                  {{ if or .Annotations.runbook_url .GeneratorURL .ExternalURL }}<b>Links</b>{{ end }}
+                  {{ if or .Annotations.runbook_url .GeneratorURL $.ExternalURL }}<b>Links</b>{{ end }}
                   {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
                   {{ if .GeneratorURL }}Generator: {{ .GeneratorURL }}{{ end }}
-                  {{ if .ExternalURL }}Alertmanager: {{ .ExternalURL }}{{ end }}
+                  {{ if $.ExternalURL }}Alertmanager: {{ $.ExternalURL }}{{ end }}
                   {{ end }}
       alertmanagerSpec:
         externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
