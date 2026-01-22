@@ -73,6 +73,8 @@ spec:
     prometheus:
       prometheusSpec:
         externalUrl: "https://prometheus.${SECRET_DOMAIN}"
+        externalLabels:
+          cluster: homelab
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
