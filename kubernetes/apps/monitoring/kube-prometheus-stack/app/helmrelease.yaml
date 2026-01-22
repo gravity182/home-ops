@@ -34,27 +34,31 @@ spec:
                 chat_id: ${SECRET_TELEGRAM_CHAT_ID}
                 parse_mode: HTML
                 message: |-
-                  {{ range .Alerts }}
+                  {{- range .Alerts -}}
                   <b>{{ .Status | toUpper }}</b>: {{ .Labels.alertname }}{{ if .Labels.severity }} ({{ .Labels.severity }}){{ end }}
-                  {{ if .Annotations.summary }}{{ .Annotations.summary }}{{ end }}
-                  {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
-                  {{ if or .Labels.cluster .Labels.namespace .Labels.pod .Labels.container .Labels.deployment .Labels.statefulset .Labels.daemonset .Labels.job .Labels.instance .Labels.node .Labels.service }}<b>Context</b>{{ end }}
-                  {{ if .Labels.cluster }}cluster: {{ .Labels.cluster }}{{ end }}
-                  {{ if .Labels.namespace }}ns: {{ .Labels.namespace }}{{ end }}
-                  {{ if .Labels.pod }}pod: {{ .Labels.pod }}{{ end }}
-                  {{ if .Labels.container }}container: {{ .Labels.container }}{{ end }}
-                  {{ if .Labels.deployment }}deploy: {{ .Labels.deployment }}{{ end }}
-                  {{ if .Labels.statefulset }}sts: {{ .Labels.statefulset }}{{ end }}
-                  {{ if .Labels.daemonset }}ds: {{ .Labels.daemonset }}{{ end }}
-                  {{ if .Labels.job }}job: {{ .Labels.job }}{{ end }}
-                  {{ if .Labels.instance }}instance: {{ .Labels.instance }}{{ end }}
-                  {{ if .Labels.node }}node: {{ .Labels.node }}{{ end }}
-                  {{ if .Labels.service }}service: {{ .Labels.service }}{{ end }}
-                  {{ if or .Annotations.runbook_url .GeneratorURL $.ExternalURL }}<b>Links</b>{{ end }}
-                  {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
-                  {{ if .GeneratorURL }}Generator: {{ .GeneratorURL }}{{ end }}
-                  {{ if $.ExternalURL }}Alertmanager: {{ $.ExternalURL }}{{ end }}
-                  {{ end }}
+                  {{- if .Annotations.summary }}{{ "\n" }}<i>{{ .Annotations.summary }}</i>{{- end }}
+                  {{- if .Annotations.description }}{{ "\n" }}{{ .Annotations.description }}{{- end }}
+                  {{- if or .Labels.cluster .Labels.namespace .Labels.pod .Labels.container .Labels.deployment .Labels.statefulset .Labels.daemonset .Labels.job .Labels.instance .Labels.node .Labels.service }}
+                  {{ "\n\n" }}<b>Context</b>
+                  {{- if .Labels.cluster }}{{ "\n" }}cluster: {{ .Labels.cluster }}{{- end }}
+                  {{- if .Labels.namespace }}{{ "\n" }}ns: {{ .Labels.namespace }}{{- end }}
+                  {{- if .Labels.pod }}{{ "\n" }}pod: {{ .Labels.pod }}{{- end }}
+                  {{- if .Labels.container }}{{ "\n" }}container: {{ .Labels.container }}{{- end }}
+                  {{- if .Labels.deployment }}{{ "\n" }}deploy: {{ .Labels.deployment }}{{- end }}
+                  {{- if .Labels.statefulset }}{{ "\n" }}sts: {{ .Labels.statefulset }}{{- end }}
+                  {{- if .Labels.daemonset }}{{ "\n" }}ds: {{ .Labels.daemonset }}{{- end }}
+                  {{- if .Labels.job }}{{ "\n" }}job: {{ .Labels.job }}{{- end }}
+                  {{- if .Labels.instance }}{{ "\n" }}instance: {{ .Labels.instance }}{{- end }}
+                  {{- if .Labels.node }}{{ "\n" }}node: {{ .Labels.node }}{{- end }}
+                  {{- if .Labels.service }}{{ "\n" }}service: {{ .Labels.service }}{{- end }}
+                  {{- end }}
+                  {{- if or .Annotations.runbook_url .GeneratorURL $.ExternalURL }}
+                  {{ "\n\n" }}<b>Links</b>{{ "\n" }}
+                  {{- if .Annotations.runbook_url }}<a href="{{ .Annotations.runbook_url }}">Runbook</a>{{- end }}
+                  {{- if .GeneratorURL }}{{ if .Annotations.runbook_url }} | {{ end }}<a href="{{ .GeneratorURL }}">Graph</a>{{- end }}
+                  {{- if $.ExternalURL }}{{ if or .Annotations.runbook_url .GeneratorURL }} | {{ end }}<a href="{{ $.ExternalURL }}">Alertmanager</a>{{- end }}
+                  {{- end }}
+                  {{- end }}
       alertmanagerSpec:
         externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
         secrets:
