@@ -21,11 +21,33 @@ spec:
         global:
           resolve_timeout: 5m
         route:
-          group_by: ["alertname", "namespace"]
+          group_by:
+            - alertname
+            - namespace
+            - severity
+            - cluster
+            - deployment
+            - statefulset
+            - daemonset
+            - node
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 12h
           receiver: telegram
+          routes:
+            - matchers:
+                - alertname=~"KubePod.*"
+              group_by:
+                - alertname
+                - namespace
+                - severity
+                - cluster
+                - deployment
+                - statefulset
+                - daemonset
+                - node
+                - pod
+              receiver: telegram
         receivers:
           - name: "null"
           - name: telegram
