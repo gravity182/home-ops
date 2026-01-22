@@ -112,6 +112,13 @@ spec:
         defaultMode: 0644
         globalMounts:
           - path: /app/config/widgets
+      icons:
+        enabled: true
+        type: configMap
+        name: glance-icons
+        defaultMode: 0644
+        globalMounts:
+          - path: /app/assets
       media:
         enabled: true
         type: persistentVolumeClaim
