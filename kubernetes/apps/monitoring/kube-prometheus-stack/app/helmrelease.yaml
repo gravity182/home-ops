@@ -94,6 +94,8 @@ spec:
       persistence:
         enabled: true
         storageClassName: openebs-hostpath
+      initChownData:
+        enabled: false
       admin:
         existingSecret: grafana-admin-credentials
         userKey: username
