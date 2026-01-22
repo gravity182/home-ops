@@ -11,5 +11,3 @@ resources:
   - ./loki/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./k8s-monitoring/ks.yaml
-  # NOTE: Remove grafana after verifying kube-prometheus-stack works
-  # - ./grafana/ks.yaml
