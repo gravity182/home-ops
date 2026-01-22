@@ -2,10 +2,10 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: media-cleanup
+  name: cronjobs
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/media-cleanup/app
+  path: ./kubernetes/apps/default/cronjobs
   postBuild:
     substituteFrom:
       - name: cluster-secrets

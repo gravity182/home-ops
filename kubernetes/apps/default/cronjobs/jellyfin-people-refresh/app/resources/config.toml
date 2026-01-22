@@ -1,0 +1,15 @@
+[settings]
+limit = 50
+page_sleep_seconds = 5
+item_sleep_seconds = 1
+http_timeout_seconds = 30
+
+[[targets]]
+name = "jellyfin"
+url = "http://jellyfin.default.svc.cluster.local:8096"
+api_key_file = "/secrets/jellyfin-api-key"
+
+[[targets]]
+name = "jellyfin-xxx"
+url = "http://jellyfin-xxx.default.svc.cluster.local:8096"
+api_key_file = "/secrets/jellyfin-xxx-api-key"
