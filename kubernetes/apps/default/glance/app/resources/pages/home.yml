@@ -20,42 +20,42 @@
               url: https://jellyfin.${SECRET_DOMAIN}
               check-url: http://jellyfin.default.svc.cluster.local:8096/health
               same-tab: true
-              icon: sh:jellyfin-light
+              icon: /assets/jellyfin-light.svg
             - title: Jellyfin XXX
               url: https://xxx.${SECRET_DOMAIN}
               check-url: http://jellyfin-xxx.default.svc.cluster.local:8096/health
               same-tab: true
-              icon: sh:jellyfin-light
+              icon: /assets/jellyfin-light.svg
             - title: Seerr
               url: https://requests.${SECRET_DOMAIN}
               check-url: http://seerr.default.svc.cluster.local:5055/api/v1/status
               same-tab: true
-              icon: sh:overseerr-light
+              icon: /assets/overseerr-light.svg
             - title: Radarr
               url: https://radarr.${SECRET_DOMAIN}
               check-url: http://radarr.default.svc.cluster.local:7878/ping
               same-tab: true
-              icon: sh:radarr-light
+              icon: /assets/radarr-light.svg
             - title: Sonarr
               url: https://sonarr.${SECRET_DOMAIN}
               check-url: http://sonarr.default.svc.cluster.local:8989/ping
               same-tab: true
-              icon: sh:sonarr-light
+              icon: /assets/sonarr-light.svg
             - title: Lidarr
               url: https://lidarr.${SECRET_DOMAIN}
               check-url: http://lidarr.default.svc.cluster.local:8686/ping
               same-tab: true
-              icon: sh:lidarr-light
+              icon: /assets/lidarr-light.svg
             - title: Prowlarr
               url: https://prowlarr.${SECRET_DOMAIN}
               check-url: http://prowlarr.default.svc.cluster.local:9696/ping
               same-tab: true
-              icon: sh:prowlarr-light
+              icon: /assets/prowlarr-light.svg
             - title: Stash
               url: https://stash.${SECRET_DOMAIN}
               check-url: http://stash.default.svc.cluster.local:9999/healthz
               same-tab: true
-              icon: sh:stash-light
+              icon: /assets/stash-light.svg
         - type: monitor
           title: Downloaders
           cache: 1m
@@ -64,17 +64,17 @@
               url: https://qbittorrent.${SECRET_DOMAIN}
               check-url: http://qbittorrent.default.svc.cluster.local:8080/api/v2/app/version
               same-tab: true
-              icon: sh:qbittorrent-light
+              icon: /assets/qbittorrent-light.svg
             - title: SABnzbd
               url: https://sabnzbd.${SECRET_DOMAIN}
               check-url: http://sabnzbd.default.svc.cluster.local:8080/sabnzbd/
               same-tab: true
-              icon: sh:sabnzbd-light
+              icon: /assets/sabnzbd-light.svg
             - title: Slskd
               url: https://slskd.${SECRET_DOMAIN}
               check-url: http://slskd.default.svc.cluster.local:5030/health
               same-tab: true
-              icon: sh:slskd-light
+              icon: /assets/slskd-light.svg
         - type: monitor
           title: Utils
           cache: 1m
@@ -83,7 +83,7 @@
               url: https://gist.${SECRET_DOMAIN}
               check-url: http://opengist.default.svc.cluster.local:6157/healthcheck
               same-tab: true
-              icon: sh:opengist-light
+              icon: /assets/opengist-light.svg
         - $include: ../widgets/qbittorrent.yml
         - $include: ../widgets/jellyfin-stats.yml
     - size: small
@@ -96,17 +96,17 @@
               url: https://adguard.${SECRET_DOMAIN}
               check-url: http://adguard-home.network.svc.cluster.local:3000/control/status
               same-tab: true
-              icon: sh:adguard-home-light
+              icon: /assets/adguard-home-light.svg
             - title: Authentik
               url: https://authentik.${SECRET_DOMAIN}
               check-url: http://authentik-server.authentik.svc.cluster.local:80/-/health/live/
               same-tab: true
-              icon: sh:authentik-light
+              icon: /assets/authentik-light.svg
             - title: Grafana
               url: https://grafana.${SECRET_DOMAIN}
               check-url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80/api/health
               same-tab: true
-              icon: sh:grafana-light
+              icon: /assets/grafana-light.svg
         - type: dns-stats
           service: adguard
           url: http://adguard-home.network.svc.cluster.local:3000

@@ -32,5 +32,24 @@ configMapGenerator:
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: glance-icons
+    files:
+      - ./icons/adguard-home-light.svg
+      - ./icons/authentik-light.svg
+      - ./icons/grafana-light.svg
+      - ./icons/jellyfin-light.svg
+      - ./icons/lidarr-light.svg
+      - ./icons/opengist-light.svg
+      - ./icons/overseerr-light.svg
+      - ./icons/prowlarr-light.svg
+      - ./icons/qbittorrent-light.svg
+      - ./icons/radarr-light.svg
+      - ./icons/sabnzbd-light.svg
+      - ./icons/slskd-light.svg
+      - ./icons/sonarr-light.svg
+      - ./icons/stash-light.svg
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 generatorOptions:
   disableNameSuffixHash: true
