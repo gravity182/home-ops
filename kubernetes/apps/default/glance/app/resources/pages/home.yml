@@ -104,7 +104,7 @@
               icon: sh:authentik-light
             - title: Grafana
               url: https://grafana.${SECRET_DOMAIN}
-              check-url: http://grafana.monitoring.svc.cluster.local:80
+              check-url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80
               same-tab: true
               icon: sh:grafana-light
         - type: dns-stats
