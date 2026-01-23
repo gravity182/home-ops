@@ -114,7 +114,49 @@ spec:
         }
       # extra loki.process rules
       # see https://grafana.com/docs/alloy/latest/reference/components/loki/loki.process/
-      extraLogProcessingStages:
+      extraLogProcessingStages: |-
+        stage.match {
+          selector = "{app=~\"radarr|sonarr|lidarr|prowlarr\"}"
+          stage.json {
+            expressions = {
+              t  = "\"@t\"",  // timestamp
+              l  = "\"@l\"",  // level
+              m  = "\"@m\"",  // rendered message
+              mt = "\"@mt\"", // message template (not used downstream)
+              x  = "\"@x\"",  // exception
+              i  = "\"@i\"",  // event id
+              r  = "\"@r\"",  // renderings
+              tr = "\"@tr\"", // trace id
+              sp = "\"@sp\"", // span id
+            }
+          }
+          stage.drop {
+            source = "m"
+            expression = "^$"
+          }
+          stage.timestamp {
+            source = "t"
+            format = "RFC3339Nano"
+          }
+          stage.labels {
+            values = {
+              level = "l",
+              detected_level = "l",
+            }
+          }
+          stage.structured_metadata {
+            values = {
+              trace_id = "tr",
+              span_id = "sp",
+              event_id = "i",
+              exception = "x",
+              renderings = "r",
+            }
+          }
+          stage.output {
+            source = "m"
+          }
+        }
       # indexed labels
       labelsToKeep:
         - service_name
