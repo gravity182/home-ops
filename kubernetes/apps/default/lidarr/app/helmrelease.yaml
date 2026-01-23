@@ -25,10 +25,15 @@ spec:
               LIDARR__APP__THEME: dark
               LIDARR__AUTH__METHOD: External
               LIDARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              LIDARR__LOG__LEVEL: &log-level info
+              LIDARR__LOG__CONSOLELEVEL: *log-level
+              LIDARR__LOG__CONSOLEFORMAT: Clef
               LIDARR__LOG__DBENABLED: "False"
-              LIDARR__LOG__LEVEL: info
+              LIDARR__LOG__ANALYTICSENABLED: "False"
               LIDARR__SERVER__PORT: &port 8686
-              LIDARR__UPDATE__BRANCH: master
+              LIDARR__UPDATE__BRANCH: develop
+              LIDARR__UPDATE__MECHANISM: "Docker"
+              LIDARR__UPDATE__AUTOMATICALLY: "False"
               TZ: Europe/Moscow
             probes:
               liveness: &probes
