@@ -11,6 +11,15 @@ spec:
   values:
     cleanPrometheusOperatorObjectNames: true
 
+    # Disable kube-proxy monitoring (Cilium runs with kubeProxyReplacement enabled)
+    kubeProxy:
+      enabled: false
+
+    # Default alert rules
+    defaultRules:
+      rules:
+        kubeProxy: false
+
     # Alertmanager
     alertmanager:
       config:
