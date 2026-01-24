@@ -8,6 +8,7 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./helmrepository-grafana.yaml
   - ./loki/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./k8s-monitoring/ks.yaml
