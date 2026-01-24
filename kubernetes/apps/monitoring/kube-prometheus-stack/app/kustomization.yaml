@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - ./helmrepository.yaml
+  - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./secret.sops.yaml
