@@ -41,6 +41,44 @@ tasks:
       - test -f {{.TALOSCONFIG}}
       - which kubectl talhelper talosctl yq
 
+  mirror-talos-installer:
+    desc: Mirror Talos installer image (linux/amd64) into local registry [IP=required]
+    dir: "{{.TALOS_DIR}}"
+    requires:
+      vars: [IP]
+    vars:
+      LOCAL_REGISTRY: '{{default "192.168.3.25:5001" .LOCAL_REGISTRY}}'
+
+      TALOS_IMAGE:
+        sh: yq -r '.nodes[] | select(.ipAddress == "{{.IP}}") | .talosImageURL' {{.TALOS_DIR}}/talconfig.yaml
+      TALOS_VERSION:
+        sh: yq -r '.talosVersion' {{.TALOS_DIR}}/talenv.yaml
+
+      SRC_IMAGE: "{{.TALOS_IMAGE}}:{{.TALOS_VERSION}}"
+      # Destination keeps the same repo path after the registry host:
+      # factory.talos.dev/installer/<id>:vX.Y.Z -> 192.168.3.25:5001/installer/<id>:vX.Y.Z
+      DST_IMAGE:
+        sh: |
+          set -euo pipefail
+          src="{{.SRC_IMAGE}}"
+          # drop the first path segment (registry host)
+          rest="${src#*/}"
+          echo "{{.LOCAL_REGISTRY}}/${rest}"
+
+    preconditions:
+      - test -f talconfig.yaml
+      - test -f talenv.yaml
+      - which yq docker
+
+    cmds:
+      - 'echo "Source:      {{.SRC_IMAGE}}"'
+      - 'echo "Destination: {{.DST_IMAGE}}"'
+      - 'echo "Platform:    linux/amd64"'
+      - docker pull --platform=linux/amd64 "{{.SRC_IMAGE}}"
+      - docker tag "{{.SRC_IMAGE}}" "{{.DST_IMAGE}}"
+      - docker push "{{.DST_IMAGE}}"
+      - echo "Done."
+
   upgrade-k8s:
     desc: Upgrade Kubernetes
     dir: "{{.TALOS_DIR}}"
