@@ -1,0 +1,34 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: metrics-exporters-jellyfin-rules
+spec:
+  groups:
+    - name: metrics-exporters.jellyfin.rules
+      rules:
+        - alert: JellyfinCollectorFailed
+          expr: jellyfin_scrape_collector_success{job="metrics-exporters-jellyfin-exporter"} == 0
+          for: 10m
+          labels:
+            severity: critical
+            component: media-management
+            app: jellyfin
+          annotations:
+            summary: >-
+              Jellyfin exporter collector failed
+            description: >-
+              Collector {{ $labels.collector }} is failing scrapes.
+
+        - alert: JellyfinExporterHandlerErrors
+          expr: increase(promhttp_metric_handler_errors_total{job="metrics-exporters-jellyfin-exporter"}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: jellyfin
+          annotations:
+            summary: >-
+              Jellyfin exporter /metrics handler errors increased
+            description: >-
+              promhttp_metric_handler_errors_total increased by {{ $value }} over the last 15m.

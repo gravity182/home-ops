@@ -1,0 +1,93 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: metrics-exporters-sonarr-rules
+spec:
+  groups:
+    - name: metrics-exporters.sonarr.rules
+      rules:
+        - alert: SonarrSystemStatusNotOK
+          expr: sonarr_system_status{job="metrics-exporters-sonarr-exporter"} != 1
+          for: 10m
+          labels:
+            severity: critical
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr system unhealthy
+            description: >-
+              sonarr_system_status is {{ $value }} (expected 1). Check Sonarr UI → System → Status.
+
+        - alert: SonarrHealthIssuesWarning
+          expr: >-
+            sum without (message, source, type, wikiurl) (sonarr_system_health_issues{job="metrics-exporters-sonarr-exporter", type!="error"}) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr health issues present
+            description: >-
+              Sonarr reports {{ $value }} non-error health issue(s).
+
+        - alert: SonarrHealthIssuesCritical
+          expr: >-
+            sum without (message, source, wikiurl) (sonarr_system_health_issues{job="metrics-exporters-sonarr-exporter", type="error"}) > 0
+          for: 15m
+          labels:
+            severity: critical
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr health errors present
+            description: >-
+              Sonarr reports {{ $value }} health error(s).
+
+        - alert: SonarrExporterScrape5xx
+          expr: >-
+            increase(sonarr_scrape_requests_total{job="metrics-exporters-sonarr-exporter", code=~"5.."}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr exporter sees 5xx from Sonarr API
+            description: >-
+              HTTP 5xx responses from Sonarr API in the last 15m: {{ $value }}.
+
+        - alert: SonarrExporterScrapeSlow
+          expr: sonarr_scrape_duration_seconds{job="metrics-exporters-sonarr-exporter"} > 20
+          for: 10m
+          labels:
+            severity: warning
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr exporter scrapes are slow
+            description: >-
+              Last Sonarr exporter scrape took {{ $value | humanizeDuration }} (timeout is 30s).
+
+        - alert: SonarrBacklogForTwoWeeks
+          expr: >-
+            max without (__name__) (
+              (sonarr_episode_missing_total{job="metrics-exporters-sonarr-exporter"} > 0)
+              or (sonarr_episode_cutoff_unmet_total{job="metrics-exporters-sonarr-exporter"} > 0)
+            ) > 0
+          for: 14d
+          labels:
+            severity: info
+            component: media-management
+            app: sonarr
+          annotations:
+            summary: >-
+              Sonarr backlog non-zero for 14 days
+            description: >-
+              Sonarr reports a non-empty backlog for 14 days (missing/cutoff unmet).

@@ -1,0 +1,89 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: metrics-exporters-lidarr-rules
+spec:
+  groups:
+    - name: metrics-exporters.lidarr.rules
+      rules:
+        - alert: LidarrSystemStatusNotOK
+          expr: lidarr_system_status{job="metrics-exporters-lidarr-exporter"} != 1
+          for: 10m
+          labels:
+            severity: critical
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr system unhealthy
+            description: >-
+              lidarr_system_status is {{ $value }} (expected 1). Check Lidarr UI → System → Status.
+
+        - alert: LidarrHealthIssuesWarning
+          expr: >-
+            sum without (message, source, type, wikiurl) (lidarr_system_health_issues{job="metrics-exporters-lidarr-exporter", type!="error"}) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr health issues present
+            description: >-
+              Lidarr reports {{ $value }} non-error health issue(s).
+
+        - alert: LidarrHealthIssuesCritical
+          expr: >-
+            sum without (message, source, wikiurl) (lidarr_system_health_issues{job="metrics-exporters-lidarr-exporter", type="error"}) > 0
+          for: 15m
+          labels:
+            severity: critical
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr health errors present
+            description: >-
+              Lidarr reports {{ $value }} health error(s).
+
+        - alert: LidarrExporterScrape5xx
+          expr: >-
+            increase(lidarr_scrape_requests_total{job="metrics-exporters-lidarr-exporter", code=~"5.."}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr exporter sees 5xx from Lidarr API
+            description: >-
+              HTTP 5xx responses from Lidarr API in the last 15m: {{ $value }}.
+
+        - alert: LidarrExporterScrapeSlow
+          expr: lidarr_scrape_duration_seconds{job="metrics-exporters-lidarr-exporter"} > 20
+          for: 10m
+          labels:
+            severity: warning
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr exporter scrapes are slow
+            description: >-
+              Last Lidarr exporter scrape took {{ $value | humanizeDuration }} (timeout is 30s).
+
+        - alert: LidarrBacklogForTwoWeeks
+          expr: lidarr_albums_missing_total{job="metrics-exporters-lidarr-exporter"} > 0
+          for: 14d
+          labels:
+            severity: info
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr backlog non-zero for 14 days
+            description: >-
+              Lidarr reports missing albums for 14 days.
