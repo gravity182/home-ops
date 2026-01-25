@@ -1,0 +1,17 @@
+name = "deadman-switch"
+main = "src/index.ts"
+compatibility_date = "2026-01-25"
+workers_dev = true
+preview_urls = false
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+DEADMAN_CHECK_IDS = "watchdog-homelab"
+DEADMAN_TIMEOUT_SECONDS = "720"
+DEADMAN_DEDUPE_SECONDS = "3600"
+
+[[kv_namespaces]]
+binding = "DEADMAN_KV"
+id = "fb8f7c05ab534a9f8de5b7d37379bf79"
