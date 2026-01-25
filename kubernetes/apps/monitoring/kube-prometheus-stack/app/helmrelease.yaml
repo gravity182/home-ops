@@ -34,27 +34,27 @@ spec:
           resolve_timeout: 5m
         inhibit_rules:
           - source_matchers:
-              - 'severity = critical'
+              - "severity = critical"
             target_matchers:
-              - 'severity =~ warning|info'
+              - "severity =~ warning|info"
             equal:
-              - 'namespace'
-              - 'alertname'
+              - "namespace"
+              - "alertname"
           - source_matchers:
-              - 'severity = warning'
+              - "severity = warning"
             target_matchers:
-              - 'severity = info'
+              - "severity = info"
             equal:
-              - 'namespace'
-              - 'alertname'
+              - "namespace"
+              - "alertname"
           - source_matchers:
-              - 'alertname = InfoInhibitor'
+              - "alertname = InfoInhibitor"
             target_matchers:
-              - 'severity = info'
+              - "severity = info"
             equal:
-              - 'namespace'
+              - "namespace"
           - target_matchers:
-              - 'alertname = InfoInhibitor'
+              - "alertname = InfoInhibitor"
         route:
           group_by:
             - alertname
@@ -64,6 +64,11 @@ spec:
           repeat_interval: 12h
           receiver: telegram
           routes:
+            ## https://runbooks.prometheus-operator.dev/runbooks/general/infoinhibitor/
+            ## This alert should be routed to a null receiver and configured to inhibit alerts with severity="info"
+            - matchers:
+                - alertname="InfoInhibitor"
+              receiver: "null"
             - matchers:
                 - alertname="Watchdog"
               receiver: deadman-webhook
@@ -119,9 +124,10 @@ spec:
                   {{- end }}
                   {{- end }}
         templates:
-          - '/etc/alertmanager/config/*.tmpl'
+          - "/etc/alertmanager/config/*.tmpl"
       alertmanagerSpec:
         externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
+        retention: 120h
         secrets:
           - alertmanager-telegram-secret
           - alertmanager-deadman-secret
@@ -151,8 +157,19 @@ spec:
         ruleSelectorNilUsesHelmValues: false
         scrapeConfigSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
+        scrapeInterval: 30s
+        evaluationInterval: 30s
         retention: 14d
         retentionSize: 50GB
+        query:
+          timeout: 2m
+          maxConcurrency: 20
+          maxSamples: 50000000
+        enforcedSampleLimit: 50000
+        enforcedTargetLimit: 1000
+        enforcedLabelLimit: 100
+        enforcedLabelNameLengthLimit: 100
+        enforcedLabelValueLengthLimit: 500
         resources:
           requests:
             memory: 800Mi
