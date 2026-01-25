@@ -20,21 +20,41 @@ spec:
       rules:
         kubeProxy: false
 
-    # Alertmanager
+    ## Alertmanager configuration directives
+    ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
+    ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
+    ##
     alertmanager:
       config:
         global:
           resolve_timeout: 5m
+        inhibit_rules:
+          - source_matchers:
+              - 'severity = critical'
+            target_matchers:
+              - 'severity =~ warning|info'
+            equal:
+              - 'namespace'
+              - 'alertname'
+          - source_matchers:
+              - 'severity = warning'
+            target_matchers:
+              - 'severity = info'
+            equal:
+              - 'namespace'
+              - 'alertname'
+          - source_matchers:
+              - 'alertname = InfoInhibitor'
+            target_matchers:
+              - 'severity = info'
+            equal:
+              - 'namespace'
+          - target_matchers:
+              - 'alertname = InfoInhibitor'
         route:
           group_by:
             - alertname
             - namespace
-            - severity
-            - cluster
-            - deployment
-            - statefulset
-            - daemonset
-            - node
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 12h
@@ -94,6 +114,8 @@ spec:
                   {{- if $.ExternalURL }}{{ if or .Annotations.runbook_url .GeneratorURL }} | {{ end }}<a href="{{ $.ExternalURL }}">Alertmanager</a>{{- end }}
                   {{- end }}
                   {{- end }}
+        templates:
+          - '/etc/alertmanager/config/*.tmpl'
       alertmanagerSpec:
         externalUrl: "https://alertmanager.${SECRET_DOMAIN}"
         secrets:
