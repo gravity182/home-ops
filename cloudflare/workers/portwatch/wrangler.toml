@@ -1,0 +1,23 @@
+name = "portwatch"
+main = "src/index.ts"
+compatibility_date = "2026-01-25"
+workers_dev = true
+preview_urls = false
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+# Public ports to probe (TCP connect).
+PORTWATCH_PORTS = "443,30413"
+
+# Alerting behavior
+PORTWATCH_CONSECUTIVE_FAILURES_THRESHOLD = "3"
+PORTWATCH_REMINDER_SECONDS = "21600" # 6h
+
+# TCP connect timeout per port probe.
+PORTWATCH_CONNECT_TIMEOUT_MS = "3000"
+
+[[kv_namespaces]]
+binding = "PORTWATCH_KV"
+id = "646291b05078418fa45bd444866af847"
