@@ -21,7 +21,9 @@ spec:
 
     server:
       metrics:
-        enabled: false
+        enabled: true
+        serviceMonitor:
+          enabled: true
       volumes:
         - name: secret-key-creds
           secret:
@@ -39,7 +41,9 @@ spec:
 
     worker:
       metrics:
-        enabled: false
+        enabled: true
+        serviceMonitor:
+          enabled: true
       volumes:
         - name: secret-key-creds
           secret:
