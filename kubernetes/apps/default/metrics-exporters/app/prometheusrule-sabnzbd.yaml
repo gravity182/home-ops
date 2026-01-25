@@ -1,0 +1,53 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: metrics-exporters-sabnzbd-rules
+spec:
+  groups:
+    - name: metrics-exporters.sabnzbd.rules
+      rules:
+        - alert: SabnzbdQueueStalled
+          expr: >-
+            sabnzbd_queue_remaining_bytes{job="metrics-exporters-sabnzbd-exporter"} > 0
+            and sabnzbd_queue_download_rate_bytes_per_second{job="metrics-exporters-sabnzbd-exporter"} == 0
+            and sabnzbd_paused{job="metrics-exporters-sabnzbd-exporter"} == 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd queue is stalled (not paused)
+            description: >-
+              SABnzbd has remaining bytes in queue but download rate is 0 and it is not paused.
+
+        - alert: SabnzbdSlowDownload
+          expr: >-
+            sabnzbd_queue_size{job="metrics-exporters-sabnzbd-exporter"} > 0
+            and sabnzbd_paused{job="metrics-exporters-sabnzbd-exporter"} == 0
+            and sabnzbd_queue_download_rate_bytes_per_second{job="metrics-exporters-sabnzbd-exporter"} < (1 * 1024 * 1024)
+          for: 1h
+          labels:
+            severity: info
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd downloads are slow (< 1 MiB/s)
+            description: >-
+              SABnzbd queue has items and download rate is {{ $value | humanize1024 }}B/s (threshold 1 MiB/s).
+
+        - alert: SabnzbdPausedTooLong
+          expr: sabnzbd_paused{job="metrics-exporters-sabnzbd-exporter"} == 1
+          for: 24h
+          labels:
+            severity: info
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd has been paused for 24 hours
+            description: >-
+              SABnzbd has been paused continuously for 24 hours.
