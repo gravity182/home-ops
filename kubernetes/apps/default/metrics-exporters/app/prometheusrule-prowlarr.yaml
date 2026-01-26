@@ -89,6 +89,35 @@ spec:
             description: >-
               Max indexer average response time in the last 15m: {{ $value | humanizeDuration }}.
 
+        - alert: ProwlarrVipExpiring
+          expr: >-
+            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) < (30 * 24 * 60 * 60)
+            and max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) > 0
+          for: 1h
+          labels:
+            severity: warning
+            component: media-management
+            app: prowlarr
+          annotations:
+            summary: >-
+              Prowlarr VIP expiring soon
+            description: >-
+              VIP for indexer {{ $labels.indexer }} expires in {{ $value | humanizeDuration }} (threshold 30d).
+
+        - alert: ProwlarrVipExpired
+          expr: >-
+            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) <= 0
+          for: 1h
+          labels:
+            severity: critical
+            component: media-management
+            app: prowlarr
+          annotations:
+            summary: >-
+              Prowlarr VIP expired
+            description: >-
+              VIP for indexer {{ $labels.indexer }} is expired (expires_in_seconds={{ $value }}).
+
         - alert: ProwlarrIndexerHighFailureRate
           expr: >-
             (
