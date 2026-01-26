@@ -1,0 +1,123 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cilium-rules
+  namespace: kube-system
+spec:
+  groups:
+    - name: cilium.rules
+      interval: 30s
+      rules:
+        - alert: CiliumAgentControllersFailingHigh
+          expr: |
+            cilium_controllers_failing{namespace="kube-system"} > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium agent on {{ $labels.node }} has {{ $value }} failing controllers"
+            description: "Cilium agent has controllers that are failing, which may indicate issues with endpoint management or policy enforcement"
+
+        - alert: CiliumBPFMapPressureHigh
+          expr: |
+            cilium_bpf_map_pressure{namespace="kube-system"} > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium BPF map {{ $labels.map_name }} on {{ $labels.node }} is {{ $value | humanizePercentage }} full"
+            description: "BPF map pressure is high, may lead to connection tracking or load balancing issues if it reaches 100%"
+
+        - alert: CiliumBPFMapPressureCritical
+          expr: |
+            cilium_bpf_map_pressure{namespace="kube-system"} > 0.95
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Cilium BPF map {{ $labels.map_name }} on {{ $labels.node }} is {{ $value | humanizePercentage }} full (CRITICAL)"
+            description: "BPF map is nearly full, imminent connection tracking or load balancing failures"
+
+        - alert: CiliumEndpointsNotReady
+          expr: |
+            sum(cilium_endpoint_state{namespace="kube-system",endpoint_state!="ready"}) by (node) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium on {{ $labels.node }} has {{ $value }} non-ready endpoints"
+            description: "Multiple endpoints are not in ready state, check endpoint regeneration and network policies"
+
+        - alert: CiliumEndpointRegenerationSlow
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(cilium_endpoint_regeneration_time_stats_seconds_bucket{namespace="kube-system",status="success"}[5m])) by (le, node)
+            ) > 30
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium endpoint regeneration on {{ $labels.node }} is slow (P99: {{ $value }}s)"
+            description: "Successful endpoint regeneration is taking more than 30 seconds at P99, may indicate policy complexity or resource constraints"
+
+        - alert: CiliumUnreachableNodes
+          expr: |
+            cilium_unreachable_nodes{namespace="kube-system"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Cilium agent on {{ $labels.node }} cannot reach {{ $value }} nodes"
+            description: "Node connectivity issues detected, check network health and Cilium agent status"
+
+        - alert: CiliumNodeConnectivityUnreachable
+          expr: |
+            cilium_node_health_connectivity_status{namespace="kube-system",status="unreachable"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Cilium node {{ $labels.source_node_name }} cannot reach health {{ $labels.type }}"
+            description: "Node-to-node or node-to-endpoint connectivity failure detected"
+
+        - alert: CiliumHighPacketDropRate
+          expr: |
+            sum(rate(cilium_drop_count_total{namespace="kube-system",reason!~"Policy denied|Invalid source ip"}[5m])) by (node, reason, direction)
+            > 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium on {{ $labels.node }} dropping packets: {{ $labels.reason }} ({{ $labels.direction }})"
+            description: "High packet drop rate ({{ $value }}/s) detected, investigate reason: {{ $labels.reason }}"
+
+        - alert: CiliumOperatorErrors
+          expr: |
+            rate(cilium_operator_errors_warnings_total{namespace="kube-system",level="ERROR"}[5m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium operator reporting errors in {{ $labels.subsystem }}"
+            description: "Cilium operator is experiencing errors, check operator logs for details"
+
+        - alert: CiliumAgentErrors
+          expr: |
+            rate(cilium_errors_warnings_total{namespace="kube-system",level=~"ERROR|WARN"}[5m]) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium agent on {{ $labels.node }} reporting errors in {{ $labels.subsystem }}"
+            description: "Cilium agent error/warning rate is {{ $value }}/s (level: {{ $labels.level }}, subsystem: {{ $labels.subsystem }}), check agent logs for details"
+
+        - alert: CiliumIPCacheErrors
+          expr: |
+            rate(cilium_ipcache_errors_total{namespace="kube-system"}[5m]) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cilium IP cache errors on {{ $labels.node }}: {{ $labels.error }}"
+            description: "IP cache errors detected ({{ $value }}/s, type: {{ $labels.type }}, error: {{ $labels.error }}), may indicate issues with identity management or endpoint updates"
