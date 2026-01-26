@@ -6,3 +6,17 @@ resources:
   - ./helmrepository.yaml
   - ./httproute.yaml
   - ./secret.sops.yaml
+  - ./prometheusrule.yaml
+
+configMapGenerator:
+  - name: authentik-dashboard
+    files:
+      - ./resources/authentik-dashboard.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: "disabled"
+
+generatorOptions:
+  disableNameSuffixHash: true
