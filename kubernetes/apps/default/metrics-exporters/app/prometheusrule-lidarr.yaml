@@ -62,6 +62,20 @@ spec:
             description: >-
               HTTP 5xx responses from Lidarr API in the last 15m: {{ $value }}.
 
+        - alert: LidarrExporterUnauthorized
+          expr: >-
+            increase(lidarr_scrape_requests_total{job="metrics-exporters-lidarr-exporter", code=~"401|403"}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: lidarr
+          annotations:
+            summary: >-
+              Lidarr exporter unauthorized (401/403)
+            description: >-
+              Lidarr exporter received HTTP 401/403 from Lidarr API in the last 15m: {{ $value }}. Check API key / auth settings.
+
         - alert: LidarrExporterScrapeSlow
           expr: lidarr_scrape_duration_seconds{job="metrics-exporters-lidarr-exporter"} > 20
           for: 10m

@@ -62,6 +62,20 @@ spec:
             description: >-
               HTTP 5xx responses from Radarr API in the last 15m: {{ $value }}.
 
+        - alert: RadarrExporterUnauthorized
+          expr: >-
+            increase(radarr_scrape_requests_total{job="metrics-exporters-radarr-exporter", code=~"401|403"}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: radarr
+          annotations:
+            summary: >-
+              Radarr exporter unauthorized (401/403)
+            description: >-
+              Radarr exporter received HTTP 401/403 from Radarr API in the last 15m: {{ $value }}. Check API key / auth settings.
+
         - alert: RadarrExporterScrapeSlow
           expr: radarr_scrape_duration_seconds{job="metrics-exporters-radarr-exporter"} > 20
           for: 10m
