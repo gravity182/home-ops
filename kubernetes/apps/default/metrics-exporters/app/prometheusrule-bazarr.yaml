@@ -48,6 +48,20 @@ spec:
             description: >-
               HTTP 5xx responses from Bazarr API in the last 15m: {{ $value }}.
 
+        - alert: BazarrExporterUnauthorized
+          expr: >-
+            increase(bazarr_scrape_requests_total{job="metrics-exporters-bazarr-exporter", code=~"401|403"}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: bazarr
+          annotations:
+            summary: >-
+              Bazarr exporter unauthorized (401/403)
+            description: >-
+              Bazarr exporter received HTTP 401/403 from Bazarr API in the last 15m: {{ $value }}. Check API key / auth settings.
+
         - alert: BazarrExporterScrapeSlow
           expr: bazarr_scrape_duration_seconds{job="metrics-exporters-bazarr-exporter"} > 20
           for: 10m

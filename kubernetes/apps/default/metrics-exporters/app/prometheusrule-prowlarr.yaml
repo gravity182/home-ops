@@ -151,6 +151,20 @@ spec:
             description: >-
               HTTP 5xx responses from Prowlarr API in the last 15m: {{ $value }}.
 
+        - alert: ProwlarrExporterUnauthorized
+          expr: >-
+            increase(prowlarr_scrape_requests_total{job="metrics-exporters-prowlarr-exporter", code=~"401|403"}[15m]) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: prowlarr
+          annotations:
+            summary: >-
+              Prowlarr exporter unauthorized (401/403)
+            description: >-
+              Prowlarr exporter received HTTP 401/403 from Prowlarr API in the last 15m: {{ $value }}. Check API key / auth settings.
+
         - alert: ProwlarrExporterScrapeSlow
           expr: prowlarr_scrape_duration_seconds{job="metrics-exporters-prowlarr-exporter"} > 20
           for: 10m
