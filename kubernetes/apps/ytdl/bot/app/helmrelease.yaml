@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/yt-download-bot
-              tag: latest@sha256:741b05ec992ef5129ea3ca7dafd35e7b0e0df74824eb1576799c02c0a55fd267
+              tag: latest@sha256:75a5166649885006ce7a895daffa769f095b79402bf36bc9ed7c94290d6ff483
               pullPolicy: IfNotPresent
             env:
               - name: TZ
