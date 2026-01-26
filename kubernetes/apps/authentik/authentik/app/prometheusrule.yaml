@@ -1,0 +1,70 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: authentik-rules
+  namespace: authentik
+spec:
+  groups:
+    - name: authentik.rules
+      interval: 30s
+      rules:
+        - alert: AuthentikHighErrorRate
+          expr: |
+            (
+              sum(rate(django_http_responses_total_by_status_total{namespace="authentik",status=~"5.."}[5m]))
+              /
+              sum(rate(django_http_responses_total_by_status_total{namespace="authentik"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Authentik is returning more than 5% HTTP 5xx errors
+            description: "{{ $value | humanizePercentage }} of requests are failing with 5xx status codes"
+
+        - alert: AuthentikHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{namespace="authentik"}[5m])) by (le)
+            ) > 2
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Authentik 95th percentile request latency is above 2 seconds
+            description: "P95 latency is {{ $value | humanizeDuration }}, users may experience slowness"
+
+        - alert: AuthentikNoWorkersRunning
+          expr: |
+            (
+              sum(authentik_admin_workers{namespace="authentik"}) == 0
+              or
+              sum(authentik_tasks_workers{namespace="authentik"}) == 0
+            )
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Authentik has no worker processes running
+            description: "Worker processes are required for background tasks and system health"
+
+        - alert: AuthentikOutpostDisconnected
+          expr: |
+            authentik_outpost_connection{namespace="authentik"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Authentik outpost {{ $labels.outpost_name }} is disconnected"
+            description: "Outpost {{ $labels.outpost_name }} ({{ $labels.outpost_type }}) has been disconnected for 5 minutes"
+
+        - alert: AuthentikTaskQueueBuildup
+          expr: |
+            sum(authentik_tasks_in_progress{namespace="authentik"}) > 50
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Authentik task queue has {{ $value }} tasks in progress
+            description: "Task queue may be backed up, check worker health and performance"
