@@ -23,7 +23,7 @@ spec:
         - alert: RadarrHealthIssuesWarning
           expr: >-
             sum without (message, source, type, wikiurl) (radarr_system_health_issues{job="metrics-exporters-radarr-exporter", type!="error"}) > 0
-          for: 15m
+          for: 1h
           labels:
             severity: warning
             component: media-management
@@ -37,7 +37,7 @@ spec:
         - alert: RadarrHealthIssuesCritical
           expr: >-
             sum without (message, source, wikiurl) (radarr_system_health_issues{job="metrics-exporters-radarr-exporter", type="error"}) > 0
-          for: 15m
+          for: 1h
           labels:
             severity: critical
             component: media-management
