@@ -23,7 +23,7 @@ spec:
         - alert: ProwlarrHealthIssuesWarning
           expr: >-
             sum without (message, source, type, wikiurl) (prowlarr_system_health_issues{job="metrics-exporters-prowlarr-exporter", type!="error"}) > 0
-          for: 15m
+          for: 1h
           labels:
             severity: warning
             component: media-management
@@ -37,7 +37,7 @@ spec:
         - alert: ProwlarrHealthIssuesCritical
           expr: >-
             sum without (message, source, wikiurl) (prowlarr_system_health_issues{job="metrics-exporters-prowlarr-exporter", type="error"}) > 0
-          for: 15m
+          for: 1h
           labels:
             severity: critical
             component: media-management
