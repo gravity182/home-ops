@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sabnzbd-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: sabnzbd
+  interval: 1h
+  values:
+    controllers:
+      sabnzbd-exporter:
+        containers:
+          app:
+            image:
+              repository: msroest/sabnzbd_exporter
+              tag: 0.1.80
+            env:
+              SABNZBD_BASEURLS: "http://sabnzbd.default.svc.cluster.local:8080/sabnzbd"
+              SABNZBD_APIKEYS:
+                valueFrom:
+                  secretKeyRef:
+                    name: sabnzbd-exporter-secret
+                    key: SABNZBD_API_KEY
+            ports:
+              - name: metrics
+                containerPort: &sabPort 9387
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *sabPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *sabPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      metrics:
+        controller: sabnzbd-exporter
+        ports:
+          metrics:
+            port: 9387
+
+    serviceMonitor:
+      metrics:
+        enabled: true
+        service:
+          identifier: metrics
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s

@@ -5,7 +5,7 @@ metadata:
   name: bazarr
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/bazarr/app
+  path: ./kubernetes/apps/default/bazarr
   postBuild:
     substituteFrom:
       - name: cluster-secrets

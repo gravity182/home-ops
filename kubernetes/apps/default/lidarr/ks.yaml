@@ -5,7 +5,7 @@ metadata:
   name: lidarr
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/lidarr/app
+  path: ./kubernetes/apps/default/lidarr
   postBuild:
     substituteFrom:
       - name: cluster-secrets

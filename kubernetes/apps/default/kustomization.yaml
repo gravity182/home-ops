@@ -29,5 +29,4 @@ resources:
   - ./backrest/ks.yaml
   - ./bazarr/ks.yaml
   - ./glance/ks.yaml
-  - ./metrics-exporters/ks.yaml
   - ./grafana-dashboards/ks.yaml

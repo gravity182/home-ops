@@ -2,13 +2,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: metrics-exporters-radarr-rules
+  name: radarr-rules
 spec:
   groups:
-    - name: metrics-exporters.radarr.rules
+    - name: radarr.rules
       rules:
         - alert: RadarrSystemStatusNotOK
-          expr: radarr_system_status{job="metrics-exporters-radarr-exporter"} != 1
+          expr: radarr_system_status{job="radarr-exporter"} != 1
           for: 10m
           labels:
             severity: critical
@@ -22,7 +22,7 @@ spec:
 
         - alert: RadarrHealthIssuesWarning
           expr: >-
-            sum without (message, source, type, wikiurl) (radarr_system_health_issues{job="metrics-exporters-radarr-exporter", type!="error"}) > 0
+            sum without (message, source, type, wikiurl) (radarr_system_health_issues{job="radarr-exporter", type!="error"}) > 0
           for: 1h
           labels:
             severity: warning
@@ -36,7 +36,7 @@ spec:
 
         - alert: RadarrHealthIssuesCritical
           expr: >-
-            sum without (message, source, wikiurl) (radarr_system_health_issues{job="metrics-exporters-radarr-exporter", type="error"}) > 0
+            sum without (message, source, wikiurl) (radarr_system_health_issues{job="radarr-exporter", type="error"}) > 0
           for: 1h
           labels:
             severity: critical
@@ -50,7 +50,7 @@ spec:
 
         - alert: RadarrExporterScrape5xx
           expr: >-
-            increase(radarr_scrape_requests_total{job="metrics-exporters-radarr-exporter", code=~"5.."}[15m]) > 0
+            increase(radarr_scrape_requests_total{job="radarr-exporter", code=~"5.."}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -64,7 +64,7 @@ spec:
 
         - alert: RadarrExporterUnauthorized
           expr: >-
-            increase(radarr_scrape_requests_total{job="metrics-exporters-radarr-exporter", code=~"401|403"}[15m]) > 0
+            increase(radarr_scrape_requests_total{job="radarr-exporter", code=~"401|403"}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -77,7 +77,7 @@ spec:
               Radarr exporter received HTTP 401/403 from Radarr API in the last 15m: {{ $value }}. Check API key / auth settings.
 
         - alert: RadarrExporterScrapeSlow
-          expr: radarr_scrape_duration_seconds{job="metrics-exporters-radarr-exporter"} > 20
+          expr: radarr_scrape_duration_seconds{job="radarr-exporter"} > 20
           for: 10m
           labels:
             severity: warning
@@ -92,9 +92,9 @@ spec:
         - alert: RadarrBacklogForTwoWeeks
           expr: >-
             max without (__name__) (
-              (radarr_movie_missing_total{job="metrics-exporters-radarr-exporter"} > 0)
-              or (radarr_movie_wanted_total{job="metrics-exporters-radarr-exporter"} > 0)
-              or (radarr_movie_cutoff_unmet_total{job="metrics-exporters-radarr-exporter"} > 0)
+              (radarr_movie_missing_total{job="radarr-exporter"} > 0)
+              or (radarr_movie_wanted_total{job="radarr-exporter"} > 0)
+              or (radarr_movie_cutoff_unmet_total{job="radarr-exporter"} > 0)
             ) > 0
           for: 14d
           labels:
@@ -106,3 +106,29 @@ spec:
               Radarr backlog non-zero for 14 days
             description: >-
               Radarr reports a non-empty backlog for 14 days (missing/wanted/cutoff unmet).
+
+        - alert: RadarrDiskSpaceLowWarning
+          expr: radarr_rootfolder_freespace_bytes{job="radarr-exporter"} < (100 * 1024 * 1024 * 1024)
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: radarr
+          annotations:
+            summary: >-
+              Low disk space for Radarr storage
+            description: >-
+              {{ $labels.job }} {{ if $labels.path }}(path {{ $labels.path }}){{ end }} has only {{ $value | humanize1024 }} free (threshold 100GiB).
+
+        - alert: RadarrDiskSpaceLowCritical
+          expr: radarr_rootfolder_freespace_bytes{job="radarr-exporter"} < (20 * 1024 * 1024 * 1024)
+          for: 15m
+          labels:
+            severity: critical
+            component: media-management
+            app: radarr
+          annotations:
+            summary: >-
+              Critically low disk space for Radarr storage
+            description: >-
+              {{ $labels.job }} {{ if $labels.path }}(path {{ $labels.path }}){{ end }} has only {{ $value | humanize1024 }} free (threshold 20GiB).

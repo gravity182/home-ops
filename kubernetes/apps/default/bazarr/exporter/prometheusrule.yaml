@@ -2,13 +2,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: metrics-exporters-bazarr-rules
+  name: bazarr-rules
 spec:
   groups:
-    - name: metrics-exporters.bazarr.rules
+    - name: bazarr.rules
       rules:
         - alert: BazarrSystemStatusNotOK
-          expr: bazarr_system_status{job="metrics-exporters-bazarr-exporter"} != 1
+          expr: bazarr_system_status{job="bazarr-exporter"} != 1
           for: 10m
           labels:
             severity: critical
@@ -22,7 +22,7 @@ spec:
 
         - alert: BazarrHealthIssuesWarning
           expr: >-
-            sum without (issue, object) (bazarr_system_health_issues{job="metrics-exporters-bazarr-exporter"}) > 0
+            sum without (issue, object) (bazarr_system_health_issues{job="bazarr-exporter"}) > 0
           for: 1h
           labels:
             severity: warning
@@ -36,7 +36,7 @@ spec:
 
         - alert: BazarrExporterScrape5xx
           expr: >-
-            increase(bazarr_scrape_requests_total{job="metrics-exporters-bazarr-exporter", code=~"5.."}[15m]) > 0
+            increase(bazarr_scrape_requests_total{job="bazarr-exporter", code=~"5.."}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -50,7 +50,7 @@ spec:
 
         - alert: BazarrExporterUnauthorized
           expr: >-
-            increase(bazarr_scrape_requests_total{job="metrics-exporters-bazarr-exporter", code=~"401|403"}[15m]) > 0
+            increase(bazarr_scrape_requests_total{job="bazarr-exporter", code=~"401|403"}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -63,7 +63,7 @@ spec:
               Bazarr exporter received HTTP 401/403 from Bazarr API in the last 15m: {{ $value }}. Check API key / auth settings.
 
         - alert: BazarrExporterScrapeSlow
-          expr: bazarr_scrape_duration_seconds{job="metrics-exporters-bazarr-exporter"} > 20
+          expr: bazarr_scrape_duration_seconds{job="bazarr-exporter"} > 20
           for: 10m
           labels:
             severity: warning
@@ -75,11 +75,11 @@ spec:
             description: >-
               Last Bazarr exporter scrape took {{ $value | humanizeDuration }} (timeout is 30s).
 
-        - alert: BazarrBacklogForTwoWeeks
+        - alert: BazarrSubtitlesBacklog
           expr: >-
             max without (__name__) (
-              (bazarr_subtitles_missing_total{job="metrics-exporters-bazarr-exporter"} > 0)
-              or (bazarr_subtitles_wanted_total{job="metrics-exporters-bazarr-exporter"} > 0)
+              (bazarr_subtitles_missing_total{job="bazarr-exporter"} > 0)
+              or (bazarr_subtitles_wanted_total{job="bazarr-exporter"} > 0)
             ) > 0
           for: 14d
           labels:
@@ -88,6 +88,6 @@ spec:
             app: bazarr
           annotations:
             summary: >-
-              Bazarr backlog non-zero for 14 days
+              Bazarr subtitles backlog non-zero for 14 days
             description: >-
               Bazarr reports missing/wanted subtitles for 14 days.

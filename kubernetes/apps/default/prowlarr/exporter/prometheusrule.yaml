@@ -2,13 +2,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: metrics-exporters-prowlarr-rules
+  name: prowlarr-rules
 spec:
   groups:
-    - name: metrics-exporters.prowlarr.rules
+    - name: prowlarr.rules
       rules:
         - alert: ProwlarrSystemStatusNotOK
-          expr: prowlarr_system_status{job="metrics-exporters-prowlarr-exporter"} != 1
+          expr: prowlarr_system_status{job="prowlarr-exporter"} != 1
           for: 10m
           labels:
             severity: critical
@@ -22,7 +22,7 @@ spec:
 
         - alert: ProwlarrHealthIssuesWarning
           expr: >-
-            sum without (message, source, type, wikiurl) (prowlarr_system_health_issues{job="metrics-exporters-prowlarr-exporter", type!="error"}) > 0
+            sum without (message, source, type, wikiurl) (prowlarr_system_health_issues{job="prowlarr-exporter", type!="error"}) > 0
           for: 1h
           labels:
             severity: warning
@@ -36,7 +36,7 @@ spec:
 
         - alert: ProwlarrHealthIssuesCritical
           expr: >-
-            sum without (message, source, wikiurl) (prowlarr_system_health_issues{job="metrics-exporters-prowlarr-exporter", type="error"}) > 0
+            sum without (message, source, wikiurl) (prowlarr_system_health_issues{job="prowlarr-exporter", type="error"}) > 0
           for: 1h
           labels:
             severity: critical
@@ -48,22 +48,8 @@ spec:
             description: >-
               Prowlarr reports {{ $value }} health error(s).
 
-        - alert: ProwlarrNoEnabledIndexers
-          expr: prowlarr_indexer_enabled_total{job="metrics-exporters-prowlarr-exporter"} < 1
-          for: 10m
-          labels:
-            severity: critical
-            component: media-management
-            app: prowlarr
-          annotations:
-            summary: >-
-              Prowlarr has no enabled indexers
-            description: >-
-              Enabled indexer count is {{ $value }} (expected >= 1).
-
-        - alert: ProwlarrIndexerLatencyHigh
-          expr: >-
-            max_over_time(prowlarr_indexer_average_response_time_ms{job="metrics-exporters-prowlarr-exporter"}[15m]) > 15000
+        - alert: ProwlarrNoIndexersEnabled
+          expr: prowlarr_indexer_enabled_total{job="prowlarr-exporter"} < 1
           for: 30m
           labels:
             severity: warning
@@ -71,28 +57,13 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr indexer latency is high
+              No indexers enabled in Prowlarr
             description: >-
-              Max indexer average response time in the last 15m: {{ $value | humanizeDuration }}.
+              Prowlarr has no enabled indexers.
 
-        - alert: ProwlarrIndexerLatencyVeryHigh
+        - alert: ProwlarrIndexersSlowWarning
           expr: >-
-            max_over_time(prowlarr_indexer_average_response_time_ms{job="metrics-exporters-prowlarr-exporter"}[15m]) > 30000
-          for: 30m
-          labels:
-            severity: critical
-            component: media-management
-            app: prowlarr
-          annotations:
-            summary: >-
-              Prowlarr indexer latency is very high
-            description: >-
-              Max indexer average response time in the last 15m: {{ $value | humanizeDuration }}.
-
-        - alert: ProwlarrVipExpiring
-          expr: >-
-            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) < (30 * 24 * 60 * 60)
-            and max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) > 0
+            max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m]) > 15000
           for: 1h
           labels:
             severity: warning
@@ -100,32 +71,60 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr VIP expiring soon
+              Prowlarr indexers are slow
             description: >-
-              VIP for indexer {{ $labels.indexer }} expires in {{ $value | humanizeDuration }} (threshold 30d).
+              Prowlarr indexer response time exceeded 15s in the last 15m.
 
-        - alert: ProwlarrVipExpired
+        - alert: ProwlarrIndexersSlowCritical
           expr: >-
-            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="metrics-exporters-prowlarr-exporter"}) <= 0
-          for: 1h
+            max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m]) > 30000
+          for: 30m
           labels:
             severity: critical
             component: media-management
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr VIP expired
+              Prowlarr indexers are very slow
             description: >-
-              VIP for indexer {{ $labels.indexer }} is expired (expires_in_seconds={{ $value }}).
+              Prowlarr indexer response time exceeded 30s in the last 15m.
 
-        - alert: ProwlarrIndexerHighFailureRate
+        - alert: ProwlarrIndexerVipExpiringSoon
           expr: >-
-            (
-              sum(clamp_min(delta(prowlarr_indexer_failed_queries_total{job="metrics-exporters-prowlarr-exporter"}[15m]), 0))
+            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="prowlarr-exporter"}) < (30 * 24 * 60 * 60)
+            and max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="prowlarr-exporter"}) > 0
+          for: 6h
+          labels:
+            severity: warning
+            component: media-management
+            app: prowlarr
+          annotations:
+            summary: >-
+              Prowlarr indexer VIP expiring soon
+            description: >-
+              Indexer {{ $labels.indexer }} VIP expires in less than 30 days.
+
+        - alert: ProwlarrIndexerVipExpired
+          expr: >-
+            max by (indexer) (prowlarr_indexer_vip_expires_in_seconds{job="prowlarr-exporter"}) <= 0
+          for: 1h
+          labels:
+            severity: warning
+            component: media-management
+            app: prowlarr
+          annotations:
+            summary: >-
+              Prowlarr indexer VIP expired
+            description: >-
+              Indexer {{ $labels.indexer }} VIP has expired.
+
+        - alert: ProwlarrIndexerFailureRateHigh
+          expr: >-
+            clamp_min(sum(clamp_min(delta(prowlarr_indexer_failed_queries_total{job="prowlarr-exporter"}[15m]), 0)), 0)
               /
-              clamp_min(sum(clamp_min(delta(prowlarr_indexer_queries_total{job="metrics-exporters-prowlarr-exporter"}[15m]), 0)), 1)
-            ) > 0.3
-            and sum(clamp_min(delta(prowlarr_indexer_queries_total{job="metrics-exporters-prowlarr-exporter"}[15m]), 0)) > 0
+            clamp_min(sum(clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 0)), 1)
+            > 0.5
+            and sum(clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 0)) > 0
           for: 30m
           labels:
             severity: warning
@@ -133,13 +132,13 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr indexer failure rate > 30%
+              Prowlarr indexer failure rate high
             description: >-
-              Failed/total query ratio over 15m is {{ $value | humanizePercentage }} (threshold 30%).
+              More than 50% of indexer queries are failing in the last 15m.
 
         - alert: ProwlarrExporterScrape5xx
           expr: >-
-            increase(prowlarr_scrape_requests_total{job="metrics-exporters-prowlarr-exporter", code=~"5.."}[15m]) > 0
+            increase(prowlarr_scrape_requests_total{job="prowlarr-exporter", code=~"5.."}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -153,7 +152,7 @@ spec:
 
         - alert: ProwlarrExporterUnauthorized
           expr: >-
-            increase(prowlarr_scrape_requests_total{job="metrics-exporters-prowlarr-exporter", code=~"401|403"}[15m]) > 0
+            increase(prowlarr_scrape_requests_total{job="prowlarr-exporter", code=~"401|403"}[15m]) > 0
           for: 30m
           labels:
             severity: warning
@@ -166,7 +165,7 @@ spec:
               Prowlarr exporter received HTTP 401/403 from Prowlarr API in the last 15m: {{ $value }}. Check API key / auth settings.
 
         - alert: ProwlarrExporterScrapeSlow
-          expr: prowlarr_scrape_duration_seconds{job="metrics-exporters-prowlarr-exporter"} > 20
+          expr: prowlarr_scrape_duration_seconds{job="prowlarr-exporter"} > 20
           for: 10m
           labels:
             severity: warning

@@ -1,0 +1,118 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: qbittorrent-rules
+spec:
+  groups:
+    - name: qbittorrent.rules
+      rules:
+        - alert: QbittorrentDisconnected
+          expr: qbittorrent_transfer_connection_status{job="qbittorrent-exporter", connection_status!="connected"} == 1
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent disconnected
+            description: >-
+              qBittorrent connection status is not connected.
+
+        - alert: QbittorrentTorrentErrors
+          expr: qbittorrent_torrent_states{job="qbittorrent-exporter", name="error"} > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent torrent errors present
+            description: >-
+              qBittorrent reports torrents in error state.
+
+        - alert: QbittorrentMissingFiles
+          expr: qbittorrent_torrent_states{job="qbittorrent-exporter", name="missingFiles"} > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent missing files
+            description: >-
+              qBittorrent reports torrents with missing files.
+
+        - alert: QbittorrentNoPeers
+          expr: >-
+            qbittorrent_global_total_peer_connections{job="qbittorrent-exporter"} == 0
+            and on (job) qbittorrent_transfer_connection_status{job="qbittorrent-exporter", connection_status="connected"} == 1
+            and on (job) qbittorrent_torrent_states{job="qbittorrent-exporter", name=~"downloading|stalledDL|queuedDL|metaDL"} > 0
+          for: 2h
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent has no peers
+            description: >-
+              qBittorrent has active torrents but no peer connections.
+
+        - alert: QbittorrentStalledDownloads
+          expr: qbittorrent_torrent_states{job="qbittorrent-exporter", name="stalledDL"} > 0
+          for: 6h
+          labels:
+            severity: info
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent stalled downloads
+            description: >-
+              qBittorrent has stalled downloads for 6 hours.
+
+        - alert: QbittorrentDhtNodesZero
+          expr: >-
+            qbittorrent_global_dht_nodes{job="qbittorrent-exporter"} == 0
+            and on (job) qbittorrent_transfer_connection_status{job="qbittorrent-exporter", connection_status="connected"} == 1
+            and on (job) qbittorrent_torrent_states{job="qbittorrent-exporter", name=~"downloading|stalledDL|queuedDL|metaDL"} > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              qBittorrent DHT nodes zero
+            description: >-
+              qBittorrent has zero DHT nodes while downloads are active.
+
+        - alert: QbittorrentDiskSpaceLowWarning
+          expr: qbittorrent_global_free_space_on_disk_bytes{job="qbittorrent-exporter"} < (100 * 1024 * 1024 * 1024)
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              Low disk space for qBittorrent storage
+            description: >-
+              {{ $labels.job }} has only {{ $value | humanize1024 }} free (threshold 100GiB).
+
+        - alert: QbittorrentDiskSpaceLowCritical
+          expr: qbittorrent_global_free_space_on_disk_bytes{job="qbittorrent-exporter"} < (20 * 1024 * 1024 * 1024)
+          for: 15m
+          labels:
+            severity: critical
+            component: media-management
+            app: qbittorrent
+          annotations:
+            summary: >-
+              Critically low disk space for qBittorrent storage
+            description: >-
+              {{ $labels.job }} has only {{ $value | humanize1024 }} free (threshold 20GiB).
