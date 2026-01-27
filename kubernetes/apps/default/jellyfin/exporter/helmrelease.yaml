@@ -1,0 +1,85 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jellyfin-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: jellyfin
+  interval: 1h
+  values:
+    controllers:
+      jellyfin-exporter:
+        containers:
+          app:
+            image:
+              repository: rebelcore/jellyfin-exporter
+              tag: v1.3.9
+            args:
+              - "--jellyfin.address=http://jellyfin.default.svc.cluster.local:8096"
+              - "--jellyfin.token=$(JELLYFIN_API_KEY)"
+            env:
+              JELLYFIN_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: jellyfin-exporter-secret
+                    key: JELLYFIN_API_KEY
+            ports:
+              - name: metrics
+                containerPort: &jellyPort 9594
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *jellyPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *jellyPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      metrics:
+        controller: jellyfin-exporter
+        ports:
+          metrics:
+            port: 9594
+
+    serviceMonitor:
+      metrics:
+        enabled: true
+        service:
+          identifier: metrics
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s

@@ -1,0 +1,53 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sabnzbd-rules
+spec:
+  groups:
+    - name: sabnzbd.rules
+      rules:
+        - alert: SabnzbdQueueStalled
+          expr: >-
+            sabnzbd_queue_remaining_bytes{job="sabnzbd-exporter"} > 0
+            and sabnzbd_queue_download_rate_bytes_per_second{job="sabnzbd-exporter"} == 0
+            and sabnzbd_paused{job="sabnzbd-exporter"} == 0
+          for: 30m
+          labels:
+            severity: warning
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd queue stalled
+            description: >-
+              SABnzbd has items in queue but download speed is zero while not paused.
+
+        - alert: SabnzbdQueueSlow
+          expr: >-
+            sabnzbd_queue_size{job="sabnzbd-exporter"} > 0
+            and sabnzbd_paused{job="sabnzbd-exporter"} == 0
+            and sabnzbd_queue_download_rate_bytes_per_second{job="sabnzbd-exporter"} < (1 * 1024 * 1024)
+          for: 6h
+          labels:
+            severity: info
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd queue slow
+            description: >-
+              SABnzbd downloads are below 1 MiB/s for 6 hours while queue has items.
+
+        - alert: SabnzbdPaused
+          expr: sabnzbd_paused{job="sabnzbd-exporter"} == 1
+          for: 6h
+          labels:
+            severity: info
+            component: media-management
+            app: sabnzbd
+          annotations:
+            summary: >-
+              SABnzbd paused for 6 hours
+            description: >-
+              SABnzbd has been paused for at least 6 hours.

@@ -1,0 +1,82 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lidarr-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: lidarr
+  interval: 1h
+  values:
+    controllers:
+      lidarr-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.3.0
+            args:
+              - lidarr
+            env:
+              PORT: "9707"
+              URL: "http://lidarr.default.svc.cluster.local:8686"
+              APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: lidarr-exporter-secret
+                    key: LIDARR_API_KEY
+            probes: &exportarrProbes
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &exportarrPort 9707
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *exportarrPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources: &exportarrResources
+              requests:
+                cpu: 10m
+                memory: 64Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      metrics:
+        controller: lidarr-exporter
+        ports:
+          metrics:
+            port: 9707
+
+    serviceMonitor:
+      metrics:
+        enabled: true
+        service:
+          identifier: metrics
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s

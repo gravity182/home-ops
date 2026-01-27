@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: qbittorrent-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: qbittorrent
+  interval: 1h
+  values:
+    controllers:
+      qbittorrent-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/martabal/qbittorrent-exporter
+              tag: v1.13.2
+            env:
+              QBITTORRENT_BASE_URL: "http://qbittorrent.default.svc.cluster.local:8080"
+              EXPORTER_PORT: "8090"
+            ports:
+              - name: metrics
+                containerPort: &qbitPort 8090
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *qbitPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /metrics
+                    port: *qbitPort
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      metrics:
+        controller: qbittorrent-exporter
+        ports:
+          metrics:
+            port: 8090
+
+    serviceMonitor:
+      metrics:
+        enabled: true
+        service:
+          identifier: metrics
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 2m
+            scrapeTimeout: 30s
