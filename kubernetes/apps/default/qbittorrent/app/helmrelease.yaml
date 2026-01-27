@@ -31,7 +31,7 @@ spec:
                 echo "VueTorrent ${VUETORRENT_VERSION} installed"
             env:
               # renovate: datasource=github-releases depName=VueTorrent/VueTorrent
-              VUETORRENT_VERSION: v2.24.2
+              VUETORRENT_VERSION: v2.31.3
         containers:
           app:
             image:
