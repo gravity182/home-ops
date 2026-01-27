@@ -25,7 +25,7 @@ spec:
               PROWLARR__APP__THEME: dark
               PROWLARR__AUTH__METHOD: External
               PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
-              PROWLARR__LOG__LEVEL: &log-level info
+              PROWLARR__LOG__LEVEL: &log-level debug
               PROWLARR__LOG__CONSOLELEVEL: *log-level
               PROWLARR__LOG__CONSOLEFORMAT: Clef
               PROWLARR__LOG__DBENABLED: "False"
