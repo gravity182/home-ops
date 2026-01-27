@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: lidarr.rules
+      labels:
+        namespace: default
+        app: lidarr
       rules:
         - alert: LidarrSystemStatusNotOK
           expr: lidarr_system_status{job="lidarr-exporter"} != 1

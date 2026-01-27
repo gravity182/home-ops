@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: qbittorrent.rules
+      labels:
+        namespace: default
+        app: qbittorrent
       rules:
         - alert: QbittorrentDisconnected
           expr: qbittorrent_transfer_connection_status{job="qbittorrent-exporter", connection_status!="connected"} == 1

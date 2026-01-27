@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: sabnzbd.rules
+      labels:
+        namespace: default
+        app: sabnzbd
       rules:
         - alert: SabnzbdQueueStalled
           expr: >-
