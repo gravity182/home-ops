@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: cert-manager.rules
+      labels:
+        namespace: cert-manager
+        app: cert-manager
       rules:
         - alert: CertManagerAbsent
           expr: |-
@@ -18,6 +21,9 @@ spec:
             severity: critical
 
     - name: certificates
+      labels:
+        namespace: cert-manager
+        app: cert-manager
       rules:
         - alert: CertManagerCertExpirySoon
           expr: |-

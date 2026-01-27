@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: bazarr.rules
+      labels:
+        namespace: default
+        app: bazarr
       rules:
         - alert: BazarrSystemStatusNotOK
           expr: bazarr_system_status{job="bazarr-exporter"} != 1

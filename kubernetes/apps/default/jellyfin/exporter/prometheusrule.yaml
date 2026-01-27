@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: jellyfin.rules
+      labels:
+        namespace: default
+        app: jellyfin
       rules:
         - alert: JellyfinCollectorFailed
           expr: jellyfin_scrape_collector_success{job="jellyfin-exporter"} == 0

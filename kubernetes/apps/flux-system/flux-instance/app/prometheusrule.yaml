@@ -7,6 +7,9 @@ metadata:
 spec:
   groups:
     - name: flux-instance.rules
+      labels:
+        namespace: flux-system
+        app: flux-instance
       rules:
         - alert: FluxInstanceAbsent
           expr: |-

@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: radarr.rules
+      labels:
+        namespace: default
+        app: radarr
       rules:
         - alert: RadarrSystemStatusNotOK
           expr: radarr_system_status{job="radarr-exporter"} != 1

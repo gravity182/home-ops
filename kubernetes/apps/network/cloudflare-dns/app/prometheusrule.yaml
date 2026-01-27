@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: external-dns.rules
+      labels:
+        namespace: network
+        app: cloudflare-dns
       rules:
         - alert: ExternalDNSStale
           expr: |-

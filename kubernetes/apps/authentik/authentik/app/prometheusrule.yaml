@@ -8,6 +8,9 @@ spec:
   groups:
     - name: authentik.rules
       interval: 30s
+      labels:
+        namespace: authentik
+        app: authentik
       rules:
         - alert: AuthentikHighErrorRate
           expr: |

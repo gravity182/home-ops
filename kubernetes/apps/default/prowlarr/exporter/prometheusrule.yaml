@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: prowlarr.rules
+      labels:
+        namespace: default
+        app: prowlarr
       rules:
         - alert: ProwlarrSystemStatusNotOK
           expr: prowlarr_system_status{job="prowlarr-exporter"} != 1

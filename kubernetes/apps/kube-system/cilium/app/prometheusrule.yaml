@@ -8,6 +8,9 @@ spec:
   groups:
     - name: cilium.rules
       interval: 30s
+      labels:
+        namespace: kube-system
+        app: cilium
       rules:
         - alert: CiliumAgentControllersFailingHigh
           expr: |

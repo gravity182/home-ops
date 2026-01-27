@@ -6,6 +6,9 @@ metadata:
 spec:
   groups:
     - name: sonarr.rules
+      labels:
+        namespace: default
+        app: sonarr
       rules:
         - alert: SonarrSystemStatusNotOK
           expr: sonarr_system_status{job="sonarr-exporter"} != 1
