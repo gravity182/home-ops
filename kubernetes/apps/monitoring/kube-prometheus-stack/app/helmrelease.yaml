@@ -256,10 +256,10 @@ spec:
       resources:
         requests:
           memory: 32Mi
-          cpu: 10m
+          cpu: 50m
         limits:
           memory: 64Mi
-          cpu: 100m
+          cpu: 300m
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
       resources:
