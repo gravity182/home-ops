@@ -8,12 +8,6 @@ resources:
   - ./ocirepository.yaml
   - ./secret.sops.yaml
 configMapGenerator:
-  - name: radarr-scripts
-    files:
-      - jellyfin-notify.sh=../../common/resources/jellyfin-notify.sh
-    options:
-      annotations:
-        kustomize.toolkit.fluxcd.io/substitute: disabled
   - name: radarr-jellyfin-config
     literals:
       - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
