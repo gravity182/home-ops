@@ -3,6 +3,8 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cert-manager
+  annotations:
+    reconcile.fluxcd.io/requestedAt: "2026-01-27T14:25:00Z"
 spec:
   chartRef:
     kind: OCIRepository
