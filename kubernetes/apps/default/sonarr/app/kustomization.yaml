@@ -8,7 +8,7 @@ resources:
   - ./helmrelease.yaml
   - ./secret.sops.yaml
 configMapGenerator:
-  - name: sonarr-jellyfin-config
+  - name: sonarr-jellyfin-notify-script-config
     literals:
       - JELLYFIN_URL=http://jellyfin.default.svc.cluster.local:8096
       - JELLYFIN_LIBRARY_ID=767bffe4f11c93ef34b805451a696a4e

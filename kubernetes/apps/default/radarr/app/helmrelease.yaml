@@ -37,7 +37,7 @@ spec:
               TZ: Europe/Moscow
             envFrom:
               - secret: radarr-jellyfin-api
-              - configMap: radarr-jellyfin-config
+              - configMap: radarr-jellyfin-notify-script-config
             probes:
               liveness: &probes
                 enabled: true
