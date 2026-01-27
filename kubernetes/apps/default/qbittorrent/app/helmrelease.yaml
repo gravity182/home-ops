@@ -26,9 +26,12 @@ spec:
               - -c
               - |
                 set -e
-                curl -sSfL "https://github.com/VueTorrent/VueTorrent/releases/download/${VUETORRENT_VERSION}/vuetorrent.zip" -o /tmp/vuetorrent.zip
+                curl -sSfL "https://github.com/VueTorrent/VueTorrent/releases/download/$${VUETORRENT_VERSION}/vuetorrent.zip" -o /tmp/vuetorrent.zip
                 unzip -qn /tmp/vuetorrent.zip -d /
-                echo "VueTorrent ${VUETORRENT_VERSION} installed"
+                echo "VueTorrent $${VUETORRENT_VERSION} installed"
+            env:
+              # renovate: datasource=github-releases depName=VueTorrent/VueTorrent
+              VUETORRENT_VERSION: v2.24.2
         containers:
           app:
             image:
