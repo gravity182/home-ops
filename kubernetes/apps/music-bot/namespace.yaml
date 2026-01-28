@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: music-bot
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
