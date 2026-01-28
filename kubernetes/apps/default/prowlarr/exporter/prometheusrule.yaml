@@ -64,9 +64,9 @@ spec:
             description: >-
               Prowlarr has no enabled indexers.
 
-        - alert: ProwlarrIndexersSlowWarning
+        - alert: ProwlarrIndexersSlow
           expr: >-
-            max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m]) > 15000
+            max by (indexer) (max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m])) > 15000
           for: 1h
           labels:
             severity: warning
@@ -74,23 +74,9 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr indexers are slow
+              Prowlarr indexer {{ $labels.indexer }} is slow
             description: >-
-              Prowlarr indexer response time exceeded 15s in the last 15m.
-
-        - alert: ProwlarrIndexersSlowCritical
-          expr: >-
-            max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m]) > 30000
-          for: 30m
-          labels:
-            severity: critical
-            component: media-management
-            app: prowlarr
-          annotations:
-            summary: >-
-              Prowlarr indexers are very slow
-            description: >-
-              Prowlarr indexer response time exceeded 30s in the last 15m.
+              Prowlarr indexer {{ $labels.indexer }} response time peaked at {{ printf "%.0f" $value }}ms (> 15000ms) in the last 15m.
 
         - alert: ProwlarrIndexerVipExpiringSoon
           expr: >-
