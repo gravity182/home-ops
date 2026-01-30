@@ -23,23 +23,8 @@ spec:
             description: >-
               sonarr_system_status is {{ $value }} (expected 1). Check Sonarr UI → System → Status.
 
-        - alert: SonarrHealthIssuesWarning
-          expr: >-
-            sum without (message, source, type, wikiurl) (sonarr_system_health_issues{job="sonarr-exporter", type!="error"}) > 0
-          for: 1h
-          labels:
-            severity: warning
-            component: media-management
-            app: sonarr
-          annotations:
-            summary: >-
-              Sonarr health issues present
-            description: >-
-              Sonarr reports {{ $value }} non-error health issue(s).
-
         - alert: SonarrHealthIssuesCritical
-          expr: >-
-            sum without (message, source, wikiurl) (sonarr_system_health_issues{job="sonarr-exporter", type="error"}) > 0
+          expr: sonarr_system_health_issues{job="sonarr-exporter", type="error"} > 0
           for: 1h
           labels:
             severity: critical
@@ -47,9 +32,9 @@ spec:
             app: sonarr
           annotations:
             summary: >-
-              Sonarr health errors present
+              Sonarr health error: {{ $labels.source }}
             description: >-
-              Sonarr reports {{ $value }} health error(s).
+              {{ $labels.message }}{{ if $labels.wikiurl }} - See: {{ $labels.wikiurl }}{{ end }}
 
         - alert: SonarrExporterScrape5xx
           expr: >-

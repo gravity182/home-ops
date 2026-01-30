@@ -21,7 +21,7 @@ spec:
             summary: >-
               qBittorrent disconnected
             description: >-
-              qBittorrent connection status is not connected.
+              qBittorrent connection status is {{ $labels.connection_status }}.
 
         - alert: QbittorrentTorrentErrors
           expr: qbittorrent_torrent_states{job="qbittorrent-exporter", name="error"} > 0
@@ -34,7 +34,7 @@ spec:
             summary: >-
               qBittorrent torrent errors present
             description: >-
-              qBittorrent reports torrents in error state.
+              qBittorrent reports {{ $value }} torrent(s) in error state.
 
         - alert: QbittorrentMissingFiles
           expr: qbittorrent_torrent_states{job="qbittorrent-exporter", name="missingFiles"} > 0
@@ -47,7 +47,7 @@ spec:
             summary: >-
               qBittorrent missing files
             description: >-
-              qBittorrent reports torrents with missing files.
+              qBittorrent reports {{ $value }} torrent(s) with missing files.
 
         - alert: QbittorrentNoPeers
           expr: >-
@@ -76,7 +76,7 @@ spec:
             summary: >-
               qBittorrent stalled downloads
             description: >-
-              qBittorrent has stalled downloads for 6 hours.
+              qBittorrent has {{ $value }} stalled download(s) for 6 hours.
 
         - alert: QbittorrentDhtNodesZero
           expr: >-
