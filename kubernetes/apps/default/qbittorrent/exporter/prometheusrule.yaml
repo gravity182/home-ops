@@ -93,29 +93,3 @@ spec:
               qBittorrent DHT nodes zero
             description: >-
               qBittorrent has zero DHT nodes while downloads are active.
-
-        - alert: QbittorrentDiskSpaceLowWarning
-          expr: qbittorrent_global_free_space_on_disk_bytes{job="qbittorrent-exporter"} < (100 * 1024 * 1024 * 1024)
-          for: 30m
-          labels:
-            severity: warning
-            component: media-management
-            app: qbittorrent
-          annotations:
-            summary: >-
-              Low disk space for qBittorrent storage
-            description: >-
-              {{ $labels.job }} has only {{ $value | humanize1024 }} free (threshold 100GiB).
-
-        - alert: QbittorrentDiskSpaceLowCritical
-          expr: qbittorrent_global_free_space_on_disk_bytes{job="qbittorrent-exporter"} < (20 * 1024 * 1024 * 1024)
-          for: 15m
-          labels:
-            severity: critical
-            component: media-management
-            app: qbittorrent
-          annotations:
-            summary: >-
-              Critically low disk space for qBittorrent storage
-            description: >-
-              {{ $labels.job }} has only {{ $value | humanize1024 }} free (threshold 20GiB).
