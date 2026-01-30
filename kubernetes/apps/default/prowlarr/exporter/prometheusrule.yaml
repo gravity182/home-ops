@@ -23,23 +23,8 @@ spec:
             description: >-
               prowlarr_system_status is {{ $value }} (expected 1). Check Prowlarr UI → System → Status.
 
-        - alert: ProwlarrHealthIssuesWarning
-          expr: >-
-            sum without (message, source, type, wikiurl) (prowlarr_system_health_issues{job="prowlarr-exporter", type!="error"}) > 0
-          for: 1h
-          labels:
-            severity: warning
-            component: media-management
-            app: prowlarr
-          annotations:
-            summary: >-
-              Prowlarr health issues present
-            description: >-
-              Prowlarr reports {{ $value }} non-error health issue(s).
-
         - alert: ProwlarrHealthIssuesCritical
-          expr: >-
-            sum without (message, source, wikiurl) (prowlarr_system_health_issues{job="prowlarr-exporter", type="error"}) > 0
+          expr: prowlarr_system_health_issues{job="prowlarr-exporter", type="error"} > 0
           for: 1h
           labels:
             severity: critical
@@ -47,9 +32,9 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr health errors present
+              Prowlarr health error: {{ $labels.source }}
             description: >-
-              Prowlarr reports {{ $value }} health error(s).
+              {{ $labels.message }}{{ if $labels.wikiurl }} - See: {{ $labels.wikiurl }}{{ end }}
 
         - alert: ProwlarrNoIndexersEnabled
           expr: prowlarr_indexer_enabled_total{job="prowlarr-exporter"} < 1
@@ -64,7 +49,7 @@ spec:
             description: >-
               Prowlarr has no enabled indexers.
 
-        - alert: ProwlarrIndexersSlow
+        - alert: ProwlarrIndexerSlow
           expr: >-
             max by (indexer) (max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m])) > 15000
           for: 1h
@@ -109,11 +94,12 @@ spec:
 
         - alert: ProwlarrIndexerFailureRateHigh
           expr: >-
-            clamp_min(sum(clamp_min(delta(prowlarr_indexer_failed_queries_total{job="prowlarr-exporter"}[15m]), 0)), 0)
+            (
+              clamp_min(delta(prowlarr_indexer_failed_queries_total{job="prowlarr-exporter"}[15m]), 0)
               /
-            clamp_min(sum(clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 0)), 1)
-            > 0.5
-            and sum(clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 0)) > 0
+              clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 1)
+            ) > 0.5
+            and clamp_min(delta(prowlarr_indexer_queries_total{job="prowlarr-exporter"}[15m]), 0) > 0
           for: 30m
           labels:
             severity: warning
@@ -121,9 +107,9 @@ spec:
             app: prowlarr
           annotations:
             summary: >-
-              Prowlarr indexer failure rate high
+              Prowlarr indexer {{ $labels.indexer }} failure rate high
             description: >-
-              More than 50% of indexer queries are failing in the last 15m.
+              Indexer {{ $labels.indexer }} has {{ printf "%.0f" (mul $value 100) }}% query failure rate in the last 15m.
 
         - alert: ProwlarrExporterScrape5xx
           expr: >-

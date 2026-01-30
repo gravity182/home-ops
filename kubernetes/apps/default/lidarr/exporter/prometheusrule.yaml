@@ -23,23 +23,8 @@ spec:
             description: >-
               lidarr_system_status is {{ $value }} (expected 1). Check Lidarr UI → System → Status.
 
-        - alert: LidarrHealthIssuesWarning
-          expr: >-
-            sum without (message, source, type, wikiurl) (lidarr_system_health_issues{job="lidarr-exporter", type!="error"}) > 0
-          for: 1h
-          labels:
-            severity: warning
-            component: media-management
-            app: lidarr
-          annotations:
-            summary: >-
-              Lidarr health issues present
-            description: >-
-              Lidarr reports {{ $value }} non-error health issue(s).
-
         - alert: LidarrHealthIssuesCritical
-          expr: >-
-            sum without (message, source, wikiurl) (lidarr_system_health_issues{job="lidarr-exporter", type="error"}) > 0
+          expr: lidarr_system_health_issues{job="lidarr-exporter", type="error"} > 0
           for: 1h
           labels:
             severity: critical
@@ -47,9 +32,9 @@ spec:
             app: lidarr
           annotations:
             summary: >-
-              Lidarr health errors present
+              Lidarr health error: {{ $labels.source }}
             description: >-
-              Lidarr reports {{ $value }} health error(s).
+              {{ $labels.message }}{{ if $labels.wikiurl }} - See: {{ $labels.wikiurl }}{{ end }}
 
         - alert: LidarrExporterScrape5xx
           expr: >-

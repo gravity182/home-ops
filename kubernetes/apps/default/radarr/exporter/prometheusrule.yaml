@@ -23,23 +23,8 @@ spec:
             description: >-
               radarr_system_status is {{ $value }} (expected 1). Check Radarr UI → System → Status.
 
-        - alert: RadarrHealthIssuesWarning
-          expr: >-
-            sum without (message, source, type, wikiurl) (radarr_system_health_issues{job="radarr-exporter", type!="error"}) > 0
-          for: 1h
-          labels:
-            severity: warning
-            component: media-management
-            app: radarr
-          annotations:
-            summary: >-
-              Radarr health issues present
-            description: >-
-              Radarr reports {{ $value }} non-error health issue(s).
-
         - alert: RadarrHealthIssuesCritical
-          expr: >-
-            sum without (message, source, wikiurl) (radarr_system_health_issues{job="radarr-exporter", type="error"}) > 0
+          expr: radarr_system_health_issues{job="radarr-exporter", type="error"} > 0
           for: 1h
           labels:
             severity: critical
@@ -47,9 +32,9 @@ spec:
             app: radarr
           annotations:
             summary: >-
-              Radarr health errors present
+              Radarr health error: {{ $labels.source }}
             description: >-
-              Radarr reports {{ $value }} health error(s).
+              {{ $labels.message }}{{ if $labels.wikiurl }} - See: {{ $labels.wikiurl }}{{ end }}
 
         - alert: RadarrExporterScrape5xx
           expr: >-

@@ -23,20 +23,6 @@ spec:
             description: >-
               bazarr_system_status is {{ $value }} (expected 1). Check Bazarr UI → System → Status.
 
-        - alert: BazarrHealthIssuesWarning
-          expr: >-
-            sum without (issue, object) (bazarr_system_health_issues{job="bazarr-exporter"}) > 0
-          for: 1h
-          labels:
-            severity: warning
-            component: media-management
-            app: bazarr
-          annotations:
-            summary: >-
-              Bazarr health issues present
-            description: >-
-              Bazarr reports {{ $value }} health issue(s).
-
         - alert: BazarrExporterScrape5xx
           expr: >-
             increase(bazarr_scrape_requests_total{job="bazarr-exporter", code=~"5.."}[15m]) > 0
