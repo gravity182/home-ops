@@ -13,4 +13,3 @@ resources:
   - ./intel-gpu-resource-driver/ks.yaml
   - ./metrics-server/ks.yaml
   - ./reloader/ks.yaml
-  - ./arp-announce/ks.yaml

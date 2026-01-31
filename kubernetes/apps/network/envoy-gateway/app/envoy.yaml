@@ -12,6 +12,15 @@ spec:
     kubernetes:
       envoyDeployment:
         replicas: 1
+        patch:
+          type: StrategicMerge
+          value:
+            spec:
+              template:
+                spec:
+                  # TODO: Switch back to Cilium VIP (router issue workaround)
+                  hostNetwork: true
+                  dnsPolicy: ClusterFirstWithHostNet
         container:
           imageRepository: mirror.gcr.io/envoyproxy/envoy
           resources:
@@ -20,7 +29,7 @@ spec:
             limits:
               memory: 1Gi
       envoyService:
-        externalTrafficPolicy: Local
+        type: ClusterIP
   shutdown:
     drainTimeout: 180s
   telemetry:
@@ -47,16 +56,7 @@ metadata:
   name: envoy-internal
 spec:
   gatewayClassName: envoy
-  infrastructure:
-    annotations:
-      lbipam.cilium.io/ips: "192.168.3.102"
   listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Same
     - name: https
       protocol: HTTPS
       port: 443
@@ -91,6 +91,7 @@ spec:
       envoyService:
         type: NodePort
         externalTrafficPolicy: Local
+        # TODO: Switch back to Cilium VIP (router issue workaround)
         patch:
           type: StrategicMerge
           value:
@@ -99,6 +100,7 @@ spec:
                 - name: https
                   port: 443
                   nodePort: 30443
+                  protocol: TCP
                 - name: http
                   port: 80
                   nodePort: 30080
@@ -208,9 +210,6 @@ metadata:
 spec:
   parentRefs:
     - name: envoy-external
-      namespace: network
-      sectionName: http
-    - name: envoy-internal
       namespace: network
       sectionName: http
   rules:
