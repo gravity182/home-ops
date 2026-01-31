@@ -14,6 +14,9 @@ spec:
   interval: 1h
   # https://github.com/gabe565/charts/blob/main/charts/adguard-home/values.yaml
   values:
+    # TODO: Switch back to Cilium VIP (router issue workaround)
+    hostNetwork: true
+
     image:
       repository: adguard/adguardhome
       tag: v0.107.71
@@ -28,11 +31,9 @@ spec:
             port: 3000
       dns-tcp:
         enabled: true
-        type: LoadBalancer
-        externalTrafficPolicy: Local
-        annotations:
-          lbipam.cilium.io/ips: "192.168.3.110"
-          lbipam.cilium.io/sharing-key: adguard-home-dns
+        type: ClusterIP
+        externalTrafficPolicy: ""
+        annotations: {}
         ports:
           dns-tcp:
             enabled: true
@@ -41,11 +42,9 @@ spec:
             enabled: false
       dns-udp:
         enabled: true
-        type: LoadBalancer
-        externalTrafficPolicy: Local
-        annotations:
-          lbipam.cilium.io/ips: "192.168.3.110"
-          lbipam.cilium.io/sharing-key: adguard-home-dns
+        type: ClusterIP
+        externalTrafficPolicy: ""
+        annotations: {}
         ports:
           dns-udp:
             enabled: true
@@ -84,7 +83,7 @@ spec:
       theme: auto
       dns:
         bind_hosts:
-          - 0.0.0.0
+          - 192.168.3.26
         port: 53
         anonymize_client_ip: false
         ratelimit: 20
@@ -222,10 +221,10 @@ spec:
         safebrowsing_block_host: standard-block.dns.adguard.com
         rewrites:
           - domain: ${SECRET_DOMAIN}
-            answer: 192.168.3.102
+            answer: 192.168.3.26
             enabled: true
           - domain: '*.${SECRET_DOMAIN}'
-            answer: 192.168.3.102
+            answer: 192.168.3.26
             enabled: true
         safe_fs_patterns:
           - /opt/adguardhome/work/data/userfilters/*
