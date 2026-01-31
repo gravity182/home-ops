@@ -26,6 +26,8 @@ spec:
                 value: Europe/Moscow
               - name: DATA_DIR
                 value: /data
+              - name: MEDIA_DIR
+                value: /media
               - name: YTDLP_COOKIE_FILE
                 value: /run/secrets/ytdlp-cookies/cookies.txt
               - name: VALID_DS_DIAG_LEVEL
@@ -76,9 +78,17 @@ spec:
       data:
         enabled: true
         type: persistentVolumeClaim
-        existingClaim: music-bot-media
+        storageClass: openebs-hostpath
+        size: 2Gi
+        accessMode: ReadWriteOnce
         globalMounts:
           - path: /data
+      media:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: music-bot-media
+        globalMounts:
+          - path: /media
       cookies:
         enabled: true
         type: secret

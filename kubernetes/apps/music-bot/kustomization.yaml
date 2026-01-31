@@ -9,5 +9,5 @@ components:
 resources:
   - ./namespace.yaml
   - ./ghcr-secret.sops.yaml
-  - ./data-pvc.yaml
+  - ./media-pvc.yaml
   - ./bot/ks.yaml
