@@ -54,7 +54,7 @@ spec:
             max by (indexer) (max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m])) > 15000
           for: 1h
           labels:
-            severity: warning
+            severity: info
             component: media-management
             app: prowlarr
           annotations:
