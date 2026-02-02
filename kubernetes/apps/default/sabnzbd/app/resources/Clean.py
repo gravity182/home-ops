@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SABnzbd pre-queue script: cleans up the NZB/job name (removes common bot/appended suffixes) before download starts.
+# Configure as "Pre-queue user script" in SAB (Config > Switches) to run for every incoming job.
 
 ##################################################################
 ### SABnzbd - Clean NZB Renamer                                 ##

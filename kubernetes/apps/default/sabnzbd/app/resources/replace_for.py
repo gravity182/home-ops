@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SABnzbd post-processing script: renames files in the completed job folder by replacing "_" with "."
+# Assign this script to a SAB category (Config > Categories) to run automatically after download/unpack.
 
 ##################################################################
 ### SABnzbd - Replace underscores with dots                     ##
