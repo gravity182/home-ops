@@ -109,7 +109,7 @@ spec:
             summary: >-
               Prowlarr indexer {{ $labels.indexer }} failure rate high
             description: >-
-              Indexer {{ $labels.indexer }} has {{ printf "%.0f" (mul $value 100) }}% query failure rate in the last 15m.
+              Indexer {{ $labels.indexer }} has {{ $value | humanizePercentage }} query failure rate in the last 15m.
 
         - alert: ProwlarrExporterScrape5xx
           expr: >-
