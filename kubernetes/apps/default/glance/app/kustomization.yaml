@@ -38,6 +38,8 @@ configMapGenerator:
     files:
       - ./icons/adguard-home-light.svg
       - ./icons/authentik-light.svg
+      - ./icons/drunkenslug.png
+      - ./icons/easynews.png
       - ./icons/grafana-light.svg
       - ./icons/jellyfin-light.svg
       - ./icons/lidarr-light.svg
@@ -46,6 +48,7 @@ configMapGenerator:
       - ./icons/prowlarr-light.svg
       - ./icons/qbittorrent-light.svg
       - ./icons/radarr-light.svg
+      - ./icons/rutracker.png
       - ./icons/sabnzbd-light.svg
       - ./icons/slskd-light.svg
       - ./icons/sonarr-light.svg
