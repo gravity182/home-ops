@@ -116,12 +116,12 @@ spec:
                   {{- if .Labels.daemonset }}{{ "\n" }}ds: {{ .Labels.daemonset }}{{- end }}
                   {{- if .Labels.node }}{{ "\n" }}node: {{ .Labels.node }}{{- end }}
                   {{- end }}
-                  {{- if or .Annotations.runbook_url .GeneratorURL $.ExternalURL }}
                   {{ "\n\n" }}<b>Links</b>{{ "\n" }}
-                  {{- if .Annotations.runbook_url }}<a href="{{ .Annotations.runbook_url }}">Runbook</a>{{- end }}
-                  {{- if .GeneratorURL }}{{ if .Annotations.runbook_url }} | {{ end }}<a href="{{ .GeneratorURL }}">Graph</a>{{- end }}
-                  {{- if $.ExternalURL }}{{ if or .Annotations.runbook_url .GeneratorURL }} | {{ end }}<a href="{{ $.ExternalURL }}">Alertmanager</a>{{- end }}
-                  {{- end }}
+                  {{- if .Annotations.runbook_url }}<a href="{{ .Annotations.runbook_url }}">Runbook</a> | {{ end }}
+                  {{- if .GeneratorURL }}<a href="{{ .GeneratorURL }}">Graph</a> | {{ end }}
+                  {{- if $.ExternalURL }}<a href="{{ $.ExternalURL }}/#/alerts?filter=%7Balertname%3D%22{{ .Labels.alertname }}%22%7D">Alertmanager</a> | {{ end -}}
+                  <a href="https://grafana.${SECRET_DOMAIN}/alerting/list?search={{ .Labels.alertname }}">Grafana</a> | <a href="https://grafana.${SECRET_DOMAIN}/alerting/silence/new?alertmanager=Alertmanager&matcher=alertname={{ .Labels.alertname }}">🔇 Mute</a>
+                  {{ "\n\n" }}
                   {{- end }}
         templates:
           - "/etc/alertmanager/config/*.tmpl"
