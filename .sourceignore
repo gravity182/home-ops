@@ -1,0 +1,2 @@
+# Allow Glance PNG icons in Flux artifact.
+!/kubernetes/apps/default/glance/app/icons/*.png
