@@ -280,3 +280,63 @@ spec:
                 expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
                 labels:
                   severity: critical
+      node-temp-rules:
+        groups:
+          - name: node-temperature
+            rules:
+              - alert: NodeCpuTemperatureHigh
+                annotations:
+                  summary: >-
+                    CPU temperature is high on {{ $labels.instance }}
+                  description: >-
+                    CPU temperature is {{ $value }}°C on {{ $labels.instance }}.
+                expr: >-
+                  max by (instance) (node_hwmon_temp_celsius{chip="platform_coretemp_0"}) >= 80
+                for: 10m
+                labels:
+                  severity: warning
+              - alert: NodeCpuTemperatureCritical
+                annotations:
+                  summary: >-
+                    CPU temperature is critical on {{ $labels.instance }}
+                  description: >-
+                    CPU temperature is {{ $value }}°C on {{ $labels.instance }}.
+                expr: >-
+                  max by (instance) (node_hwmon_temp_celsius{chip="platform_coretemp_0"}) >= 90
+                for: 5m
+                labels:
+                  severity: critical
+      smartctl-temp-rules:
+        groups:
+          - name: smartctl-temperature
+            rules:
+              - alert: SmartctlDeviceTemperatureHigh
+                annotations:
+                  summary: >-
+                    SMART temperature is high on {{ $labels.instance }}
+                  description: >-
+                    SMART temperature is {{ $value }}°C for {{ $labels.model_name }} ({{ $labels.device }}) on {{ $labels.instance }}.
+                expr: >-
+                  (
+                    smartctl_device_temperature{temperature_type="current"}
+                      * on (device) group_left (model_name)
+                    smartctl_device
+                  ) >= 50
+                for: 10m
+                labels:
+                  severity: warning
+              - alert: SmartctlDeviceTemperatureCritical
+                annotations:
+                  summary: >-
+                    SMART temperature is critical on {{ $labels.instance }}
+                  description: >-
+                    SMART temperature is {{ $value }}°C for {{ $labels.model_name }} ({{ $labels.device }}) on {{ $labels.instance }}.
+                expr: >-
+                  (
+                    smartctl_device_temperature{temperature_type="current"}
+                      * on (device) group_left (model_name)
+                    smartctl_device
+                  ) >= 60
+                for: 5m
+                labels:
+                  severity: critical

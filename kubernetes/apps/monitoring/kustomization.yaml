@@ -12,3 +12,4 @@ resources:
   - ./loki/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./k8s-monitoring/ks.yaml
+  - ./smartctl-exporter/ks.yaml
