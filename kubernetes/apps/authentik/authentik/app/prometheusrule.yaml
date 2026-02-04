@@ -26,18 +26,6 @@ spec:
             summary: Authentik is returning more than 5% HTTP 5xx errors
             description: "{{ $value | humanizePercentage }} of requests are failing with 5xx status codes"
 
-        - alert: AuthentikHighLatency
-          expr: |
-            histogram_quantile(0.95,
-              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{namespace="authentik"}[5m])) by (le)
-            ) > 2
-          for: 10m
-          labels:
-            severity: warning
-          annotations:
-            summary: Authentik 95th percentile request latency is above 2 seconds
-            description: "P95 latency is {{ $value | humanizeDuration }}, users may experience slowness"
-
         - alert: AuthentikNoWorkersRunning
           expr: |
             (
