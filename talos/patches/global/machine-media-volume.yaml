@@ -1,0 +1,10 @@
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: media
+provisioning:
+  diskSelector:
+    match: disk.model == "PSSD T7" && !system_disk
+  minSize: 900GB
+mount:
+  mountpoint: /var/mnt/media
