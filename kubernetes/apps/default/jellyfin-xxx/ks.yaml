@@ -4,6 +4,9 @@ kind: Kustomization
 metadata:
   name: jellyfin-xxx
 spec:
+  dependsOn:
+    - name: intel-gpu-resource-driver
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/default/jellyfin-xxx/app
   postBuild:
