@@ -51,8 +51,8 @@ spec:
 
         - alert: ProwlarrIndexerSlow
           expr: >-
-            max by (indexer) (max_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[15m])) > 15000
-          for: 1h
+            max by (indexer) (avg_over_time(prowlarr_indexer_average_response_time_ms{job="prowlarr-exporter"}[1h])) > 15000
+          for: 24h
           labels:
             severity: info
             component: media-management
@@ -61,7 +61,7 @@ spec:
             summary: >-
               Prowlarr indexer {{ $labels.indexer }} is slow
             description: >-
-              Prowlarr indexer {{ $labels.indexer }} response time peaked at {{ printf "%.0f" $value }}ms (> 15000ms) in the last 15m.
+              Prowlarr indexer {{ $labels.indexer }} average response time is {{ printf "%.0f" $value }}ms (> 15000ms) over the last 1h.
 
         - alert: ProwlarrIndexerVipExpiringSoon
           expr: >-
