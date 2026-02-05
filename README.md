@@ -18,3 +18,12 @@ Other components worth mentioning:
 
 - Workflow automation w/ [GitHub Actions](https://github.com/features/actions)
 - Dependency automation w/ [Renovate](https://www.mend.io/renovate)
+
+## Development
+
+Enable the local Conventional Commits check:
+
+```bash
+brew install pre-commit
+pre-commit install -t commit-msg
+```
