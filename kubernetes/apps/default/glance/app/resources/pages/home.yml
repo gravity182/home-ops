@@ -10,16 +10,24 @@
           location: ${GLANCE_WEATHER_LOCATION}
           units: metric
         - type: bookmarks
-          title: Bookmarks
+          title: Indexers
           groups:
             - links:
-                - title: RuTracker
-                  url: https://rutracker.org/forum/tracker.php?f=100,101,1213,1235,124,1247,140,1457,1460,1493,1543,1576,1577,166,1670,181,185,187,1900,194,1940,1950,208,209,2090,2091,2092,2093,2097,2109,212,2198,2199,2200,2201,2220,2221,2258,2339,2343,2365,2459,252,2540,271,272,312,313,352,4,484,498,505,511,514,521,539,549,572,7,709,718,775,815,816,822,84,877,905,921,93,930,934
+                - title: RuTracker.org
+                  url: https://rutracker.org/
                   icon: /assets/rutracker.png
                   same-tab: true
+                - title: NoNaMe ClubL
+                  url: https://nnmclub.to/
+                  icon: /assets/noname-clubl.png
+                  same-tab: true
                 - title: DrunkenSlug
-                  url: https://drunkenslug.com/
+                  url: https://drunkenslug.com
                   icon: /assets/drunkenslug.png
+                  same-tab: true
+                - title: NZBgeek
+                  url: https://nzbgeek.info
+                  icon: /assets/nzbgeek.png
                   same-tab: true
                 - title: Easynews
                   url: https://members.easynews.com/3.0/index//

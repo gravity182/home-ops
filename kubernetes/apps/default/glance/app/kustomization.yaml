@@ -38,16 +38,23 @@ configMapGenerator:
     files:
       - ./icons/adguard-home-light.svg
       - ./icons/authentik-light.svg
+      - ./icons/booktracker.png
       - ./icons/drunkenslug.png
       - ./icons/easynews.png
       - ./icons/grafana-light.svg
       - ./icons/jellyfin-light.svg
+      - ./icons/kinozal.png
       - ./icons/lidarr-light.svg
+      - ./icons/milkie.png
+      - ./icons/noname-clubl.png
+      - ./icons/nzbgeek.png
       - ./icons/opengist-light.svg
       - ./icons/overseerr-light.svg
+      - ./icons/pornolab.png
       - ./icons/prowlarr-light.svg
       - ./icons/qbittorrent-light.svg
       - ./icons/radarr-light.svg
+      - ./icons/rutor.png
       - ./icons/rutracker.png
       - ./icons/sabnzbd-light.svg
       - ./icons/slskd-light.svg
