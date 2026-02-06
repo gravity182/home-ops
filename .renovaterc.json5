@@ -164,6 +164,17 @@
       matchUpdateTypes: ["major", "minor", "patch", "digest", "pin"],
       minimumReleaseAge: null
     },
+    {
+      description: "Stash Python requirements: ignore schedule + automerge",
+      matchManagers: ["pip_requirements"],
+      matchFileNames: ["kubernetes/apps/default/stash/app/resources/python/requirements.txt"],
+      schedule: ["at any time"],
+      automergeSchedule: ["at any time"],
+      automerge: true,
+      automergeType: "branch",
+      ignoreTests: true,
+      matchUpdateTypes: ["major", "minor", "patch", "pin"],
+    },
   ],
   customManagers: [
     {
