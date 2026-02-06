@@ -149,14 +149,11 @@
       addLabels: ["renovate/github-release"],
     },
     {
-      description: "YTDL Bot: ignore schedule",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/gravity182/yt-download-bot"],
-      schedule: ["at any time"],
       description: "yt-download-bot: ignore schedule + automerge",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/gravity182/yt-download-bot"],
       schedule: ["at any time"],
+      automergeSchedule: ["at any time"],
       pinDigests: true,
       automerge: true,
       automergeType: "branch",
@@ -165,7 +162,7 @@
       minimumReleaseAge: null
     },
     {
-      description: "Stash Python requirements: ignore schedule + automerge",
+      description: "Stash Python deps: ignore schedule + automerge",
       matchManagers: ["pip_requirements"],
       matchFileNames: ["kubernetes/apps/default/stash/app/resources/python/requirements.txt"],
       schedule: ["at any time"],
@@ -174,6 +171,7 @@
       automergeType: "branch",
       ignoreTests: true,
       matchUpdateTypes: ["major", "minor", "patch", "pin"],
+      minimumReleaseAge: null
     },
   ],
   customManagers: [
