@@ -16,7 +16,7 @@ spec:
           app:
             image:
               repository: rebelcore/jellyfin-exporter
-              tag: v1.3.9
+              tag: v1.4.0@sha256:dd35d901df663141025670b4b44a62a178b331e9fa084b17016f6fba46343ce9
             args:
               - "--jellyfin.address=http://jellyfin.default.svc.cluster.local:8096"
               - "--jellyfin.token=$(JELLYFIN_API_KEY)"
