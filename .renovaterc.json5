@@ -12,7 +12,10 @@
   dependencyDashboardTitle: "Renovate Dashboard :robot:",
   automergeType: "pr",
   platformAutomerge: true,
-  schedule: ["every weekend"],
+  schedule: ["before 10am on monday"],
+  lockFileMaintenance: {
+    schedule: ["before 10am on monday"],
+  },
   ignorePaths: ["**/*.sops.*"],
   flux: {
     managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/"],
