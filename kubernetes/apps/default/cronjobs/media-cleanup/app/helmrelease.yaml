@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: python
-              tag: 3.14-alpine@sha256:31da4cb527055e4e3d7e9e006dffe9329f84ebea79eaca0a1f1c27ce61e40ca5
+              tag: 3.14-alpine@sha256:faee120f7885a06fcc9677922331391fa690d911c020abb9e8025ff3d908e510
             command: ["python", "/scripts/cleanup.py"]
             env:
               JELLYFIN_URL: http://jellyfin.default.svc.cluster.local:8096
