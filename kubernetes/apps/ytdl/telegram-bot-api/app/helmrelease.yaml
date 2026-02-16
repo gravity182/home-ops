@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: aiogram/telegram-bot-api
-              tag: "9.3"
+              tag: "9.4@sha256:baee95bc86bea67f205b14ba411a996cef43cb6d8e8b7f590c6f6c3bcdb20d3e"
             env:
               - name: TZ
                 value: Europe/Moscow
