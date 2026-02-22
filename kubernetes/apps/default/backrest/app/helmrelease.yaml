@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: garethgeorge/backrest
-              tag: v1.10@sha256:1308397161321b3c5aeca8acc6bf26eccb990df385f2532d3ce0eaa8b483dedf
+              tag: v1.12@sha256:448fee1cb4cdf3f7d7078078480d38713673924ad415bfdf84bf9e49ff570201
             env:
               BACKREST_DATA: /data
               BACKREST_CONFIG: /config/config.json
