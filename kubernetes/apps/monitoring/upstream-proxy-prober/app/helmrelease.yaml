@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: upstream-proxy-prober
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: upstream-proxy-prober
+  interval: 1h
+  values:
+    controllers:
+      upstream-proxy-prober:
+        initContainers:
+          config:
+            image:
+              repository: docker.io/library/alpine
+              tag: "3.20"
+              digest: sha256:765942a4039992336de8dd5db680586e1a206607dd06170ff0a37267a9e01958
+            resources:
+              requests:
+                cpu: 1m
+                memory: 8Mi
+              limits:
+                cpu: 50m
+                memory: 32Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            command:
+              - sh
+              - -ec
+              - |
+                cat > /etc/blackbox/blackbox.yml <<EOF
+                modules:
+                  http_via_upstream_proxy:
+                    prober: http
+                    timeout: 10s
+                    http:
+                      method: GET
+                      preferred_ip_protocol: ip4
+                      follow_redirects: true
+                      proxy_url: "${UPSTREAM_HTTP_PROXY_URL}"
+                EOF
+            env:
+              UPSTREAM_HTTP_PROXY_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: SECRET_HTTP_PROXY_URL
+
+        containers:
+          app:
+            image:
+              repository: docker.io/prom/blackbox-exporter
+              tag: v0.25.0
+              digest: sha256:67847e8aaec3c4852a2c7d84d5344e7931521962988c48df00cd980cd1b490a2
+            args:
+              - --config.file=/etc/blackbox/blackbox.yml
+              - --log.level=warn
+            ports:
+              - name: http
+                containerPort: &port 9115
+                protocol: TCP
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                cpu: 100m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      app:
+        controller: upstream-proxy-prober
+        ports:
+          http:
+            port: *port
+
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /etc/blackbox
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

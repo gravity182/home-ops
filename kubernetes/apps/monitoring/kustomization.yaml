@@ -13,3 +13,4 @@ resources:
   - ./kube-prometheus-stack/ks.yaml
   - ./k8s-monitoring/ks.yaml
   - ./smartctl-exporter/ks.yaml
+  - ./upstream-proxy-prober/ks.yaml

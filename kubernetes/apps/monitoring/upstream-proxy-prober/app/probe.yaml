@@ -1,0 +1,17 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: upstream-http-proxy
+spec:
+  jobName: upstream-http-proxy
+  interval: 1m
+  module: http_via_upstream_proxy
+  prober:
+    url: upstream-proxy-prober.monitoring.svc.cluster.local:9115
+    path: /probe
+    scheme: http
+  targets:
+    staticConfig:
+      static:
+        - https://www.microsoft.com/en-us/

@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: upstream-http-proxy-rules
+spec:
+  groups:
+    - name: upstream-http-proxy
+      rules:
+        - alert: UpstreamHttpProxyDown
+          expr: probe_success{job="upstream-http-proxy"} == 0 or absent(probe_success{job="upstream-http-proxy"})
+          for: 5m
+          labels:
+            severity: critical
+            component: networking
+          annotations:
+            summary: >-
+              Upstream HTTP proxy is down
+            description: >-
+              The blackbox probe via the upstream HTTP proxy to www.microsoft.com is failing.
