@@ -9,7 +9,7 @@ if [ -n "$radarr_eventtype" ]; then
 elif [ -n "$sonarr_eventtype" ]; then
   service="sonarr"
   event_type="$sonarr_eventtype"
-  item_type="Series"
+  item_type="Episode"
   display_type="TV Series"
   title="$sonarr_series_title"
 else
@@ -27,72 +27,195 @@ if [ -z "$JELLYFIN_PATH_FROM" ] || [ -z "$JELLYFIN_PATH_TO" ]; then
   exit 1
 fi
 
+jf_get() {
+  curl -fsS -H "Authorization: MediaBrowser Token=\"${JELLYFIN_API_KEY}\"" "${JELLYFIN_URL}${1}"
+}
+
+jf_post() {
+  curl -fsSX POST -H "Authorization: MediaBrowser Token=\"${JELLYFIN_API_KEY}\"" -H "Content-Length: 0" "${JELLYFIN_URL}${1}"
+}
+
+poll_for_item() {
+  local path="$1" type="$2" timeout=120 interval=2 elapsed=0
+  while [ $elapsed -lt $timeout ]; do
+    local items_json
+    items_json="$(jf_get "/Items?parentId=${JELLYFIN_LIBRARY_ID}&recursive=true&includeItemTypes=${type}&fields=Path")" || {
+      sleep "$interval"
+      elapsed=$((elapsed + interval))
+      continue
+    }
+    local id
+    id="$(jq -r --arg path "$path" '.Items[]? | select(.Path == $path) | .Id' <<<"$items_json" | head -n 1)"
+    if [ -n "$id" ] && [ "$id" != "null" ]; then
+      echo "$id"
+      return 0
+    fi
+    sleep "$interval"
+    elapsed=$((elapsed + interval))
+  done
+  return 1
+}
+
+check_items_metadata() {
+  local check_ids="$1" check_count="$2" refresh_id="$3"
+
+  local items_json
+  items_json="$(jf_get "/Items?ids=${check_ids}&fields=Overview")" || return 1
+
+  local returned
+  returned="$(jq -r '.Items | length' <<<"$items_json")"
+  if [ "$returned" != "$check_count" ]; then
+    echo "${returned}/${check_count} items returned (expected ${check_count})" >&2
+    return 1
+  fi
+
+  # Check: Name must not contain provider ID tags, Overview must be non-empty
+  local bad_items
+  bad_items="$(jq -r '[.Items[] | select(
+    (.Name | test("\\[(tmdb|imdb|tvdb)")) or
+    ((.Overview // "") == "")
+  )] | length' <<<"$items_json")"
+  if [ "$bad_items" != "0" ]; then
+    echo "${bad_items}/${check_count} items missing metadata" >&2
+    return 1
+  fi
+
+  # For sonarr: check that no unknown season exists under the series
+  if [ "$service" = "sonarr" ]; then
+    local seasons_json
+    seasons_json="$(jf_get "/Items?parentId=${refresh_id}&includeItemTypes=Season")" || return 1
+    local unknown
+    unknown="$(jq -r '[.Items[] | select(.IndexNumber == null)] | length' <<<"$seasons_json")"
+    if [ "$unknown" != "0" ]; then
+      echo "${unknown} unknown season(s) found" >&2
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
+poll_items_metadata() {
+  local refresh_id="$1" check_ids="$2" check_count="$3"
+  local max_attempts=2 attempt=0
+
+  while [ $attempt -lt $max_attempts ]; do
+    attempt=$((attempt + 1))
+
+    jf_post "/Items/${refresh_id}/Refresh?metadataRefreshMode=FullRefresh&replaceAllMetadata=true&imageRefreshMode=FullRefresh&replaceAllImages=false&regenerateTrickplay=false" || return 1
+    echo "Metadata refresh queued (attempt ${attempt})"
+
+    local timeout=15 interval=3 elapsed=0
+    while [ $elapsed -lt $timeout ]; do
+      sleep "$interval"
+      elapsed=$((elapsed + interval))
+      local status
+      if status="$(check_items_metadata "$check_ids" "$check_count" "$refresh_id" 2>&1)"; then
+        echo "All metadata complete after ${elapsed}s (attempt ${attempt})"
+        return 0
+      fi
+      echo "Polling metadata: ${status} (${elapsed}s)"
+    done
+    echo "Metadata incomplete after ${timeout}s (attempt ${attempt})"
+  done
+  echo "Warning: metadata may be incomplete after ${max_attempts} attempts, proceeding anyway"
+  return 0
+}
+
+wait_for_task() {
+  local task_id="$1" label="$2" timeout=300 interval=3 elapsed=0
+  sleep 1
+  while [ $elapsed -lt $timeout ]; do
+    local task_json
+    task_json="$(jf_get "/ScheduledTasks/${task_id}")" || { sleep "$interval"; elapsed=$((elapsed + interval)); continue; }
+    local state
+    state="$(jq -r '.State' <<<"$task_json")"
+    if [ "$state" = "Idle" ]; then
+      echo "Task '${label}' completed after ${elapsed}s"
+      return 0
+    fi
+    local progress
+    progress="$(jq -r '.CurrentProgressPercentage // "?"' <<<"$task_json")"
+    echo "Task '${label}': state=${state} progress=${progress}% (${elapsed}s)"
+    sleep "$interval"
+    elapsed=$((elapsed + interval))
+  done
+  echo "Warning: task '${label}' did not complete within ${timeout}s"
+  return 1
+}
+
 echo "service=$service"
 echo "event_type=${event_type:-unknown}"
 
-curl -fsSX POST "${JELLYFIN_URL}/Items/${JELLYFIN_LIBRARY_ID}/Refresh?Recursive=true&api_key=${JELLYFIN_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -H "Content-Length: 0" || exit 1
+jf_post "/Items/${JELLYFIN_LIBRARY_ID}/Refresh" || exit 1
 
 if [ "$event_type" != "Download" ]; then
   echo "Not a Download event; library refresh only"
   exit 0
 fi
 
-source_path=""
+source_paths=""
 if [ "$service" = "radarr" ]; then
   if [ -n "$radarr_moviefile_path" ]; then
-    source_path="$radarr_moviefile_path"
+    source_paths="$radarr_moviefile_path"
   elif [ -n "$radarr_movie_path" ]; then
-    source_path="$radarr_movie_path"
+    source_paths="$radarr_movie_path"
   elif [ -n "$radarr_moviefile_paths" ]; then
-    source_path="${radarr_moviefile_paths%%|*}"
+    source_paths="$radarr_moviefile_paths"
   fi
 elif [ "$service" = "sonarr" ]; then
-  if [ -n "$sonarr_series_path" ]; then
-    source_path="$sonarr_series_path"
+  if [ -n "$sonarr_episodefile_paths" ]; then
+    source_paths="$sonarr_episodefile_paths"
+  elif [ -n "$sonarr_episodefile_path" ]; then
+    source_paths="$sonarr_episodefile_path"
   fi
 fi
 
-if [ -z "$source_path" ]; then
-  echo "source_path is empty"
+if [ -z "$source_paths" ]; then
+  echo "source_paths is empty"
   exit 1
 fi
 
-echo "source_path=$source_path"
+IFS='|' read -ra paths <<< "$source_paths"
+folder="$(dirname "${paths[0]}")"
+folder="${folder/#$JELLYFIN_PATH_FROM/$JELLYFIN_PATH_TO}"
+echo "Processing ${#paths[@]} file(s) in ${folder}"
 
-jellyfin_path="${source_path/#$JELLYFIN_PATH_FROM/$JELLYFIN_PATH_TO}"
-echo "mapped_path=$jellyfin_path"
+# Poll for all items to appear in Jellyfin
+item_ids=()
+for source_path in "${paths[@]}"; do
+  jellyfin_path="${source_path/#$JELLYFIN_PATH_FROM/$JELLYFIN_PATH_TO}"
 
-sleep 10
+  item_id="$(poll_for_item "$jellyfin_path" "$item_type")" || { echo "Item not found: $jellyfin_path"; exit 1; }
+  echo "item_id=$item_id"
+  item_ids+=("$item_id")
+done
 
-items_json="$(curl -fsS "${JELLYFIN_URL}/Items?parentId=${JELLYFIN_LIBRARY_ID}&recursive=true&includeItemTypes=${item_type}&fields=Path&api_key=${JELLYFIN_API_KEY}")" || exit 1
-item_id="$(jq -r --arg path "$jellyfin_path" '.Items[]? | select(.Path == $path) | .Id' <<<"$items_json" | head -n 1)"
-
-if [ -z "$item_id" ] || [ "$item_id" = "null" ]; then
-  echo "Jellyfin item not found for path: $jellyfin_path"
-  exit 1
+# For sonarr, refresh the Series item (cascades to all episodes)
+# For radarr, refresh the Movie item directly
+if [ "$service" = "sonarr" ]; then
+  if [ -z "$sonarr_series_path" ]; then
+    echo "sonarr_series_path is empty"
+    exit 1
+  fi
+  series_jf_path="${sonarr_series_path/#$JELLYFIN_PATH_FROM/$JELLYFIN_PATH_TO}"
+  refresh_id="$(poll_for_item "$series_jf_path" "Series")" || { echo "Series not found: $series_jf_path"; exit 1; }
+  echo "series_id=$refresh_id"
+else
+  refresh_id="${item_ids[0]}"
 fi
 
-echo "item_id=$item_id"
+ids_csv="$(IFS=','; echo "${item_ids[*]}")"
+poll_items_metadata "$refresh_id" "$ids_csv" "${#item_ids[@]}" || exit 1
 
-# one call rarely works correctly, so make multiple calls with delays
-curl -fsSX POST "${JELLYFIN_URL}/Items/${item_id}/Refresh?metadataRefreshMode=FullRefresh&replaceAllMetadata=false&imageRefreshMode=FullRefresh&replaceAllImages=false&regenerateTrickplay=false&api_key=${JELLYFIN_API_KEY}" \
-  -H "Content-Length: 0" || exit 1
-echo "refresh metadata queued"
-sleep 30
-curl -fsSX POST "${JELLYFIN_URL}/Items/${item_id}/Refresh?metadataRefreshMode=FullRefresh&replaceAllMetadata=true&imageRefreshMode=FullRefresh&replaceAllImages=false&regenerateTrickplay=false&api_key=${JELLYFIN_API_KEY}" \
-  -H "Content-Length: 0" || exit 1
-echo "refresh metadata queued"
-sleep 30
+jf_post "/ScheduledTasks/Running/${JELLYFIN_INTRO_SKIPPER_TASK_ID}" || exit 1
+wait_for_task "$JELLYFIN_INTRO_SKIPPER_TASK_ID" "intro skipper" || exit 1
 
-curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_INTRO_SKIPPER_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
-sleep 15
-curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_MEDIA_SEGMENT_SCAN_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
-sleep 5
+jf_post "/ScheduledTasks/Running/${JELLYFIN_MEDIA_SEGMENT_SCAN_TASK_ID}" || exit 1
+wait_for_task "$JELLYFIN_MEDIA_SEGMENT_SCAN_TASK_ID" "media segment scan" || exit 1
 
-curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_EXTRACT_CHAPTERS_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
-curl -fsSX POST "${JELLYFIN_URL}/ScheduledTasks/Running/${JELLYFIN_GENERATE_TRICKPLAY_TASK_ID}?api_key=${JELLYFIN_API_KEY}" || exit 1
+jf_post "/ScheduledTasks/Running/${JELLYFIN_EXTRACT_CHAPTERS_TASK_ID}" || exit 1
+jf_post "/ScheduledTasks/Running/${JELLYFIN_GENERATE_TRICKPLAY_TASK_ID}" || exit 1
 
 echo "${display_type} imported successfully: $title"
 exit 0
