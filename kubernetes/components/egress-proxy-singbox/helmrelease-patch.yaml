@@ -1,0 +1,219 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: not-used
+spec:
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: placeholder
+              spec:
+                template:
+                  spec:
+                    volumes:
+                      - name: singbox-config
+                        emptyDir: {}
+                      - name: singbox-tmp
+                        emptyDir: {}
+                    initContainers:
+                      - name: singbox-config
+                        image: docker.io/library/alpine:3.20@sha256:765942a4039992336de8dd5db680586e1a206607dd06170ff0a37267a9e01958
+                        imagePullPolicy: IfNotPresent
+                        securityContext:
+                          runAsUser: 1001
+                          runAsGroup: 1001
+                          runAsNonRoot: true
+                          allowPrivilegeEscalation: false
+                          readOnlyRootFilesystem: true
+                          capabilities:
+                            drop:
+                              - ALL
+                        resources:
+                          requests:
+                            cpu: 1m
+                            memory: 8Mi
+                          limits:
+                            cpu: 50m
+                            memory: 64Mi
+                        command:
+                          - sh
+                          - -ec
+                          - |
+                            # Generate sing-box config from upstream proxy URL at runtime.
+                            url="$${UPSTREAM_HTTP_PROXY_URL}"
+                            url="$${url#http://}"
+                            url="$${url#https://}"
+                            url="$${url%%/*}"
+
+                            # Split auth and host:port.
+                            user=""
+                            pass=""
+                            case "$${url}" in
+                              *@*)
+                                auth="$${url%@*}"
+                                hostport="$${url#*@}"
+                                user="$${auth%%:*}"
+                                pass="$${auth#*:}"
+                                ;;
+                              *)
+                                hostport="$${url}"
+                                ;;
+                            esac
+
+                            # Split host and port (default 80).
+                            case "$${hostport}" in
+                              *:*)
+                                host="$${hostport%:*}"
+                                port="$${hostport##*:}"
+                                ;;
+                              *)
+                                host="$${hostport}"
+                                port="80"
+                                ;;
+                            esac
+
+                            # Persist parsed values for the iptables init container.
+                            printf '%s\n' "$${host}" > /config/proxy-host
+                            printf '%s\n' "$${port}" > /config/proxy-port
+
+                            # Optional auth JSON fields.
+                            auth_json=""
+                            if [ -n "$${user}" ]; then
+                              auth_json="$$(printf ',\n                                  "username": "%s",\n                                  "password": "%s"' "$${user}" "$${pass}")"
+                            fi
+
+                            cat > /config/config.json <<EOF
+                            {
+                              "log": { "level": "warn" },
+                              "inbounds": [
+                                {
+                                  "type": "redirect",
+                                  "tag": "redir-in",
+                                  "listen": "127.0.0.1",
+                                  "listen_port": 12345
+                                }
+                              ],
+                              "outbounds": [
+                                {
+                                  "type": "http",
+                                  "tag": "upstream",
+                                  "server": "$${host}",
+                                  "server_port": $${port}$${auth_json}
+                                }
+                              ],
+                              "route": { "final": "upstream" }
+                            }
+                            EOF
+                        env:
+                          - name: UPSTREAM_HTTP_PROXY_URL
+                            valueFrom:
+                              secretKeyRef:
+                                name: cluster-secrets
+                                key: SECRET_HTTP_PROXY_URL
+                        volumeMounts:
+                          - name: singbox-config
+                            mountPath: /config
+                      - name: singbox-iptables
+                        image: docker.io/nicolaka/netshoot:v0.15@sha256:47b907d662d139d1e2f22bfe14f4efca1e3f1feed283572f47c970c780c03b61
+                        imagePullPolicy: IfNotPresent
+                        resources:
+                          requests:
+                            cpu: 1m
+                            memory: 16Mi
+                          limits:
+                            cpu: 50m
+                            memory: 64Mi
+                        securityContext:
+                          runAsUser: 0
+                          runAsGroup: 0
+                          runAsNonRoot: false
+                          allowPrivilegeEscalation: false
+                          capabilities:
+                            add:
+                              - NET_ADMIN
+                        command:
+                          - sh
+                          - -ec
+                          - |
+                            # Redirect outbound TCP to sing-box, keep cluster/private ranges and the upstream proxy direct.
+                            # Host and port were parsed by the singbox-config init container.
+                            upstream_host="$$(cat /config/proxy-host)"
+                            upstream_port="$$(cat /config/proxy-port)"
+
+                            is_ipv4() {
+                              echo "$${1}" | grep -Eq '^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$'
+                            }
+
+                            resolve_ipv4() {
+                              # Best-effort: try A records, then hosts database.
+                              getent ahostsv4 "$${1}" 2>/dev/null | awk '{print $1; exit}'
+                            }
+
+                            resolve_ipv4_hosts() {
+                              getent hosts "$${1}" 2>/dev/null | awk '{print $1; exit}'
+                            }
+
+                            iptables -t nat -N SINGBOX_REDIRECT 2>/dev/null || true
+                            iptables -t nat -F SINGBOX_REDIRECT
+
+                            iptables -t nat -A SINGBOX_REDIRECT -d 127.0.0.0/8 -j RETURN
+                            iptables -t nat -A SINGBOX_REDIRECT -d 10.0.0.0/8 -j RETURN
+                            iptables -t nat -A SINGBOX_REDIRECT -d 172.16.0.0/12 -j RETURN
+                            iptables -t nat -A SINGBOX_REDIRECT -d 192.168.0.0/16 -j RETURN
+
+                            # Avoid proxy recursion (upstream proxy endpoint).
+                            upstream_ip="$${upstream_host}"
+                            if ! is_ipv4 "$${upstream_ip}"; then
+                              upstream_ip="$$(resolve_ipv4 "$${upstream_host}")"
+                              [ -n "$${upstream_ip}" ] || upstream_ip="$$(resolve_ipv4_hosts "$${upstream_host}")"
+                            fi
+                            [ -n "$${upstream_ip}" ]
+                            iptables -t nat -A SINGBOX_REDIRECT -d "$${upstream_ip}"/32 -p tcp --dport "$${upstream_port}" -j RETURN
+
+                            iptables -t nat -A SINGBOX_REDIRECT -p tcp --syn -j REDIRECT --to-ports 12345
+
+                            # Ensure we have a single OUTPUT hook.
+                            iptables -t nat -D OUTPUT -p tcp -j SINGBOX_REDIRECT 2>/dev/null || true
+                            iptables -t nat -A OUTPUT -p tcp -j SINGBOX_REDIRECT
+                        volumeMounts:
+                          - name: singbox-config
+                            mountPath: /config
+                            readOnly: true
+                      # Native Kubernetes "sidecar": a restartable initContainer.
+                      # This ensures sing-box is started before the app container.
+                      - name: sing-box
+                        image: ghcr.io/sagernet/sing-box:1.12.22@sha256:8fa931565de9cef78495bb26d6d4b07861a86e77ca266eb4cb9876826939c965
+                        imagePullPolicy: IfNotPresent
+                        restartPolicy: Always
+                        securityContext:
+                          runAsUser: 1001
+                          runAsGroup: 1001
+                          runAsNonRoot: true
+                          allowPrivilegeEscalation: false
+                          readOnlyRootFilesystem: true
+                          capabilities:
+                            drop:
+                              - ALL
+                        args:
+                          - run
+                          - -c
+                          - /etc/sing-box/config.json
+                        resources:
+                          requests:
+                            cpu: 5m
+                            memory: 8Mi
+                          limits:
+                            cpu: 100m
+                            memory: 48Mi
+                        volumeMounts:
+                          - name: singbox-config
+                            mountPath: /etc/sing-box
+                          - name: singbox-tmp
+                            mountPath: /tmp

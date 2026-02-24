@@ -21,13 +21,25 @@ spec:
                       - name: app
                         env:
                           - name: HTTP_PROXY
-                            value: "${SECRET_HTTP_PROXY_URL}"
+                            valueFrom:
+                              secretKeyRef:
+                                name: cluster-secrets
+                                key: SECRET_HTTP_PROXY_URL
                           - name: http_proxy
-                            value: "${SECRET_HTTP_PROXY_URL}"
+                            valueFrom:
+                              secretKeyRef:
+                                name: cluster-secrets
+                                key: SECRET_HTTP_PROXY_URL
                           - name: HTTPS_PROXY
-                            value: "${SECRET_HTTP_PROXY_URL}"
+                            valueFrom:
+                              secretKeyRef:
+                                name: cluster-secrets
+                                key: SECRET_HTTP_PROXY_URL
                           - name: https_proxy
-                            value: "${SECRET_HTTP_PROXY_URL}"
+                            valueFrom:
+                              secretKeyRef:
+                                name: cluster-secrets
+                                key: SECRET_HTTP_PROXY_URL
                           - name: NO_PROXY
                             value: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,.cluster.local,.svc"
                           - name: no_proxy
