@@ -27,12 +27,12 @@ spec:
         - name: S3_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: loki-s3-credentials
+              name: loki-minio-credentials
               key: S3_ACCESS_KEY
         - name: S3_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: loki-s3-credentials
+              name: loki-minio-credentials
               key: S3_SECRET_KEY
 
     loki:
@@ -49,12 +49,12 @@ spec:
           ruler: homeserver-loki-ruler
           admin: homeserver-loki-admin
         s3:
-          endpoint: https://storage.yandexcloud.net
+          endpoint: http://minio-infra-hl.minio-infra.svc.cluster.local:9000
           accessKeyId: ${S3_ACCESS_KEY}
           secretAccessKey: ${S3_SECRET_KEY}
-          region: ru-central1
-          s3ForcePathStyle: false
-          insecure: false
+          region: us-east-1
+          s3ForcePathStyle: true
+          insecure: true
 
       storage_config:
         tsdb_shipper:
@@ -170,12 +170,12 @@ spec:
         - name: S3_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: loki-s3-credentials
+              name: loki-minio-credentials
               key: S3_ACCESS_KEY
         - name: S3_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: loki-s3-credentials
+              name: loki-minio-credentials
               key: S3_SECRET_KEY
 
     chunksCache:

@@ -2,24 +2,20 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app loki
+  name: &app minio-infra
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/monitoring/loki/app
-  targetNamespace: monitoring
+  interval: 1h
+  path: ./kubernetes/apps/minio/minio-infra/app
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  interval: 1h
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-  prune: true
+  targetNamespace: minio-infra
   wait: true
   dependsOn:
-    - name: minio-infra
-      namespace: minio
+    - name: minio-operator
+
