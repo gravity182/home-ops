@@ -202,7 +202,8 @@ spec:
     # Disable anonymous Alloy usage reporting
     collectorCommon:
       alloy:
-        enableReporting: false
+        alloy:
+          enableReporting: false
 
     # The Grafana Alloy instance that is responsible for anything that must be done on a single instance,
     # such as gathering Cluster events from the API server.
