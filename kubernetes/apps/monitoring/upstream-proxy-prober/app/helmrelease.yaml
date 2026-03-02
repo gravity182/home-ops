@@ -17,7 +17,6 @@ spec:
             image:
               repository: docker.io/library/alpine
               tag: "3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659"
-              digest: sha256:765942a4039992336de8dd5db680586e1a206607dd06170ff0a37267a9e01958
             resources:
               requests:
                 cpu: 1m
@@ -56,7 +55,6 @@ spec:
             image:
               repository: docker.io/prom/blackbox-exporter
               tag: v0.28.0@sha256:e753ff9f3fc458d02cca5eddab5a77e1c175eee484a8925ac7d524f04366c2fc
-              digest: sha256:67847e8aaec3c4852a2c7d84d5344e7931521962988c48df00cd980cd1b490a2
             args:
               - --config.file=/etc/blackbox/blackbox.yml
               - --log.level=warn
