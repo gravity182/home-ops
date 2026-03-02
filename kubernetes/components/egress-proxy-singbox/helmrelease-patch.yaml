@@ -24,7 +24,7 @@ spec:
                         emptyDir: {}
                     initContainers:
                       - name: singbox-config
-                        image: docker.io/library/alpine:3.20@sha256:765942a4039992336de8dd5db680586e1a206607dd06170ff0a37267a9e01958
+                        image: docker.io/library/alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
                         imagePullPolicy: IfNotPresent
                         securityContext:
                           runAsUser: 1001
