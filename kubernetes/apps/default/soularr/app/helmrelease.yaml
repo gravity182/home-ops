@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: mrusse08/soularr
-              tag: latest@sha256:c1cfc6425c1cc141f5f99744611eeb1af32c85258df5e2a4974d7dbf6db76840
+              tag: latest@sha256:69bc29f2072d6256c30f94fb1a0bfe8034c197791a2103d87f15ef1761347ce9
             env:
               SCRIPT_INTERVAL: "3600"
               LIDARR_API_KEY:
