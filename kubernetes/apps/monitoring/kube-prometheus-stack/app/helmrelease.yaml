@@ -244,7 +244,6 @@ spec:
           cpu: 50m
         limits:
           memory: 64Mi
-          cpu: 300m
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
       resources:
