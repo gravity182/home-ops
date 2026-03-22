@@ -45,16 +45,6 @@
               check-url: http://jellyfin.default.svc.cluster.local:8096/health
               same-tab: true
               icon: /assets/jellyfin-light.svg
-            - title: Jellyfin XXX
-              url: https://xxx.${SECRET_DOMAIN}
-              check-url: http://jellyfin-xxx.default.svc.cluster.local:8096/health
-              same-tab: true
-              icon: /assets/jellyfin-light.svg
-            - title: Seerr
-              url: https://requests.${SECRET_DOMAIN}
-              check-url: http://seerr.default.svc.cluster.local:5055/api/v1/status
-              same-tab: true
-              icon: /assets/overseerr-light.svg
             - title: Radarr
               url: https://radarr.${SECRET_DOMAIN}
               check-url: http://radarr.default.svc.cluster.local:7878/ping
@@ -75,11 +65,6 @@
               check-url: http://prowlarr.default.svc.cluster.local:9696/ping
               same-tab: true
               icon: /assets/prowlarr-light.svg
-            - title: Stash
-              url: https://stash.${SECRET_DOMAIN}
-              check-url: http://stash.default.svc.cluster.local:9999/healthz
-              same-tab: true
-              icon: /assets/stash-light.svg
         - type: monitor
           title: Downloaders
           cache: 1m
