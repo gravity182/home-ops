@@ -16,7 +16,7 @@ spec:
           app:
             image:
               repository: ghcr.io/martabal/qbittorrent-exporter
-              tag: v1.13.2
+              tag: v1.13.4@sha256:b7360b87bcbe0982e1784a6e341d9cf00137795803eac4fe9f8dd9f813d72fb6
             env:
               QBITTORRENT_BASE_URL: "http://qbittorrent.default.svc.cluster.local:8080"
               EXPORTER_PORT: "8090"
