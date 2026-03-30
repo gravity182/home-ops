@@ -31,7 +31,13 @@ spec:
                 set -euo pipefail
                 REQ=/config/requirements/requirements.txt
                 VENV=/config/venv
-                [ -x "$VENV/bin/python" ] || python3 -m venv "$VENV"
+
+                if ! [ -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -m pip --version >/dev/null 2>&1; then
+                  rm -rf "$VENV"
+                  python3 -m venv "$VENV"
+                  "$VENV/bin/python" -m ensurepip --upgrade
+                fi
+
                 "$VENV/bin/python" -m pip install -U pip setuptools wheel
                 "$VENV/bin/pip" install -r "$REQ"
           allow-public-access:
