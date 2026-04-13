@@ -19,7 +19,7 @@ spec:
           install-python-deps:
             image:
               repository: ghcr.io/home-operations/stash
-              tag: 0.31.0@sha256:2e04fb3fe054b95a8b2f11076145a6532015290b1042db4431ba5807e6a09893
+              tag: 0.31.1@sha256:12c4ee1424a211888f4e4253ef70b95a639b3d5475ea3d85e88989754569537d
             env:
               HOME: /tmp
               PIP_DISABLE_PIP_VERSION_CHECK: "1"
@@ -58,7 +58,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/stash
-              tag: 0.31.0@sha256:2e04fb3fe054b95a8b2f11076145a6532015290b1042db4431ba5807e6a09893
+              tag: 0.31.1@sha256:12c4ee1424a211888f4e4253ef70b95a639b3d5475ea3d85e88989754569537d
             env:
               PATH: /config/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               STASH_CONFIG_FILE: /config/config.yml
