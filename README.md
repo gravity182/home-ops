@@ -24,6 +24,8 @@ Other components worth mentioning:
 Enable the local Conventional Commits check:
 
 ```bash
-brew install pre-commit
-pre-commit install -t commit-msg
+mise install
+mise exec -- pre-commit install -t commit-msg
 ```
+
+If this clone previously installed the hook with a global `pre-commit`, run the install command again after switching to `mise`. The generated Git hook embeds the interpreter path used at install time.
