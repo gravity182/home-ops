@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: seerr
+spec:
+  sourcePVC: seerr
+  trigger:
+    schedule: "15 13 * * 1"
+  restic:
+    repository: seerr-volsync-repo
+    copyMethod: Direct
+    cacheStorageClassName: openebs-hostpath
+    cacheCapacity: 1Gi
+    pruneIntervalDays: 7
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+    retain:
+      daily: 14
+      weekly: 8
+      monthly: 6

@@ -8,6 +8,7 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./volsync-restic-secret.sops.yaml
   - ./media-data-pvc.yaml
   - ./common-scripts/ks.yaml
   - ./radarr/ks.yaml

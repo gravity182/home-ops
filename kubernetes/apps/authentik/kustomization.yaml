@@ -8,4 +8,5 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./volsync-restic-secret.sops.yaml
   - ./authentik/ks.yaml

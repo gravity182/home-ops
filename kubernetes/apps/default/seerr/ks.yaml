@@ -4,11 +4,16 @@ kind: Kustomization
 metadata:
   name: seerr
 spec:
+  dependsOn:
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
-  path: ./kubernetes/apps/default/seerr/app
+  path: ./kubernetes/apps/default/seerr
   postBuild:
     substituteFrom:
       - name: cluster-secrets
+        kind: Secret
+      - name: volsync-restic-secret
         kind: Secret
   prune: true
   sourceRef:

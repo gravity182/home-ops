@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: sabnzbd
+spec:
+  sourcePVC: sabnzbd
+  trigger:
+    schedule: "30 13 * * 1"
+  restic:
+    repository: sabnzbd-volsync-repo
+    copyMethod: Direct
+    cacheStorageClassName: openebs-hostpath
+    cacheCapacity: 1Gi
+    pruneIntervalDays: 7
+    moverSecurityContext:
+      runAsUser: 1001
+      runAsGroup: 1001
+      fsGroup: 1001
+    retain:
+      daily: 14
+      weekly: 8
+      monthly: 6

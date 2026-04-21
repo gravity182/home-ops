@@ -4,11 +4,16 @@ kind: Kustomization
 metadata:
   name: lidarr
 spec:
+  dependsOn:
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/lidarr
   postBuild:
     substituteFrom:
       - name: cluster-secrets
+        kind: Secret
+      - name: volsync-restic-secret
         kind: Secret
   prune: true
   sourceRef:

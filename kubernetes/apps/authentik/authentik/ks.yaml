@@ -4,11 +4,16 @@ kind: Kustomization
 metadata:
   name: authentik
 spec:
+  dependsOn:
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
-  path: ./kubernetes/apps/authentik/authentik/app
+  path: ./kubernetes/apps/authentik/authentik
   postBuild:
     substituteFrom:
       - name: cluster-secrets
+        kind: Secret
+      - name: volsync-restic-secret
         kind: Secret
   prune: true
   sourceRef:

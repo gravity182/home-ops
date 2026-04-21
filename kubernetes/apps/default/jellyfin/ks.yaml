@@ -7,11 +7,15 @@ spec:
   dependsOn:
     - name: intel-gpu-resource-driver
       namespace: kube-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/jellyfin
   postBuild:
     substituteFrom:
       - name: cluster-secrets
+        kind: Secret
+      - name: volsync-restic-secret
         kind: Secret
   prune: true
   sourceRef:
