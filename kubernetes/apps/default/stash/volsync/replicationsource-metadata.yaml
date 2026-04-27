@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: stash-metadata
   trigger:
-    schedule: "15 15 * * 1"
+    schedule: "15 5 * * 1"
   restic:
     repository: stash-metadata-volsync-repo
     copyMethod: Direct

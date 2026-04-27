@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: sabnzbd
   trigger:
-    schedule: "30 13 * * 1"
+    schedule: "30 3 * * 1"
   restic:
     repository: sabnzbd-volsync-repo
     copyMethod: Direct

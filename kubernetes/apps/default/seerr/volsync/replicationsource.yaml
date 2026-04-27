@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: seerr
   trigger:
-    schedule: "15 13 * * 1"
+    schedule: "15 3 * * 1"
   restic:
     repository: seerr-volsync-repo
     copyMethod: Direct

@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: opengist
   trigger:
-    schedule: "45 15 * * 1"
+    schedule: "45 5 * * 1"
   restic:
     repository: opengist-volsync-repo
     copyMethod: Direct

@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: sonarr
   trigger:
-    schedule: "15 12 * * 1"
+    schedule: "15 2 * * 1"
   restic:
     repository: sonarr-volsync-repo
     copyMethod: Direct

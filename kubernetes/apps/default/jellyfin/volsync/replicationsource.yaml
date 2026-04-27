@@ -7,7 +7,7 @@ metadata:
 spec:
   sourcePVC: jellyfin-config
   trigger:
-    schedule: "30 14 * * 1"
+    schedule: "30 4 * * 1"
   restic:
     repository: jellyfin-config-volsync-repo
     copyMethod: Direct
