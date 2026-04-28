@@ -189,7 +189,7 @@ spec:
                       # Native Kubernetes "sidecar": a restartable initContainer.
                       # This ensures sing-box is started before the app container.
                       - name: sing-box
-                        image: ghcr.io/sagernet/sing-box:v1.13.7@sha256:1f769f9a8ee4a3d175fd5e497e54b1128dc7e66ef09391d4b372dfad402575db
+                        image: ghcr.io/sagernet/sing-box:v1.13.11@sha256:9bed1fcb406bd971d1b48c7f824e5128d63543ca278cdcd6b5737c19941e404d
                         imagePullPolicy: IfNotPresent
                         restartPolicy: Always
                         securityContext:
