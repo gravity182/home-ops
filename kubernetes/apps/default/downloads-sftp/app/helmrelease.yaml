@@ -1,0 +1,156 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: downloads-sftp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: downloads-sftp
+  interval: 1h
+  values:
+    controllers:
+      downloads-sftp:
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/drakkan/sftpgo
+              tag: v2.7.1
+            command: ["/bin/sh", "-ec"]
+            args:
+              - |
+                exec sftpgo portable \
+                  --config-dir /config \
+                  --config-file /config/sftpgo.yaml \
+                  --directory /downloads \
+                  --username downloads \
+                  --public-key "$(cat /authorized-key/authorized-key)" \
+                  --permissions list,download \
+                  --ssh-commands "" \
+                  --sftpd-port 2022 \
+                  --httpd-port -1 \
+                  --ftpd-port -1 \
+                  --webdav-port -1 \
+                  --log-level info \
+                  --log-file-path /dev/stdout
+            workingDir: /var/lib/sftpgo
+            env:
+              TZ: Europe/Moscow
+            ports:
+              - name: sftp
+                containerPort: &port 2022
+                protocol: TCP
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        forceRename: downloads-sftp
+        controller: downloads-sftp
+        type: NodePort
+        ports:
+          sftp:
+            port: 22
+            targetPort: *port
+            nodePort: 30222
+            protocol: TCP
+    networkpolicies:
+      app:
+        controller: downloads-sftp
+        policyTypes:
+          - Ingress
+          - Egress
+        rules:
+          ingress:
+            - from:
+                - ipBlock:
+                    cidr: 192.168.3.0/24
+              ports:
+                - port: *port
+                  protocol: TCP
+          egress: []
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: downloads-sftp-config
+        globalMounts:
+          - path: /config
+            readOnly: true
+      host-key:
+        enabled: true
+        type: secret
+        name: downloads-sftp-host-key
+        defaultMode: 0440
+        globalMounts:
+          - path: /host-keys
+            readOnly: true
+      authorized-key:
+        enabled: true
+        type: configMap
+        name: downloads-sftp-authorized-key
+        globalMounts:
+          - path: /authorized-key
+            readOnly: true
+      sftpgo-home:
+        type: emptyDir
+        globalMounts:
+          - path: /var/lib/sftpgo
+      sftpgo-data:
+        type: emptyDir
+        globalMounts:
+          - path: /srv/sftpgo
+      torrents:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /downloads/torrents
+            subPath: torrents
+            readOnly: true
+      usenet:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /downloads/usenet
+            subPath: usenet
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

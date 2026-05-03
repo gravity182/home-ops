@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: downloads-sftp-authorized-key
+data:
+  authorized-key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPo0dFA/USbL37/R8T894q38AgIBLJyxPR/a814yhUAK homeserver-downloads
