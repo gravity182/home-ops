@@ -81,6 +81,13 @@ spec:
         globalMounts:
           - path: /data/usenet
             subPath: usenet
+      xxx-scenes:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /data/xxx/scenes
+            subPath: xxx/scenes
       scripts:
         type: configMap
         name: sabnzbd-scripts

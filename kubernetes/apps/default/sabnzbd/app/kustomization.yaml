@@ -8,6 +8,7 @@ configMapGenerator:
   - name: sabnzbd-scripts
     files:
       - Clean.py=./resources/Clean.py
+      - promote_xxx_scenes.py=./resources/promote_xxx_scenes.py
       - replace_for.py=./resources/replace_for.py
 generatorOptions:
   disableNameSuffixHash: true
