@@ -102,6 +102,8 @@ spec:
               - bot_token_file: /etc/alertmanager/secrets/alertmanager-telegram-secret/bot-token
                 chat_id: ${SECRET_TELEGRAM_CHAT_ID}
                 parse_mode: HTML
+                http_config:
+                  proxy_url: ${SECRET_HTTP_PROXY_URL}
                 message: |-
                   {{- range .Alerts -}}
                   {{- if eq .Status "firing" }}🔥{{ else }}✅{{ end }} <b>{{ .Status | toUpper }}</b>: {{ .Labels.alertname }}
