@@ -12,6 +12,8 @@ spec:
     kubernetes:
       envoyDeployment:
         replicas: 1
+        strategy:
+          type: Recreate
         patch:
           type: StrategicMerge
           value:
