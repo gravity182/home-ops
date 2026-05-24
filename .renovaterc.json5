@@ -34,6 +34,12 @@
   },
   packageRules: [
     {
+      description: "Wait 14 days before proposing routine dependency updates",
+      matchDatasources: ["docker", "github-releases", "helm"],
+      minimumReleaseAge: "14 days",
+      internalChecksFilter: "strict",
+    },
+    {
       description: "Disable pinDigests for OCIRepository (workaround for renovatebot/renovate#29768)",
       matchManagers: ["flux"],
       matchFileNames: ["**/ocirepository.yaml"],
@@ -212,4 +218,12 @@
       datasourceTemplate: "docker",
     },
   ],
+  vulnerabilityAlerts: {
+    enabled: true,
+    minimumReleaseAge: null,
+    prCreation: "immediate",
+    dependencyDashboardApproval: false,
+    schedule: [],
+    commitMessageSuffix: "[SECURITY]",
+  },
 }
