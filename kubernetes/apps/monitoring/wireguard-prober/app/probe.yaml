@@ -1,0 +1,17 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: wireguard-vpn
+spec:
+  jobName: wireguard-vpn
+  interval: 1m
+  module: http_over_wireguard
+  prober:
+    url: wireguard-prober.monitoring.svc.cluster.local:9115
+    path: /probe
+    scheme: http
+  targets:
+    staticConfig:
+      static:
+        - https://www.microsoft.com/en-us/

@@ -14,3 +14,4 @@ resources:
   - ./k8s-monitoring/ks.yaml
   - ./smartctl-exporter/ks.yaml
   - ./upstream-proxy-prober/ks.yaml
+  - ./wireguard-prober/ks.yaml

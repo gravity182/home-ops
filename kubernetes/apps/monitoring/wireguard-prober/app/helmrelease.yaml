@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: wireguard-prober
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: wireguard-prober
+  interval: 1h
+  values:
+    controllers:
+      wireguard-prober:
+        initContainers:
+          config:
+            image:
+              repository: docker.io/library/alpine
+              tag: "3.23@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11"
+            resources:
+              requests:
+                cpu: 1m
+                memory: 8Mi
+              limits:
+                cpu: 50m
+                memory: 32Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            command:
+              - sh
+              - -ec
+              - |
+                cat > /etc/blackbox/blackbox.yml <<EOF
+                modules:
+                  http_over_wireguard:
+                    prober: http
+                    timeout: 10s
+                    http:
+                      method: GET
+                      preferred_ip_protocol: ip4
+                      follow_redirects: true
+                EOF
+
+        containers:
+          app:
+            image:
+              repository: docker.io/prom/blackbox-exporter
+              tag: v0.28.0@sha256:e753ff9f3fc458d02cca5eddab5a77e1c175eee484a8925ac7d524f04366c2fc
+            args:
+              - --config.file=/etc/blackbox/blackbox.yml
+              - --log.level=warn
+            ports:
+              - name: http
+                containerPort: &port 9115
+                protocol: TCP
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                cpu: 100m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      app:
+        controller: wireguard-prober
+        ports:
+          http:
+            port: *port
+
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /etc/blackbox
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

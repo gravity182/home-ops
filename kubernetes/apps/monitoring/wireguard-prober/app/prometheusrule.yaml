@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: wireguard-vpn-rules
+spec:
+  groups:
+    - name: wireguard-vpn
+      rules:
+        - alert: WireGuardVpnDown
+          expr: probe_success{job="wireguard-vpn"} == 0 or absent(probe_success{job="wireguard-vpn"})
+          for: 5m
+          labels:
+            severity: critical
+            component: networking
+          annotations:
+            summary: >-
+              WireGuard VPN healthcheck is failing
+            description: >-
+              The blackbox HTTP probe from a WireGuard-routed pod to www.microsoft.com is failing.
