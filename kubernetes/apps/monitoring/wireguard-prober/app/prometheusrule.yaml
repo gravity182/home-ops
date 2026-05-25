@@ -9,7 +9,7 @@ spec:
       rules:
         - alert: WireGuardVpnDown
           expr: probe_success{job="wireguard-vpn"} == 0 or absent(probe_success{job="wireguard-vpn"})
-          for: 5m
+          for: 15m
           labels:
             severity: critical
             component: networking
@@ -17,4 +17,4 @@ spec:
             summary: >-
               WireGuard VPN healthcheck is failing
             description: >-
-              The blackbox HTTP probe from a WireGuard-routed pod to www.microsoft.com is failing.
+              The blackbox HTTP probe from a WireGuard-routed pod to Google's 204 connectivity endpoint is failing.
