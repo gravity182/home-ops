@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: k8s-monitoring
-      version: 3.8.8
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -26,7 +26,7 @@ spec:
       name: homeserver
 
     destinations:
-      - name: loki
+      loki:
         type: loki
         url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
 
@@ -37,16 +37,18 @@ spec:
     # Gathers Kubernetes lifecycle events as log data
     clusterEvents:
       enabled: true
+      destinations:
+        - loki
       collector: alloy-singleton
-      labelsToKeep:
-        - "level"
-        - "namespace"
-        - "node"
-        - "source"
-        - "reason"
-        - "job"
+      labels:
+        node: node
+        reason: reason
       structuredMetadata:
         name: name
+      extraLogProcessingStages: |-
+        stage.label_keep {
+          values = ["level","namespace","node","source","reason","job","service_name"]
+        }
       # filter namespaces
       # you can add your other namespaces to scrape
       # [] means all namespaces
@@ -59,6 +61,8 @@ spec:
     # Gathers logs from the Kubernetes Nodes
     nodeLogs:
       enabled: true
+      destinations:
+        - loki
       gatherMethod: volumes
       collector: alloy-logs
       journal:
@@ -81,8 +85,10 @@ spec:
           - kernel
 
     # Gathers logs from the Kubernetes Pods
-    podLogs:
+    podLogsViaLoki:
       enabled: true
+      destinations:
+        - loki
       gatherMethod: volumes
       collector: alloy-logs
       # remap labels
@@ -157,17 +163,9 @@ spec:
             source = "m"
           }
         }
-      # indexed labels
-      labelsToKeep:
-        - service_name
-        - app
-        - component
-        - container
-        - container_init
-        - node_name
-        - namespace
-        - level
-        - homeserver_vpn
+        stage.label_keep {
+          values = ["service_name","app","component","container","container_init","node_name","namespace","level","homeserver_vpn"]
+        }
       # unindexed labels
       # high-cardinality labels should go here
       structuredMetadata:
@@ -208,47 +206,33 @@ spec:
     # The Grafana Alloy instance that is responsible for anything that must be done on a single instance,
     # such as gathering Cluster events from the API server.
     # It is deployed as a ReplicaSet with one replica
-    alloy-singleton:
-      enabled: true
-      alloy:
-        resources:
-          requests: {}
-          limits: {}
-        mounts:
-          dockercontainers: false
-          varlog: false
+    collectors:
+      alloy-singleton:
+        controller:
+          type: deployment
+        alloy:
+          resources:
+            requests: {}
+            limits: {}
+          mounts:
+            dockercontainers: false
+            varlog: false
 
-    # The Grafana Alloy instance that scrapes workload logs on each node.
-    # It is deployed as a DaemonSet with one replica per node
-    alloy-logs:
-      enabled: true
-      alloy:
-        resources:
-          requests: {}
-          limits: {}
-        mounts:
-          dockercontainers: false
-          # required for node & pod logs
-          varlog: true
-        clustering:
-          enabled: false
-
-    # The Grafana Alloy instance that is responsible for scraping metrics from prometheus sources like cadvisor and kube-state-metrics
-    # It is deployed as a StatefulSet
-    alloy-metrics:
-      enabled: false
-      alloy:
-        resources:
-          requests: {}
-          limits: {}
-        clustering:
-          enabled: false
-
-    # The Grafana Alloy instance that opens receiver ports to process data delivered directly to Alloy (HTTP, gRPC, Zipkin, etc)
-    # For example, applications instrumented with OpenTelemetry SDKs
-    # It is deployed as a Daemonset
-    alloy-receiver:
-      enabled: false
-
-    alloy-profiles:
-      enabled: false
+      # The Grafana Alloy instance that scrapes workload logs on each node.
+      # It is deployed as a DaemonSet with one replica per node
+      alloy-logs:
+        controller:
+          type: daemonset
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
+        alloy:
+          resources:
+            requests: {}
+            limits: {}
+          mounts:
+            dockercontainers: false
+            # required for node & pod logs
+            varlog: true
+          clustering:
+            enabled: false
