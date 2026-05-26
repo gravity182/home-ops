@@ -34,6 +34,7 @@ echo "Platform:    linux/amd64"
 mkdir -p "${cache_dir}"
 
 talosctl image cache-create \
+  --force \
   --layout flat \
   --platform linux/amd64 \
   --image-cache-path "${cache_dir}" \
