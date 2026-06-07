@@ -29,6 +29,7 @@ resources:
   - ./soularr/ks.yaml
   - ./obsidian-livesync/ks.yaml
   - ./opengist/ks.yaml
+  - ./github-backup/ks.yaml
   - ./bazarr/ks.yaml
   - ./glance/ks.yaml
   - ./grafana-dashboards/ks.yaml
