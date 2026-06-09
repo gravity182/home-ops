@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: monitoring
 
 components:
-  - ../../../../components/egress-proxy-singbox
+  - ../../../../components/vpn-sidecar
 
 resources:
   - ./helmrelease.yaml
