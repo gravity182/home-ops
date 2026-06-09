@@ -18,7 +18,7 @@ spec:
                 template:
                   spec:
                     containers:
-                      - name: app
+                      - name: ${EGRESS_PROXY_CONTAINER_NAME:=app}
                         env:
                           - name: HTTP_PROXY
                             valueFrom:
@@ -41,6 +41,6 @@ spec:
                                 name: cluster-secrets
                                 key: SECRET_HTTP_PROXY_URL
                           - name: NO_PROXY
-                            value: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,.cluster.local,.svc"
+                            value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.cluster.local,.svc"
                           - name: no_proxy
-                            value: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,.cluster.local,.svc"
+                            value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.cluster.local,.svc"
