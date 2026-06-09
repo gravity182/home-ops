@@ -261,6 +261,14 @@ enable_hook = True
 dry_run = False
 # Choose if you want to append to (True) or overwrite (False) the dry-run log file.
 dry_run_append = True
+
+######################################
+#         Field Requirements         #
+
+# Skip renames when required template fields are missing.
+# Prevents incomplete filenames/paths when scene metadata is not ready.
+require_fields = True
+
 ######################################
 #            Module Related          #
 
