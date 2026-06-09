@@ -7,6 +7,8 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/network/cloudflare-dns/app
   postBuild:
+    substitute:
+      EGRESS_PROXY_CONTAINER_NAME: external-dns
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
