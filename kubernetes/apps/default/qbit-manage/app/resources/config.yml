@@ -20,7 +20,7 @@ commands:
 
 qbt:
   # qBittorrent parameters
-  host: http://qbittorrent:8080
+  host: http://qbittorrent.default.svc.cluster.local:8080
 
 settings:
   force_auto_tmm: True # Will force qBittorrent to enable Automatic Torrent Management for each torrent.
