@@ -13,6 +13,8 @@
   automergeType: "pr",
   platformAutomerge: true,
   schedule: ["before 10am on monday"],
+  minimumReleaseAge: "3 days",
+  internalChecksFilter: "strict",
   lockFileMaintenance: {
     schedule: ["before 10am on monday"],
   },
@@ -33,12 +35,6 @@
     managerFilePatterns: ["/^kustomization\\.ya?ml(?:\\.j2)?$/"],
   },
   packageRules: [
-    {
-      description: "Wait 14 days before proposing routine dependency updates",
-      matchDatasources: ["docker", "github-releases", "helm"],
-      minimumReleaseAge: "14 days",
-      internalChecksFilter: "strict",
-    },
     {
       description: "Disable pinDigests for OCIRepository (workaround for renovatebot/renovate#29768)",
       matchManagers: ["flux"],
