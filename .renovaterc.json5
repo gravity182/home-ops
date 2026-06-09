@@ -63,8 +63,6 @@
       automerge: true,
       automergeType: "branch",
       matchUpdateTypes: ["minor", "patch", "digest"],
-      minimumReleaseAge: "3 days",
-      ignoreTests: true,
     },
     {
       description: "Auto-merge Mise Tools",
@@ -72,7 +70,6 @@
       automerge: true,
       automergeType: "branch",
       matchUpdateTypes: ["minor", "patch"],
-      ignoreTests: true,
     },
     {
       matchUpdateTypes: ["major"],
@@ -175,7 +172,7 @@
       automerge: true,
       automergeType: "branch",
       ignoreTests: true,
-      matchUpdateTypes: ["major", "minor", "patch", "pin"],
+      matchUpdateTypes: ["patch"],
       minimumReleaseAge: null
     },
   ],
