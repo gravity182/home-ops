@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/drakkan/sftpgo
-              tag: v2.7.1
+              tag: v2.7.3@sha256:fd9ccdaada01c1c0674991aecbfea98f97d79313baffebcb8f708692d988bcbf
             command: ["/bin/sh", "-ec"]
             args:
               - |
