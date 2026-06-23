@@ -91,20 +91,7 @@ spec:
             limits:
               memory: 1Gi
       envoyService:
-        type: NodePort
         externalTrafficPolicy: Local
-        patch:
-          type: StrategicMerge
-          value:
-            spec:
-              ports:
-                - name: https
-                  port: 443
-                  nodePort: 30443
-                  protocol: TCP
-                - name: http
-                  port: 80
-                  nodePort: 30080
   shutdown:
     drainTimeout: 180s
   telemetry:
@@ -136,6 +123,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "192.168.8.51"
   listeners:
     - name: http
       protocol: HTTP
