@@ -4,12 +4,10 @@ clusterName: kubernetes
 talosVersion: "${talosVersion}"
 kubernetesVersion: "${kubernetesVersion}"
 
-# TODO: Switch back to Cilium VIP (router issue workaround)
-# Should use vip.ip: "192.168.3.100" instead of node IP
-endpoint: https://192.168.3.26:6443
+endpoint: https://192.168.8.50:6443
 additionalApiServerCertSans: &sans
   - "127.0.0.1"
-  - "192.168.3.26"
+  - "192.168.8.50"
 additionalMachineCertSans: *sans
 
 clusterPodNets: ["10.42.0.0/16"]
@@ -21,7 +19,7 @@ cniConfig:
 
 nodes:
   - hostname: "homeserver-main"
-    ipAddress: "192.168.3.26"
+    ipAddress: "192.168.8.10"
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
@@ -32,11 +30,14 @@ nodes:
           hardwareAddr: "e8:ff:1e:df:0a:bd"
         dhcp: false
         addresses:
-          - "192.168.3.26/24"
+          # Static node IP; keep outside the router DHCP and Cilium VIP ranges.
+          - "192.168.8.10/24"
         routes:
           - network: "0.0.0.0/0"
-            gateway: "192.168.3.1"
+            gateway: "192.168.8.1"
         mtu: 1500
+        vip:
+          ip: "192.168.8.50"
 
 # Global patches
 patches:
