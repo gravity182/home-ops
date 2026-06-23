@@ -14,9 +14,6 @@ spec:
   interval: 1h
   # https://github.com/gabe565/charts/blob/main/charts/adguard-home/values.yaml
   values:
-    # TODO: Switch back to Cilium VIP (router issue workaround)
-    hostNetwork: true
-
     image:
       repository: adguard/adguardhome
       tag: v0.107.77@sha256:e6f2b8bcda06064ab055b44933a4f0e983c35558b9cdb8d2e7ab1efcee36d890
@@ -31,9 +28,11 @@ spec:
             port: 3000
       dns-tcp:
         enabled: true
-        type: ClusterIP
-        externalTrafficPolicy: ""
-        annotations: {}
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+        annotations:
+          lbipam.cilium.io/ips: "192.168.8.53"
+          lbipam.cilium.io/sharing-key: adguard-home-dns
         ports:
           dns-tcp:
             enabled: true
@@ -42,9 +41,11 @@ spec:
             enabled: false
       dns-udp:
         enabled: true
-        type: ClusterIP
-        externalTrafficPolicy: ""
-        annotations: {}
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+        annotations:
+          lbipam.cilium.io/ips: "192.168.8.53"
+          lbipam.cilium.io/sharing-key: adguard-home-dns
         ports:
           dns-udp:
             enabled: true
@@ -83,7 +84,7 @@ spec:
       theme: auto
       dns:
         bind_hosts:
-          - 192.168.3.26
+          - 0.0.0.0
         port: 53
         anonymize_client_ip: false
         ratelimit: 20
@@ -221,10 +222,10 @@ spec:
         safebrowsing_block_host: standard-block.dns.adguard.com
         rewrites:
           - domain: ${SECRET_DOMAIN}
-            answer: 192.168.3.26
+            answer: 192.168.8.52
             enabled: true
           - domain: '*.${SECRET_DOMAIN}'
-            answer: 192.168.3.26
+            answer: 192.168.8.52
             enabled: true
         safe_fs_patterns:
           - /opt/adguardhome/work/data/userfilters/*

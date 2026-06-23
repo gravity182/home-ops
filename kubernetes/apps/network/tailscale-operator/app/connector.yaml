@@ -6,4 +6,5 @@ metadata:
 spec:
   subnetRouter:
     advertiseRoutes:
-      - 192.168.3.26/32 # homeserver-main (envoy-internal + adguard-home)
+      - 192.168.8.52/32 # envoy-internal
+      - 192.168.8.53/32 # adguard home
