@@ -1,0 +1,40 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: drm-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: drm-exporter
+  interval: 1h
+  values:
+    dra:
+      enabled: true
+      deviceClassName: gpu.intel.com
+
+    monitoring:
+      serviceMonitor:
+        enabled: true
+      dashboards:
+        enabled: true
+
+    securityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+        add:
+          # Talos does not ship the msr kernel module, so SYS_RAWIO + /dev/cpu
+          # would only enable unsupported MSR reads. PERFMON is enough for Intel
+          # i915 engine utilization and the perf-PMU power path.
+          - PERFMON
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
