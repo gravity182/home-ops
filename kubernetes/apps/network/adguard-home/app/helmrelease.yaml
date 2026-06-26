@@ -83,7 +83,7 @@ spec:
       theme: auto
       dns:
         bind_hosts:
-          - 192.168.8.10
+          - 192.168.10.10
         port: 53
         anonymize_client_ip: false
         ratelimit: 20
@@ -221,10 +221,10 @@ spec:
         safebrowsing_block_host: standard-block.dns.adguard.com
         rewrites:
           - domain: ${SECRET_DOMAIN}
-            answer: 192.168.8.52
+            answer: 192.168.10.52
             enabled: true
           - domain: '*.${SECRET_DOMAIN}'
-            answer: 192.168.8.52
+            answer: 192.168.10.52
             enabled: true
         safe_fs_patterns:
           - /opt/adguardhome/work/data/userfilters/*

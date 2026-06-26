@@ -4,10 +4,10 @@ clusterName: kubernetes
 talosVersion: "${talosVersion}"
 kubernetesVersion: "${kubernetesVersion}"
 
-endpoint: https://192.168.8.50:6443
+endpoint: https://192.168.10.50:6443
 additionalApiServerCertSans: &sans
   - "127.0.0.1"
-  - "192.168.8.50"
+  - "192.168.10.50"
 additionalMachineCertSans: *sans
 
 clusterPodNets: ["10.42.0.0/16"]
@@ -19,7 +19,7 @@ cniConfig:
 
 nodes:
   - hostname: "homeserver-main"
-    ipAddress: "192.168.8.10"
+    ipAddress: "192.168.10.10"
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
@@ -31,13 +31,13 @@ nodes:
         dhcp: false
         addresses:
           # Static node IP; keep outside the router DHCP and Cilium VIP ranges.
-          - "192.168.8.10/24"
+          - "192.168.10.10/24"
         routes:
           - network: "0.0.0.0/0"
-            gateway: "192.168.8.1"
+            gateway: "192.168.10.1"
         mtu: 1500
         vip:
-          ip: "192.168.8.50"
+          ip: "192.168.10.50"
 
 # Global patches
 patches:

@@ -98,7 +98,7 @@ spec:
           ingress:
             - from:
                 - ipBlock:
-                    cidr: 192.168.8.0/24
+                    cidr: 192.168.20.0/24
               ports:
                 - port: *port
                   protocol: TCP
