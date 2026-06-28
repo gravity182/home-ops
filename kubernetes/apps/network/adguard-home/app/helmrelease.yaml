@@ -219,13 +219,7 @@ spec:
         blocking_mode: default
         parental_block_host: family-block.dns.adguard.com
         safebrowsing_block_host: standard-block.dns.adguard.com
-        rewrites:
-          - domain: ${SECRET_DOMAIN}
-            answer: 192.168.10.52
-            enabled: true
-          - domain: '*.${SECRET_DOMAIN}'
-            answer: 192.168.10.52
-            enabled: true
+        rewrites: []
         safe_fs_patterns:
           - /opt/adguardhome/work/data/userfilters/*
         safebrowsing_cache_size: 1048576
