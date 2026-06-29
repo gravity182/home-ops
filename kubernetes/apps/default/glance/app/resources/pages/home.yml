@@ -119,7 +119,7 @@
               same-tab: true
               icon: /assets/authentik-light.svg
             - title: Grafana
-              url: https://grafana.${SECRET_DOMAIN}
+              url: https://grafana.${SECRET_DOMAIN}/dashboards
               check-url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80/api/health
               same-tab: true
               icon: /assets/grafana-light.svg
