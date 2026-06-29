@@ -36,6 +36,7 @@ configMapGenerator:
   # https://github.com/selfhst/icons
   - name: glance-icons
     files:
+      - ./icons/openwrt-light.svg
       - ./icons/adguard-home-light.svg
       - ./icons/authentik-light.svg
       - ./icons/booktracker.png

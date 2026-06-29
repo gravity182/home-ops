@@ -101,6 +101,13 @@
           title: Infra
           cache: 1m
           sites:
+            - title: OpenWrt
+              url: http://192.168.20.1/cgi-bin/luci/
+              check-url: http://192.168.20.1/cgi-bin/luci/
+              alt-status-codes:
+                - 403
+              same-tab: true
+              icon: /assets/openwrt-light.svg
             - title: AdGuard Home
               url: https://adguard.${SECRET_DOMAIN}
               check-url: http://adguard-home.network.svc.cluster.local:3000/control/status
