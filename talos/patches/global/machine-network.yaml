@@ -2,5 +2,5 @@ machine:
   network:
     disableSearchDomain: true
     nameservers:
-      - 192.168.10.1
-      - 1.1.1.1
+      # Keep node DNS off the router path - use infrastracture AdGuard directly
+      - 192.168.10.10
