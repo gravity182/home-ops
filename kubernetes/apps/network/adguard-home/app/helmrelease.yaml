@@ -136,7 +136,10 @@ spec:
         upstream_timeout: 10s
         private_networks: []
         use_private_ptr_resolvers: true
-        local_ptr_upstreams: []
+        # Resolve private PTR records via router dnsmasq, which has DHCP
+        # leases and local reverse zones.
+        local_ptr_upstreams:
+          - 192.168.10.1
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
