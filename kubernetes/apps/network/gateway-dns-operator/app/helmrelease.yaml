@@ -1,0 +1,13 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gateway-dns-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gateway-dns-operator
+  interval: 1h
+  values:
+    adguard:
+      url: http://adguard-home.network.svc.cluster.local:3000/control
