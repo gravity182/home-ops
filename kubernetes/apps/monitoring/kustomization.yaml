@@ -15,4 +15,3 @@ resources:
   - ./smartctl-exporter/ks.yaml
   - ./drm-exporter/ks.yaml
   - ./upstream-proxy-prober/ks.yaml
-  - ./wireguard-prober/ks.yaml

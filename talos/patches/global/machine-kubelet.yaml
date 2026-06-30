@@ -2,9 +2,6 @@ machine:
   kubelet:
     extraConfig:
       serializeImagePulls: false
-      allowedUnsafeSysctls:
-        # required for WireGuard VPN
-        - net.ipv4.conf.all.src_valid_mark
     nodeIP:
       validSubnets:
         - 192.168.10.0/24
