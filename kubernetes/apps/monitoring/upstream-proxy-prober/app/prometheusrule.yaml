@@ -15,6 +15,6 @@ spec:
             component: networking
           annotations:
             summary: >-
-              Upstream HTTP proxy is down
+              Upstream HTTP proxy probe is failing
             description: >-
-              The blackbox probe via the upstream HTTP proxy to www.microsoft.com is failing.
+              The blackbox probe via the upstream HTTP proxy is failing for {{ $labels.instance }}.
