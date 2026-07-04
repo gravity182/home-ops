@@ -188,7 +188,8 @@ spec:
       allocatedMemory: 128
       writebackSizeLimit: 16MB
 
-    gateway: {}
+    gateway:
+      verboseLogging: false
 
     monitoring:
       dashboards:
