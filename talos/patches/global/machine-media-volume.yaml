@@ -6,3 +6,5 @@ provisioning:
   diskSelector:
     match: disk.model == "PSSD T7" && !system_disk
   minSize: 900GB
+mount:
+  disableAccessTime: true
