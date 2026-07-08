@@ -135,11 +135,8 @@ spec:
         bootstrap_prefer_ipv6: false
         upstream_timeout: 10s
         private_networks: []
-        use_private_ptr_resolvers: true
-        # Resolve private PTR records via router dnsmasq, which has DHCP
-        # leases and local reverse zones.
-        local_ptr_upstreams:
-          - 192.168.10.1
+        use_private_ptr_resolvers: false
+        local_ptr_upstreams: []
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
