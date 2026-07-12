@@ -30,7 +30,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /sabnzbd
+                    path: /sabnzbd/
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
