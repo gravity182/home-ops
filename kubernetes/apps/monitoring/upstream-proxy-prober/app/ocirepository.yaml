@@ -4,7 +4,7 @@ kind: OCIRepository
 metadata:
   name: upstream-proxy-prober
 spec:
-  interval: 15m
+  interval: 6h
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
