@@ -101,8 +101,7 @@ spec:
         upstream_dns_file: ""
         bootstrap_dns:
           - 1.1.1.1
-        fallback_dns:
-          - 1.1.1.1
+        fallback_dns: []
         upstream_mode: load_balance
         fastest_timeout: 1s
         allowed_clients: []
