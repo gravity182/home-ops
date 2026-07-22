@@ -93,7 +93,9 @@ spec:
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
-          - https://dns.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab
+          # Follow NextDNS's dynamically managed secondary ultralow endpoint.
+          # It currently selects the low-latency Helsinki PoP for this network.
+          - https://ultralow.dns2.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab
           # Geo-blocked domains: use Quad9 to bypass DNS-level blocking
           - '[/tmdb.org/]9.9.9.9'
           - '[/themoviedb.org/]9.9.9.9'
@@ -139,7 +141,7 @@ spec:
         use_dns64: false
         dns64_prefixes: []
         serve_http3: false
-        use_http3_upstreams: true
+        use_http3_upstreams: false
         serve_plain_dns: true
         hostsfile_enabled: true
         pending_requests:
