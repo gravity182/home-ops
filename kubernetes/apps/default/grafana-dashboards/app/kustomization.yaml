@@ -32,6 +32,12 @@ configMapGenerator:
     options:
       labels:
         grafana_dashboard: "1"
+  - name: openwrt-router-dashboard
+    files:
+      - openwrt-router-dashboard.json=./resources/openwrt-router-dashboard.json
+    options:
+      labels:
+        grafana_dashboard: "1"
 
 generatorOptions:
   disableNameSuffixHash: true

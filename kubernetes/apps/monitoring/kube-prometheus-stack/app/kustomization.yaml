@@ -7,4 +7,5 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./openwrt-router.yaml
   - ./secret.sops.yaml
