@@ -188,6 +188,15 @@ spec:
       allocatedMemory: 128
       writebackSizeLimit: 16MB
 
+    memcachedExporter:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 16Mi
+        limits:
+          cpu: 50m
+          memory: 32Mi
+
     gateway:
       verboseLogging: false
 

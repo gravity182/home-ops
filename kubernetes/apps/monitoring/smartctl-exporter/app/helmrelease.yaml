@@ -16,3 +16,10 @@ spec:
       rules:
         smartCTLDDeviceTemperature:
           enabled: false
+    resources:
+      requests:
+        cpu: 5m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
