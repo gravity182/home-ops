@@ -193,7 +193,7 @@ spec:
 
     monitoring:
       dashboards:
-        enabled: true
+        enabled: false
       rules:
         enabled: true
         alerting: true
