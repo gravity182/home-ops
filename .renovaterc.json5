@@ -13,8 +13,6 @@
   automergeType: "pr",
   platformAutomerge: true,
   schedule: ["before 10am on monday"],
-  minimumReleaseAge: "3 days",
-  internalChecksFilter: "strict",
   lockFileMaintenance: {
     schedule: ["before 10am on monday"],
   },
