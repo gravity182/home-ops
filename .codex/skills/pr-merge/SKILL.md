@@ -26,6 +26,7 @@ Treat every other PR as out of scope, including non-Renovate PRs, Renovate confi
 - Require explicit user approval after presenting the merge plan and before every merge batch.
 - Process approved PRs serially. Verify the current PR before merging the next one.
 - Re-check the exact head SHA, mergeability, and required checks immediately before merging.
+- A transient `UNKNOWN` mergeability result can occur immediately after an earlier serial merge changes the target branch. Re-fetch the PR state once; proceed only when the approved head SHA is unchanged, required checks still pass, and the repeated result is `CLEAN` and `MERGEABLE`. Stop if `UNKNOWN` persists or any approved state has materially changed.
 - Merge only with `gh pr merge <number> --squash --match-head-commit <head-sha>`.
 - Do not use `--admin`, bypass checks, resolve conflicts, delete branches, force reconciliation, or delete cluster resources.
 - Stop and report the blocker when a check, diff, release note, compatibility assessment, or verification result is unclear or fails. Do not invent a workaround.
@@ -47,7 +48,7 @@ Treat every other PR as out of scope, including non-Renovate PRs, Renovate confi
 
 For each approved PR:
 
-1. Re-fetch its state, required checks, mergeability, and head SHA. Stop if any no longer match the approved plan.
+1. Re-fetch its state, required checks, mergeability, and head SHA. If mergeability is `UNKNOWN` immediately after a preceding serial merge, re-fetch once to allow GitHub to recalculate against the new target branch. Stop if it remains `UNKNOWN`, if the repeated result is not `CLEAN` and `MERGEABLE`, or if the approved head SHA or required checks no longer match the plan.
 2. Merge with squash and `--match-head-commit`.
 3. For a deployed upgrade, wait for normal Flux reconciliation. Do not force it. Verify the expected Git source revision, affected Kustomization or HelmRelease, and target workload.
 4. Prove the update reached the intended version:
