@@ -1,0 +1,87 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: radarr-importer
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: radarr-importer
+  interval: 1h
+  values:
+    controllers:
+      radarr-importer:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/gravity182/radarr-importer
+              tag: 0.1.1@sha256:ea13b318e4997b22d98a90fe4f6774feaa435a669a692e57979009893f1e8f5b
+            env:
+              RADARR_URL: http://radarr.default.svc.cluster.local:7878
+              RADARR_ROOT_FOLDER: /data/library/movies
+              OPENAI_MODEL: gpt-5.6-luna
+              OPENAI_REASONING_EFFORT: high
+              TELEGRAM_CHAT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: SECRET_TELEGRAM_CHAT_ID
+              LISTEN_ADDRESS: ":8080"
+              RECONCILE_INTERVAL_SECONDS: "300"
+              LOG_LEVEL: info
+            envFrom:
+              - secret: radarr-importer
+            ports:
+              - name: http
+                containerPort: &port 8080
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 2
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 2
+                  failureThreshold: 3
+            securityContext:
+              privileged: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: radarr-importer
+        ports:
+          http:
+            port: *port
