@@ -4,7 +4,7 @@ kind: UserVolumeConfig
 name: media
 provisioning:
   diskSelector:
-    match: disk.model == "PSSD T7" && !system_disk
+    match: "'/dev/disk/by-id/usb-Samsung_PSSD_T7_S6XDNS0W334514W-0:0' in disk.symlinks && !system_disk"
   minSize: 900GB
 mount:
   disableAccessTime: true

@@ -20,7 +20,8 @@ cniConfig:
 nodes:
   - hostname: "homeserver-main"
     ipAddress: "192.168.10.10"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      wwid: "naa.53a5a277561c2936"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/d2100ddaafd8ba8fd13d1e9edaae4502e905e7bc040a1f3542d255466d401fda

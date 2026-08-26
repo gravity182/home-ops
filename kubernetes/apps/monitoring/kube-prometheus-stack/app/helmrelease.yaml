@@ -294,6 +294,18 @@ spec:
                 expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
                 labels:
                   severity: critical
+      media-filesystem-rules:
+        groups:
+          - name: media-filesystem
+            rules:
+              - alert: MediaFilesystemMissing
+                annotations:
+                  summary: Media filesystem is missing
+                  description: /var/mnt/media is not mounted as an XFS filesystem.
+                expr: absent(node_filesystem_size_bytes{mountpoint="/var/mnt/media",fstype="xfs"})
+                for: 5m
+                labels:
+                  severity: critical
       node-temp-rules:
         groups:
           - name: node-temperature
