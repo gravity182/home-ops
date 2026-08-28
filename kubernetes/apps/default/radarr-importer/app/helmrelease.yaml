@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/radarr-importer
-              tag: 0.1.1@sha256:ea13b318e4997b22d98a90fe4f6774feaa435a669a692e57979009893f1e8f5b
+              tag: 0.1.2@sha256:8c6f720acee4468d581213074f53fd4acc123dc989bac3c2f513a973eaf7b403
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
               RADARR_ROOT_FOLDER: /data/library/movies
