@@ -19,6 +19,10 @@ talosconfig
 *.swp
 *.swo
 *~
+# Node.js
+node_modules/
+# Wrangler
+.wrangler/
 # Misc.
 .private/
 .task/
