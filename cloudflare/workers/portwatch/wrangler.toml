@@ -11,12 +11,12 @@ crons = ["* * * * *"]
 # Public ports to probe (TCP connect).
 PORTWATCH_PORTS = "443,30413"
 
-# Alerting behavior
-PORTWATCH_CONSECUTIVE_FAILURES_THRESHOLD = "3"
-PORTWATCH_REMINDER_SECONDS = "21600" # 6h
+# Alerting behavior. The Worker runs once per minute.
+PORTWATCH_FAILURE_THRESHOLD = "3"
+PORTWATCH_REPEAT_INTERVAL_SECONDS = "43200" # 12h
 
 # TCP connect timeout per port probe.
-PORTWATCH_CONNECT_TIMEOUT_MS = "3000"
+PORTWATCH_CONNECT_TIMEOUT_MS = "5000"
 
 [[kv_namespaces]]
 binding = "PORTWATCH_KV"

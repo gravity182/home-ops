@@ -3,196 +3,171 @@ import { connect } from "cloudflare:sockets";
 type Env = {
   PORTWATCH_KV: KVNamespace;
   PORTWATCH_PORTS: string;
-  PORTWATCH_CONSECUTIVE_FAILURES_THRESHOLD: string;
-  PORTWATCH_REMINDER_SECONDS: string;
+  PORTWATCH_FAILURE_THRESHOLD: string;
+  PORTWATCH_REPEAT_INTERVAL_SECONDS: string;
   PORTWATCH_CONNECT_TIMEOUT_MS: string;
-
-  // Secrets (set via `wrangler secret put ...`)
   PORTWATCH_TARGET_IP: string;
   TELEGRAM_BOT_TOKEN: string;
   TELEGRAM_CHAT_ID: string;
 };
 
 type PortState = {
-  status: "up" | "down";
-  consecutiveFailures: number;
-  firstFailureAt?: number;
-  downAt?: number;
-  lastReminderAt?: number;
+  failures: number;
+  down: boolean;
+  lastNotificationAt?: number;
 };
+
+function parsePositiveInteger(value: string, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parsePorts(value: string): number[] {
+  return value
+    .split(",")
+    .map((port) => Number(port.trim()))
+    .filter((port) => Number.isInteger(port) && port > 0 && port <= 65535);
+}
+
+function portKey(targetIp: string, port: number): string {
+  return `portwatch:${targetIp}:${port}`;
+}
 
 function nowSeconds(): number {
   return Math.floor(Date.now() / 1000);
 }
 
-function parseIntStrict(value: string, fallback: number): number {
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed)) return fallback;
-  return parsed;
-}
-
-function parsePorts(ports: string): number[] {
-  return ports
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => Number.parseInt(p, 10))
-    .filter((p) => Number.isFinite(p) && p > 0 && p <= 65535);
-}
-
-function portKey(targetIp: string, port: number): string {
-  return `portwatch:state:${targetIp}:${port}`;
-}
-
 async function loadState(env: Env, key: string): Promise<PortState> {
-  const raw = await env.PORTWATCH_KV.get(key);
-  if (!raw) {
-    return { status: "up", consecutiveFailures: 0 };
-  }
-  try {
-    return JSON.parse(raw) as PortState;
-  } catch {
-    return { status: "up", consecutiveFailures: 0 };
-  }
-}
+  const value = await env.PORTWATCH_KV.get(key);
+  if (!value) return { failures: 0, down: false };
 
-async function saveState(env: Env, key: string, state: PortState): Promise<void> {
-  await env.PORTWATCH_KV.put(key, JSON.stringify(state));
+  try {
+    const parsed = JSON.parse(value) as Partial<PortState>;
+    if (
+      typeof parsed.failures === "number" &&
+      Number.isInteger(parsed.failures) &&
+      parsed.failures >= 0 &&
+      typeof parsed.down === "boolean" &&
+      (parsed.lastNotificationAt === undefined ||
+        (typeof parsed.lastNotificationAt === "number" &&
+          Number.isInteger(parsed.lastNotificationAt)))
+    ) {
+      return parsed as PortState;
+    }
+  } catch {
+    // Treat invalid state as a new incident.
+  }
+
+  return { failures: 0, down: false };
 }
 
 async function sendTelegram(env: Env, text: string): Promise<void> {
-  const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const payload = {
-    chat_id: env.TELEGRAM_CHAT_ID,
-    text,
-    parse_mode: "HTML",
-    disable_web_page_preview: true,
-  };
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const response = await fetch(
+    `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        chat_id: env.TELEGRAM_CHAT_ID,
+        text,
+        disable_web_page_preview: true,
+      }),
+    },
+  );
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`Telegram sendMessage failed: ${response.status} ${body}`);
+    throw new Error(`Telegram sendMessage failed with ${response.status}`);
   }
 }
 
 async function tcpProbe(hostname: string, port: number, timeoutMs: number): Promise<boolean> {
-  let socket:
-    | ReturnType<typeof connect>
-    | undefined;
+  let socket: ReturnType<typeof connect> | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
   try {
     socket = connect({ hostname, port });
     await Promise.race([
       socket.opened,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("tcp probe timeout")), timeoutMs),
-      ),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error("TCP probe timed out")), timeoutMs);
+      }),
     ]);
     return true;
   } catch {
     return false;
   } finally {
-    try {
-      socket?.close();
-    } catch {
-      // ignore
-    }
+    if (timer !== undefined) clearTimeout(timer);
+    await socket?.close().catch(() => undefined);
   }
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+function downMessage(targetIp: string, port: number): string {
+  return `\u{1F525} PORT DOWN: ${targetIp}:${port}`;
+}
+
+function recoveredMessage(targetIp: string, port: number): string {
+  return `\u{2705} PORT RECOVERED: ${targetIp}:${port}`;
 }
 
 async function evaluatePort(env: Env, targetIp: string, port: number): Promise<void> {
-  const connectTimeoutMs = parseIntStrict(env.PORTWATCH_CONNECT_TIMEOUT_MS, 3000);
-  const threshold = parseIntStrict(env.PORTWATCH_CONSECUTIVE_FAILURES_THRESHOLD, 3);
-  const reminderSeconds = parseIntStrict(env.PORTWATCH_REMINDER_SECONDS, 21600);
-  const now = nowSeconds();
-
+  const threshold = parsePositiveInteger(env.PORTWATCH_FAILURE_THRESHOLD, 3);
+  const repeatIntervalSeconds = parsePositiveInteger(
+    env.PORTWATCH_REPEAT_INTERVAL_SECONDS,
+    43200,
+  );
+  const timeoutMs = parsePositiveInteger(env.PORTWATCH_CONNECT_TIMEOUT_MS, 5000);
   const key = portKey(targetIp, port);
   const state = await loadState(env, key);
 
-  const isOpen = await tcpProbe(targetIp, port, connectTimeoutMs);
+  if (await tcpProbe(targetIp, port, timeoutMs)) {
+    if (state.down) {
+      await sendTelegram(env, recoveredMessage(targetIp, port));
+    }
+    if (state.down || state.failures > 0) {
+      await env.PORTWATCH_KV.delete(key);
+    }
+    return;
+  }
 
-  if (isOpen) {
-    if (state.status === "down") {
-      await sendTelegram(
-        env,
-        `✅ <b>PORT RECOVERED</b>: <code>${escapeHtml(targetIp)}:${port}</code>`,
+  const now = nowSeconds();
+  if (state.down) {
+    if (now - (state.lastNotificationAt ?? 0) >= repeatIntervalSeconds) {
+      await sendTelegram(env, downMessage(targetIp, port));
+      await env.PORTWATCH_KV.put(
+        key,
+        JSON.stringify({ ...state, lastNotificationAt: now }),
       );
-      await saveState(env, key, { status: "up", consecutiveFailures: 0 });
-      return;
-    }
-
-    if (state.consecutiveFailures !== 0) {
-      await saveState(env, key, { ...state, consecutiveFailures: 0, firstFailureAt: undefined });
     }
     return;
   }
 
-  // Failed probe
-  if (state.status === "down") {
-    const lastReminderAt = state.lastReminderAt ?? state.downAt ?? now;
-    if (reminderSeconds > 0 && now - lastReminderAt >= reminderSeconds) {
-      await sendTelegram(
-        env,
-        `🔥 <b>PORT STILL DOWN</b>: <code>${escapeHtml(targetIp)}:${port}</code>`,
-      );
-      await saveState(env, key, { ...state, lastReminderAt: now });
-    }
+  const failures = state.failures + 1;
+  if (failures < threshold) {
+    await env.PORTWATCH_KV.put(key, JSON.stringify({ failures, down: false }));
     return;
   }
 
-  const nextFailures = (state.consecutiveFailures ?? 0) + 1;
-  const nextFirstFailureAt = state.firstFailureAt ?? now;
-
-  if (nextFailures < threshold) {
-    // Only write during the initial streak buildup. This caps writes during short blips to < threshold per event.
-    await saveState(env, key, {
-      ...state,
-      consecutiveFailures: nextFailures,
-      firstFailureAt: nextFirstFailureAt,
-    });
-    return;
-  }
-
-  // Transition to DOWN (single alert), then reminders handled above.
-  await sendTelegram(
-    env,
-    `🔥 <b>PORT DOWN</b>: <code>${escapeHtml(targetIp)}:${port}</code>`,
+  await sendTelegram(env, downMessage(targetIp, port));
+  await env.PORTWATCH_KV.put(
+    key,
+    JSON.stringify({ failures, down: true, lastNotificationAt: now }),
   );
-  await saveState(env, key, {
-    status: "down",
-    consecutiveFailures: nextFailures,
-    firstFailureAt: nextFirstFailureAt,
-    downAt: now,
-    lastReminderAt: now,
-  });
 }
 
 export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/healthz") {
-      return new Response("ok", { status: 200 });
+      return new Response("ok");
     }
     return new Response("not found", { status: 404 });
   },
 
   async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+    const targetIp = env.PORTWATCH_TARGET_IP?.trim();
     const ports = parsePorts(env.PORTWATCH_PORTS);
-    if (!env.PORTWATCH_TARGET_IP || ports.length === 0) return;
+    if (!targetIp || ports.length === 0) return;
 
-    const targetIp = env.PORTWATCH_TARGET_IP.trim();
     await Promise.all(ports.map((port) => evaluatePort(env, targetIp, port)));
   },
 };
