@@ -17,8 +17,9 @@ spec:
           schedule: "*/10 * * * *"
           timeZone: Europe/Moscow
           concurrencyPolicy: Replace
-          successfulJobsHistory: 3
-          failedJobsHistory: 1
+          successfulJobsHistory: 1
+          failedJobsHistory: 2
+          ttlSecondsAfterFinished: 3600
         pod:
           restartPolicy: OnFailure
         containers:
