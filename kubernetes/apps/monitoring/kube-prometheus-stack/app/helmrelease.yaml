@@ -10,6 +10,8 @@ spec:
   interval: 1h
   values:
     cleanPrometheusOperatorObjectNames: true
+    prometheusOperator:
+      revisionHistoryLimit: 3
 
     # Disable kube-proxy monitoring (Cilium runs with kubeProxyReplacement enabled)
     kubeProxy:
