@@ -10,7 +10,7 @@ crons = ["* * * * *"]
 [vars]
 DEADMAN_CHECK_IDS = "watchdog-homelab"
 DEADMAN_TIMEOUT_SECONDS = "720"
-DEADMAN_DEDUPE_SECONDS = "3600"
+DEADMAN_REPEAT_INTERVAL_SECONDS = "3600"
 
 [[kv_namespaces]]
 binding = "DEADMAN_KV"
