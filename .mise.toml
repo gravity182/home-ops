@@ -6,7 +6,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 
 [tools]
 "python" = "3.14.7"
-"pipx:makejinja" = "2.8.3"
+"pipx:makejinja" = "2.9.1"
 "pipx:pre-commit" = "4.6.2"
 "npm:renovate" = "44.79.6"
 "npm:wrangler" = "4.134.0"
