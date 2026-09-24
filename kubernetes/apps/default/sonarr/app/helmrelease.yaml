@@ -14,6 +14,7 @@ spec:
       sonarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          home.ops/restart-requested-at: "16:37"
         strategy: Recreate
         containers:
           app:
