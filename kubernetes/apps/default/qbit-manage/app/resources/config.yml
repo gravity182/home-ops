@@ -220,6 +220,20 @@ share_limits:
     share_limit_action: Stop
     resume_torrent_after_change: true
     add_group_to_tag: false
+  tv:
+    # Library TV torrents stop after ratio 3 AND two weeks of seeding; files are kept.
+    priority: 6
+    categories:
+      - tv
+    exclude_any_tags:
+      - noHL
+    min_seeding_time: 2w
+    max_ratio: 3.0
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
   default:
     priority: 999
     max_ratio: -1
