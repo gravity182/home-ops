@@ -145,11 +145,16 @@ share_limits:
   # Each torrent will be matched with the share limit group with the highest priority that meets the group filter criteria.
   # Each torrent can only be matched with one share limit group
   # This variable is mandatory and is a text defining the name of your grouping. This can be any string you want
-  # Manual movie tags take precedence over automatic noHL cleanup.
+  # Manual seeding tags apply to the listed categories and take precedence over automatic noHL cleanup.
   seed-unlimited:
     priority: 1
     categories:
       - movies
+      - tv
+      - games
+      - music
+      - books
+      - xxx
     include_all_tags:
       - seed-unlimited
     max_ratio: -1
@@ -159,10 +164,15 @@ share_limits:
     resume_torrent_after_change: true
     add_group_to_tag: false
   seed-extended-noHL:
-    # Extended movies without a library hardlink are deleted after ratio 5 AND two weeks of seeding.
+    # Extended torrents tagged noHL are deleted after ratio 5 AND two weeks of seeding.
     priority: 2
     categories:
       - movies
+      - tv
+      - games
+      - music
+      - books
+      - xxx
     include_all_tags:
       - seed-extended
       - noHL
@@ -174,10 +184,15 @@ share_limits:
     resume_torrent_after_change: true
     add_group_to_tag: false
   seed-extended:
-    # Extended movies with a library hardlink stop after ratio 5 AND two weeks of seeding; files are kept.
+    # Extended torrents without the noHL tag stop after ratio 5 AND two weeks of seeding; files are kept.
     priority: 3
     categories:
       - movies
+      - tv
+      - games
+      - music
+      - books
+      - xxx
     include_all_tags:
       - seed-extended
     exclude_any_tags:
