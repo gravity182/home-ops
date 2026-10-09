@@ -9,6 +9,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: radarr
+    - name: qbittorrent
   interval: 1h
   path: ./kubernetes/apps/default/radarr-importer/app
   postBuild:

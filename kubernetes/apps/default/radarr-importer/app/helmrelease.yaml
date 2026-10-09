@@ -19,9 +19,11 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/radarr-importer
-              tag: 0.1.4@sha256:eed5466ecf05a46fc49384820be3bf8bfe6c6f9e9ab74e33fd748f8dbaf478a7
+              tag: 0.2.0@sha256:6152d8b476ba3288ff0d777f6efbea7d6491878e9a688748404824908db2be32
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
+              QBITTORRENT_URL: http://qbittorrent.default.svc.cluster.local:8080
+              STATE_DB_PATH: /state/imports.sqlite
               RADARR_ROOT_FOLDER: /data/library/movies
               RADARR_DEFAULT_QUALITY_PROFILE_ID: "8"
               OPENAI_MODEL: gpt-5.6-luna
@@ -78,8 +80,20 @@ spec:
         - name: ghcr-pull-secret
       securityContext:
         runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+    persistence:
+      state:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        storageClass: openebs-hostpath
+        size: 1Gi
+        globalMounts:
+          - path: /state
     service:
       app:
         controller: radarr-importer
