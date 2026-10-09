@@ -234,6 +234,32 @@ share_limits:
     share_limit_action: Stop
     resume_torrent_after_change: true
     add_group_to_tag: false
+  games:
+    # Game torrents stop after ratio 4 AND one week of seeding; files are kept.
+    priority: 7
+    categories:
+      - games
+    min_seeding_time: 1w
+    max_ratio: 4.0
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
+  xxx:
+    # Hardlinked xxx torrents stop at ratio 4 with no minimum seeding time; files are kept.
+    priority: 8
+    categories:
+      - xxx
+    exclude_any_tags:
+      - noHL
+    min_seeding_time: 0
+    max_ratio: 4.0
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
   default:
     priority: 999
     max_ratio: -1
