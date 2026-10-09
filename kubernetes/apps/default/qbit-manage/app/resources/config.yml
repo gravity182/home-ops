@@ -6,7 +6,7 @@
 
 commands:
   # The commands defined below will IGNORE any commands used in command line and docker env variables.
-  dry_run: False
+  dry_run: True
   recheck: False
   cat_update: False
   tag_update: True
@@ -145,9 +145,53 @@ share_limits:
   # Each torrent will be matched with the share limit group with the highest priority that meets the group filter criteria.
   # Each torrent can only be matched with one share limit group
   # This variable is mandatory and is a text defining the name of your grouping. This can be any string you want
+  # Manual movie tags take precedence over automatic noHL cleanup.
+  seed-unlimited:
+    priority: 1
+    categories:
+      - movies
+    include_all_tags:
+      - seed-unlimited
+    max_ratio: -1
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
+  seed-extended-noHL:
+    # Extended movies without a library hardlink are deleted after ratio 5 AND two weeks of seeding.
+    priority: 2
+    categories:
+      - movies
+    include_all_tags:
+      - seed-extended
+      - noHL
+    min_seeding_time: 2w
+    max_ratio: 5.0
+    max_seeding_time: -1
+    cleanup: true
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
+  seed-extended:
+    # Extended movies with a library hardlink stop after ratio 5 AND two weeks of seeding; files are kept.
+    priority: 3
+    categories:
+      - movies
+    include_all_tags:
+      - seed-extended
+    exclude_any_tags:
+      - noHL
+    min_seeding_time: 2w
+    max_ratio: 5.0
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
+    add_group_to_tag: false
   noHL:
     # <MANDATORY> priority: <int/float> # This is the priority of your grouping. The lower the number the higher the priority
-    priority: 1
+    priority: 4
     # <OPTIONAL> include_any_tags: <list> # Filter the group based on one or more tags. Multiple include_any_tags are checked with an OR condition
     # Any tags defined here must be present in the torrent for it to be included in this group
     include_any_tags:
@@ -161,6 +205,20 @@ share_limits:
     cleanup: true
     # <OPTIONAL> add_group_to_tag <bool>: This adds your grouping as a tag with a prefix defined in settings . Default is true
     # Example: A grouping defined as noHL will have a tag set to ~share_limit.noHL (if using the default prefix)
+    add_group_to_tag: false
+  movies:
+    # Release seeding slots after ordinary library movies reach ratio 2 AND one week of seeding; files are kept.
+    priority: 5
+    categories:
+      - movies
+    exclude_any_tags:
+      - noHL
+    min_seeding_time: 1w
+    max_ratio: 2.0
+    max_seeding_time: -1
+    cleanup: false
+    share_limit_action: Stop
+    resume_torrent_after_change: true
     add_group_to_tag: false
   default:
     priority: 999
