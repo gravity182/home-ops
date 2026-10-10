@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/radarr-importer
-              tag: 0.2.0@sha256:6152d8b476ba3288ff0d777f6efbea7d6491878e9a688748404824908db2be32
+              tag: 0.2.1@sha256:159dc043bb4e219ac7377259d9fa853308efd7b6fb41eaddccf33a25c3a84394
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
               QBITTORRENT_URL: http://qbittorrent.default.svc.cluster.local:8080
