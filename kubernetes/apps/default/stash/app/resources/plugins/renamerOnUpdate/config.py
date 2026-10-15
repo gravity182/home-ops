@@ -319,4 +319,10 @@ exclude_studio_patterns = {}
 #     "temp_folder": {"type": "regex", "pattern": r".*[/\\]temp[/\\].*"},
 #     "specific_path": {"type": "exact", "pattern": r"E:\Movies\ToSort"},
 # }
-exclude_path_patterns = {}
+# Only manage files under /library/scenes; leave other library folders untouched.
+exclude_path_patterns = {
+    "outside_scenes": {
+        "type": "regex",
+        "pattern": r"^(?!/library/scenes(?:/|$))",
+    },
+}
