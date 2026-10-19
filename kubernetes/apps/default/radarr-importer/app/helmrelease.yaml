@@ -18,14 +18,17 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/gravity182/radarr-importer
-              tag: 0.2.3@sha256:06659c6ec77bad6a20cddde2086a59fcc36be0adee9698a5457314059a02ee17
+              repository: ghcr.io/gravity182/arr-importer
+              tag: 0.3.0@sha256:56d15076550e13b65935849523b9e74bee5e5cf37a4d61b61994e0e4223ccf60
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
+              SONARR_URL: http://sonarr.default.svc.cluster.local:8989
               QBITTORRENT_URL: http://qbittorrent.default.svc.cluster.local:8080
               STATE_DB_PATH: /state/imports.sqlite
               RADARR_ROOT_FOLDER: /data/library/movies
               RADARR_DEFAULT_QUALITY_PROFILE_ID: "8"
+              SONARR_ROOT_FOLDER: /data/library/tv
+              SONARR_DEFAULT_QUALITY_PROFILE_ID: "7"
               OPENAI_MODEL: gpt-5.6-luna
               OPENAI_REASONING_EFFORT: high
               TELEGRAM_CHAT_ID:
