@@ -9,6 +9,10 @@ spec:
     name: intel-gpu-resource-driver
   interval: 1h
   values:
+    kubeletPlugin:
+      healthMonitoring:
+        # Hardware health monitoring requires xpumd, which is not deployed.
+        enabled: false
     cdi:
       staticPath: /var/cdi/static
       dynamicPath: /var/cdi/dynamic
