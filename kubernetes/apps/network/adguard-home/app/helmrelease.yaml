@@ -93,9 +93,10 @@ spec:
         ratelimit_whitelist: []
         refuse_any: true
         upstream_dns:
+          - 'https://cloudflare-dns.com/dns-query'
           # Follow NextDNS's dynamically managed secondary ultralow endpoint.
           # It currently selects the low-latency Helsinki PoP for this network.
-          - https://ultralow.dns2.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab
+          - '#https://ultralow.dns2.nextdns.io/${SECRET_NEXTDNS_PROFILE_ID}/Homelab'
           # Geo-blocked domains: use Quad9 to bypass DNS-level blocking
           - '[/tmdb.org/]9.9.9.9'
           - '[/themoviedb.org/]9.9.9.9'
