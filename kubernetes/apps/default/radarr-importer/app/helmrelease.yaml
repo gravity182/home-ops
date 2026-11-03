@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/arr-importer
-              tag: 0.3.2@sha256:b1cb8b9f7113e3af1f168196eb76370334d2649ea3fa5ffc26815b42273ada21
+              tag: 0.3.3@sha256:6c7e3dab35843c5992612d522bea2a205e354da5fe31f1dbab1a01a19b737f08
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
               SONARR_URL: http://sonarr.default.svc.cluster.local:8989
