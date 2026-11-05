@@ -104,6 +104,7 @@
             - title: OpenWrt
               url: http://192.168.20.1/cgi-bin/luci/
               check-url: http://192.168.20.1/cgi-bin/luci/
+              allow-insecure: true
               alt-status-codes:
                 - 403
               same-tab: true
