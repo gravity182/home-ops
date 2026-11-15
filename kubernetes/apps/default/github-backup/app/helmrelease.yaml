@@ -26,7 +26,7 @@ spec:
           app:
             image:
               repository: python
-              tag: 3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
+              tag: 3.14-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67
             command: ["/bin/sh", "-ec"]
             args:
               - |
