@@ -4,7 +4,8 @@ set -euo pipefail
 node_ip="${1:-}"
 
 cache_dir="../.private/talos-image-cache"
-mirror_address="192.168.3.25:5001"
+mirror_url="$(yq -er '.machine.registries.mirrors."factory.talos.dev".endpoints[0]' patches/global/machine-registry-mirror.yaml)"
+mirror_address="${mirror_url#http://}"
 
 if [[ -z "${node_ip}" ]]; then
   echo "usage: $0 <node-ip>" >&2
