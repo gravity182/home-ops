@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravity182/arr-importer
-              tag: 0.4.0@sha256:71612ecf26342586f88d4227335e89b2a3b62e69c8b13ff3fc30fa9a4560c8b2
+              tag: 0.4.1@sha256:65e8c166156e449d88385cfa98e477835a4c3724982a3c1379bdfdc8e137129a
             env:
               RADARR_URL: http://radarr.default.svc.cluster.local:7878
               SONARR_URL: http://sonarr.default.svc.cluster.local:8989
@@ -37,7 +37,7 @@ spec:
                     name: cluster-secrets
                     key: SECRET_TELEGRAM_CHAT_ID
               LISTEN_ADDRESS: ":8080"
-              RECONCILE_INTERVAL_SECONDS: "300"
+              RECONCILE_INTERVAL_SECONDS: "60"
               LOG_LEVEL: info
             envFrom:
               - secret: radarr-importer
